@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators') => {
+  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
@@ -41,7 +41,6 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'stats', icon: Award, label: t.stats },
     { key: 'register', icon: UserPlus, label: t.register },
     { key: 'database', icon: Database, label: t.database },
-    { key: 'collaborators', icon: Users, label: t.collaborators },
     ...(showAdminTab ? [{ key: 'admin', icon: Settings, label: t.admin }] : [])
   ];
 

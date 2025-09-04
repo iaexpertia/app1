@@ -59,34 +59,3 @@ export interface Bike {
   year?: number;
   type: 'Road' | 'Mountain' | 'Gravel' | 'Electric' | 'Other';
 }
-
-export interface Business {
-  id: string;
-  name: string;
-  description: string;
-  category: 'Bike Shop' | 'Hotel' | 'Restaurant' | 'Tour Guide' | 'Equipment' | 'Other';
-  contactInfo: {
-    email: string;
-    phone: string;
-    website?: string;
-    address: string;
-  };
-  images: string[];
-  isActive: boolean;
-  createdDate: string;
-}
-
-export interface Collaborator {
-  id: string;
-  name: string;
-  role: string;
-  description: string;
-  image?: string;
-  socialLinks?: {
-    website?: string;
-    instagram?: string;
-    twitter?: string;
-    linkedin?: string;
-  };
-  isActive: boolean;
-}
