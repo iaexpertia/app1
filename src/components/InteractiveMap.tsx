@@ -286,6 +286,87 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             <div className="text-sm text-blue-700">Total</div>
           </div>
         </div>
+        
+        {/* Difficulty Color Classification */}
+        <div className="mt-6 pt-6 border-t border-slate-200">
+          <h4 className="text-md font-semibold text-slate-800 mb-4">Clasificación por Dificultad UCI</h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-green-600">
+                <svg width="14" height="14" fill="white" viewBox="0 0 24 24">
+                  <circle cx="6" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <circle cx="18" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M6 16 L12 8 L18 16" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M9 10 L15 10" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M8 8 L10 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <path d="M15 8 L17 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13" r="0.8" fill="white"/>
+                </svg>
+              </div>
+              <span className="text-sm text-slate-700 font-medium">{t.cuarta}</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-blue-600">
+                <svg width="14" height="14" fill="white" viewBox="0 0 24 24">
+                  <circle cx="6" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <circle cx="18" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M6 16 L12 8 L18 16" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M9 10 L15 10" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M8 8 L10 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <path d="M15 8 L17 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13" r="0.8" fill="white"/>
+                </svg>
+              </div>
+              <span className="text-sm text-slate-700 font-medium">{t.tercera}</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center border-2 border-yellow-600">
+                <svg width="14" height="14" fill="white" viewBox="0 0 24 24">
+                  <circle cx="6" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <circle cx="18" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M6 16 L12 8 L18 16" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M9 10 L15 10" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M8 8 L10 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <path d="M15 8 L17 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13" r="0.8" fill="white"/>
+                </svg>
+              </div>
+              <span className="text-sm text-slate-700 font-medium">{t.segunda}</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center border-2 border-orange-600">
+                <svg width="14" height="14" fill="white" viewBox="0 0 24 24">
+                  <circle cx="6" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <circle cx="18" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M6 16 L12 8 L18 16" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M9 10 L15 10" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M8 8 L10 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <path d="M15 8 L17 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13" r="0.8" fill="white"/>
+                </svg>
+              </div>
+              <span className="text-sm text-slate-700 font-medium">{t.primera}</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center border-2 border-red-600">
+                <svg width="14" height="14" fill="white" viewBox="0 0 24 24">
+                  <circle cx="6" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <circle cx="18" cy="16" r="2.5" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M6 16 L12 8 L18 16" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M9 10 L15 10" fill="none" stroke="white" strokeWidth="1"/>
+                  <path d="M8 8 L10 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <path d="M15 8 L17 8" fill="none" stroke="white" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13" r="0.8" fill="white"/>
+                </svg>
+              </div>
+              <span className="text-sm text-slate-700 font-medium">{t.especial}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
