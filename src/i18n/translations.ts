@@ -897,25 +897,7 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Treure dels Meus Ports',
     alreadyInMyPasses: 'Ja als Meus Ports',
     availablePasses: 'Ports Disponibles',
-    mySelectedPasses: 'Els Meus Ports Seleccionats',
-    
-    // Collaborators
-    collaboratorsDescription: 'Coneix l\'equip darrere Mountain Pass Conquest',
-    noCollaborators: 'No hi ha col·laboradors',
-    noCollaboratorsDesc: 'Encara no s\'han afegit col·laboradors al projecte',
-    
-    // Business Management
-    manageBusinesses: 'Gestionar Negocis',
-    registeredBusinesses: 'Negocis Registrats',
-    totalBusinesses: 'negocis totals',
-    noBusinesses: 'No hi ha negocis registrats',
-    addBusiness: 'Afegir Negoci',
-    editBusiness: 'Editar Negoci',
-    businessName: 'Nom del Negoci',
-    businessCategory: 'Categoria',
-    website: 'Lloc Web',
-    address: 'Adreça',
-    images: 'Imatges'
+    mySelectedPasses: 'Els Meus Ports Seleccionats'
   }
 };
 
