@@ -80,7 +80,20 @@ const createBikeIcon = (difficulty: string, isConquered: boolean) => {
           ${isConquered ? 'animation: pulse 2s infinite;' : ''}
         ">
           <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
-            <path d="M5 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm14 2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM7.5 12l1.5-3h3l1.5 3M9 12v3m6-3v3m-6-3h6m-8 0h2m8 0h2"/>
+            <!-- Rueda trasera -->
+            <circle cx="6" cy="16" r="3" fill="none" stroke="white" stroke-width="1.5"/>
+            <!-- Rueda delantera -->
+            <circle cx="18" cy="16" r="3" fill="none" stroke="white" stroke-width="1.5"/>
+            <!-- Marco principal -->
+            <path d="M6 16 L12 8 L18 16" fill="none" stroke="white" stroke-width="1.5"/>
+            <!-- Tubo superior -->
+            <path d="M9 10 L15 10" fill="none" stroke="white" stroke-width="1.5"/>
+            <!-- Asiento -->
+            <path d="M8 8 L10 8" fill="none" stroke="white" stroke-width="2"/>
+            <!-- Manillar -->
+            <path d="M15 8 L17 8" fill="none" stroke="white" stroke-width="2"/>
+            <!-- Pedal -->
+            <circle cx="12" cy="13" r="1" fill="white"/>
           </svg>
         </div>
         ${conqueredBadge}
