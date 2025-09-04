@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { MountainPass, Cyclist } from '../types';
+import { MountainPass, Cyclist, Business } from '../types';
 import { Translation } from '../i18n/translations';
 import { loadCyclists, updateCyclist, removeCyclist } from '../utils/cyclistStorage';
+import { loadBusinesses, addBusiness, removeBusiness, updateBusiness } from '../utils/businessStorage';
 import { 
   Settings, 
   Users, 
@@ -9,9 +10,15 @@ import {
   Edit3, 
   Trash2, 
   Save,
-  Upload,
+  Building2,
+  Plus,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
   Eye,
-  EyeOff
+  EyeOff,
+  X
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -25,14 +32,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdatePass, 
   t 
 }) => {
-  const [activeSection, setActiveSection] = useState<'cyclists' | 'passes'>('cyclists');
+  const [activeSection, setActiveSection] = useState<'cyclists' | 'passes' | 'businesses'>('cyclists');
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
-  const [showPasswords, setShowPasswords] = useState(false);
+  const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
+  const [showAddBusinessModal, setShowAddBusinessModal] = useState(false);
+  const [newBusiness, setNewBusiness] = useState<Partial<Business>>({
+    name: '',
+    description: '',
+    category: 'Bike Shop',
+    contactInfo: {
+      email: '',
+      phone: '',
+      website: '',
+      address: ''
+    },
+    images: [],
+    isActive: true
+  });
 
   useEffect(() => {
     setCyclists(loadCyclists());
+    setBusinesses(loadBusinesses());
   }, []);
 
   const handleUpdateCyclist = (cyclist: Cyclist) => {
@@ -51,6 +74,59 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleUpdatePass = (pass: MountainPass) => {
     onUpdatePass(pass);
     setEditingPass(null);
+  };
+
+  const handleAddBusiness = () => {
+    if (!newBusiness.name || !newBusiness.contactInfo?.email) {
+      alert('Por favor completa al menos el nombre y email del negocio');
+      return;
+    }
+
+    const businessToAdd: Business = {
+      id: `business-${Date.now()}`,
+      name: newBusiness.name!,
+      description: newBusiness.description || '',
+      category: newBusiness.category as any || 'Bike Shop',
+      contactInfo: {
+        email: newBusiness.contactInfo?.email || '',
+        phone: newBusiness.contactInfo?.phone || '',
+        website: newBusiness.contactInfo?.website || '',
+        address: newBusiness.contactInfo?.address || ''
+      },
+      images: newBusiness.images || [],
+      isActive: true,
+      createdDate: new Date().toISOString().split('T')[0]
+    };
+
+    addBusiness(businessToAdd);
+    setBusinesses(loadBusinesses());
+    setShowAddBusinessModal(false);
+    setNewBusiness({
+      name: '',
+      description: '',
+      category: 'Bike Shop',
+      contactInfo: {
+        email: '',
+        phone: '',
+        website: '',
+        address: ''
+      },
+      images: [],
+      isActive: true
+    });
+  };
+
+  const handleUpdateBusiness = (business: Business) => {
+    updateBusiness(business);
+    setBusinesses(loadBusinesses());
+    setEditingBusiness(null);
+  };
+
+  const handleDeleteBusiness = (businessId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este negocio?')) {
+      removeBusiness(businessId);
+      setBusinesses(loadBusinesses());
+    }
   };
 
   return (
@@ -84,6 +160,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             <Mountain className="h-4 w-4" />
             <span>{t.managePasses}</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveSection('businesses')}
+            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+              activeSection === 'businesses'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            <Building2 className="h-4 w-4" />
+            <span>{t.manageBusinesses}</span>
           </button>
         </div>
       </div>
@@ -207,6 +295,97 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
+      {/* Businesses Management */}
+      {activeSection === 'businesses' && (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-slate-800">{t.registeredBusinesses}</h3>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-slate-600">{businesses.length} {t.totalBusinesses}</span>
+              <button
+                onClick={() => setShowAddBusinessModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>{t.addBusiness}</span>
+              </button>
+            </div>
+          </div>
+
+          {businesses.length === 0 ? (
+            <div className="text-center py-12">
+              <Building2 className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-xl text-slate-600">{t.noBusinesses}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {businesses.map((business) => (
+                <div key={business.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  {business.images.length > 0 && (
+                    <div className="relative h-32 mb-3">
+                      <img 
+                        src={business.images[0]} 
+                        alt={business.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-slate-800">{business.name}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      business.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {business.isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-slate-600 mb-2">{business.category}</p>
+                  <p className="text-sm text-slate-700 mb-3 line-clamp-2">{business.description}</p>
+                  
+                  <div className="space-y-1 text-xs text-slate-600 mb-4">
+                    <div className="flex items-center">
+                      <Mail className="h-3 w-3 mr-1" />
+                      <span>{business.contactInfo.email}</span>
+                    </div>
+                    {business.contactInfo.phone && (
+                      <div className="flex items-center">
+                        <Phone className="h-3 w-3 mr-1" />
+                        <span>{business.contactInfo.phone}</span>
+                      </div>
+                    )}
+                    {business.contactInfo.address && (
+                      <div className="flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span className="line-clamp-1">{business.contactInfo.address}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setEditingBusiness(business)}
+                      className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBusiness(business.id)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Edit Cyclist Modal */}
       {editingCyclist && (
         <EditCyclistModal
@@ -223,6 +402,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           pass={editingPass}
           onSave={handleUpdatePass}
           onClose={() => setEditingPass(null)}
+          t={t}
+        />
+      )}
+
+      {/* Add Business Modal */}
+      {showAddBusinessModal && (
+        <AddBusinessModal
+          business={newBusiness}
+          onSave={handleAddBusiness}
+          onClose={() => setShowAddBusinessModal(false)}
+          onChange={setNewBusiness}
+          t={t}
+        />
+      )}
+
+      {/* Edit Business Modal */}
+      {editingBusiness && (
+        <EditBusinessModal
+          business={editingBusiness}
+          onSave={handleUpdateBusiness}
+          onClose={() => setEditingBusiness(null)}
           t={t}
         />
       )}
