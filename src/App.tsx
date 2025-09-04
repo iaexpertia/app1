@@ -162,6 +162,12 @@ function App() {
             t={t}
           />
         )}
+        
+        {activeTab === 'collaborators' && (
+          <CollaboratorsView
+            t={t}
+          />
+        )}
       </main>
       
       <PassModal

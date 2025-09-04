@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { MountainPass, Cyclist } from '../types';
+import { MountainPass, Cyclist, Business } from '../types';
 import { Translation } from '../i18n/translations';
 import { loadCyclists, updateCyclist, removeCyclist } from '../utils/cyclistStorage';
+import { loadBusinesses, addBusiness, removeBusiness, updateBusiness } from '../utils/businessStorage';
 import { 
   Settings, 
   Users, 
@@ -9,9 +10,15 @@ import {
   Edit3, 
   Trash2, 
   Save,
-  Upload,
+  Building2,
+  Plus,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
   Eye,
-  EyeOff
+  EyeOff,
+  X
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -25,14 +32,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdatePass, 
   t 
 }) => {
-  const [activeSection, setActiveSection] = useState<'cyclists' | 'passes'>('cyclists');
+  const [activeSection, setActiveSection] = useState<'cyclists' | 'passes' | 'businesses'>('cyclists');
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
-  const [showPasswords, setShowPasswords] = useState(false);
+  const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
+  const [showAddBusinessModal, setShowAddBusinessModal] = useState(false);
+  const [newBusiness, setNewBusiness] = useState<Partial<Business>>({
+    name: '',
+    description: '',
+    category: 'Bike Shop',
+    contactInfo: {
+      email: '',
+      phone: '',
+      website: '',
+      address: ''
+    },
+    images: [],
+    isActive: true
+  });
 
   useEffect(() => {
     setCyclists(loadCyclists());
+    setBusinesses(loadBusinesses());
   }, []);
 
   const handleUpdateCyclist = (cyclist: Cyclist) => {
@@ -51,6 +74,59 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleUpdatePass = (pass: MountainPass) => {
     onUpdatePass(pass);
     setEditingPass(null);
+  };
+
+  const handleAddBusiness = () => {
+    if (!newBusiness.name || !newBusiness.contactInfo?.email) {
+      alert('Por favor completa al menos el nombre y email del negocio');
+      return;
+    }
+
+    const businessToAdd: Business = {
+      id: `business-${Date.now()}`,
+      name: newBusiness.name!,
+      description: newBusiness.description || '',
+      category: newBusiness.category as any || 'Bike Shop',
+      contactInfo: {
+        email: newBusiness.contactInfo?.email || '',
+        phone: newBusiness.contactInfo?.phone || '',
+        website: newBusiness.contactInfo?.website || '',
+        address: newBusiness.contactInfo?.address || ''
+      },
+      images: newBusiness.images || [],
+      isActive: true,
+      createdDate: new Date().toISOString().split('T')[0]
+    };
+
+    addBusiness(businessToAdd);
+    setBusinesses(loadBusinesses());
+    setShowAddBusinessModal(false);
+    setNewBusiness({
+      name: '',
+      description: '',
+      category: 'Bike Shop',
+      contactInfo: {
+        email: '',
+        phone: '',
+        website: '',
+        address: ''
+      },
+      images: [],
+      isActive: true
+    });
+  };
+
+  const handleUpdateBusiness = (business: Business) => {
+    updateBusiness(business);
+    setBusinesses(loadBusinesses());
+    setEditingBusiness(null);
+  };
+
+  const handleDeleteBusiness = (businessId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este negocio?')) {
+      removeBusiness(businessId);
+      setBusinesses(loadBusinesses());
+    }
   };
 
   return (
@@ -84,6 +160,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             <Mountain className="h-4 w-4" />
             <span>{t.managePasses}</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveSection('businesses')}
+            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+              activeSection === 'businesses'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            <Building2 className="h-4 w-4" />
+            <span>{t.manageBusinesses}</span>
           </button>
         </div>
       </div>
@@ -207,6 +295,97 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
+      {/* Businesses Management */}
+      {activeSection === 'businesses' && (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-slate-800">{t.registeredBusinesses}</h3>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-slate-600">{businesses.length} {t.totalBusinesses}</span>
+              <button
+                onClick={() => setShowAddBusinessModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>{t.addBusiness}</span>
+              </button>
+            </div>
+          </div>
+
+          {businesses.length === 0 ? (
+            <div className="text-center py-12">
+              <Building2 className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-xl text-slate-600">{t.noBusinesses}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {businesses.map((business) => (
+                <div key={business.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  {business.images.length > 0 && (
+                    <div className="relative h-32 mb-3">
+                      <img 
+                        src={business.images[0]} 
+                        alt={business.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-slate-800">{business.name}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      business.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {business.isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-slate-600 mb-2">{business.category}</p>
+                  <p className="text-sm text-slate-700 mb-3 line-clamp-2">{business.description}</p>
+                  
+                  <div className="space-y-1 text-xs text-slate-600 mb-4">
+                    <div className="flex items-center">
+                      <Mail className="h-3 w-3 mr-1" />
+                      <span>{business.contactInfo.email}</span>
+                    </div>
+                    {business.contactInfo.phone && (
+                      <div className="flex items-center">
+                        <Phone className="h-3 w-3 mr-1" />
+                        <span>{business.contactInfo.phone}</span>
+                      </div>
+                    )}
+                    {business.contactInfo.address && (
+                      <div className="flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span className="line-clamp-1">{business.contactInfo.address}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setEditingBusiness(business)}
+                      className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBusiness(business.id)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Edit Cyclist Modal */}
       {editingCyclist && (
         <EditCyclistModal
@@ -223,6 +402,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           pass={editingPass}
           onSave={handleUpdatePass}
           onClose={() => setEditingPass(null)}
+          t={t}
+        />
+      )}
+
+      {/* Add Business Modal */}
+      {showAddBusinessModal && (
+        <AddBusinessModal
+          business={newBusiness}
+          onSave={handleAddBusiness}
+          onClose={() => setShowAddBusinessModal(false)}
+          onChange={setNewBusiness}
+          t={t}
+        />
+      )}
+
+      {/* Edit Business Modal */}
+      {editingBusiness && (
+        <EditBusinessModal
+          business={editingBusiness}
+          onSave={handleUpdateBusiness}
+          onClose={() => setEditingBusiness(null)}
           t={t}
         />
       )}
@@ -465,6 +665,419 @@ const EditPassModal: React.FC<EditPassModalProps> = ({
               rows={3}
               required
             />
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              {t.cancel}
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              {t.saveChanges}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Add Business Modal Component
+interface AddBusinessModalProps {
+  business: Partial<Business>;
+  onSave: () => void;
+  onClose: () => void;
+  onChange: (business: Partial<Business>) => void;
+  t: Translation;
+}
+
+const AddBusinessModal: React.FC<AddBusinessModalProps> = ({ 
+  business, 
+  onSave, 
+  onClose, 
+  onChange,
+  t 
+}) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave();
+  };
+
+  const addImage = () => {
+    const url = prompt('Introduce la URL de la imagen:');
+    if (url) {
+      onChange({
+        ...business,
+        images: [...(business.images || []), url]
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    onChange({
+      ...business,
+      images: (business.images || []).filter((_, i) => i !== index)
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">{t.addBusiness}</h3>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                {t.businessName} <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={business.name || ''}
+                onChange={(e) => onChange({ ...business, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.businessCategory}</label>
+              <select
+                value={business.category || 'Bike Shop'}
+                onChange={(e) => onChange({ ...business, category: e.target.value as any })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="Bike Shop">Tienda de Bicicletas</option>
+                <option value="Hotel">Hotel</option>
+                <option value="Restaurant">Restaurante</option>
+                <option value="Tour Guide">Guía Turístico</option>
+                <option value="Equipment">Equipamiento</option>
+                <option value="Other">Otro</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t.description}</label>
+            <textarea
+              value={business.description || ''}
+              onChange={(e) => onChange({ ...business, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                {t.email} <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                value={business.contactInfo?.email || ''}
+                onChange={(e) => onChange({ 
+                  ...business, 
+                  contactInfo: { ...business.contactInfo, email: e.target.value } as any
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.phone}</label>
+              <input
+                type="tel"
+                value={business.contactInfo?.phone || ''}
+                onChange={(e) => onChange({ 
+                  ...business, 
+                  contactInfo: { ...business.contactInfo, phone: e.target.value } as any
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.website}</label>
+              <input
+                type="url"
+                value={business.contactInfo?.website || ''}
+                onChange={(e) => onChange({ 
+                  ...business, 
+                  contactInfo: { ...business.contactInfo, website: e.target.value } as any
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="https://..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.address}</label>
+              <input
+                type="text"
+                value={business.contactInfo?.address || ''}
+                onChange={(e) => onChange({ 
+                  ...business, 
+                  contactInfo: { ...business.contactInfo, address: e.target.value } as any
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-slate-700">{t.images}</label>
+              <button
+                type="button"
+                onClick={addImage}
+                className="text-sm text-orange-600 hover:text-orange-700"
+              >
+                + Añadir imagen
+              </button>
+            </div>
+            {business.images && business.images.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {business.images.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img src={image} alt={`Imagen ${index + 1}`} className="w-full h-20 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              {t.cancel}
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              {t.addBusiness}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Edit Business Modal Component
+interface EditBusinessModalProps {
+  business: Business;
+  onSave: (business: Business) => void;
+  onClose: () => void;
+  t: Translation;
+}
+
+const EditBusinessModal: React.FC<EditBusinessModalProps> = ({ 
+  business, 
+  onSave, 
+  onClose, 
+  t 
+}) => {
+  const [formData, setFormData] = useState(business);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const addImage = () => {
+    const url = prompt('Introduce la URL de la imagen:');
+    if (url) {
+      setFormData({
+        ...formData,
+        images: [...formData.images, url]
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData({
+      ...formData,
+      images: formData.images.filter((_, i) => i !== index)
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">{t.editBusiness}</h3>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.businessName}</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.businessCategory}</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="Bike Shop">Tienda de Bicicletas</option>
+                <option value="Hotel">Hotel</option>
+                <option value="Restaurant">Restaurante</option>
+                <option value="Tour Guide">Guía Turístico</option>
+                <option value="Equipment">Equipamiento</option>
+                <option value="Other">Otro</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t.description}</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.email}</label>
+              <input
+                type="email"
+                value={formData.contactInfo.email}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, email: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.phone}</label>
+              <input
+                type="tel"
+                value={formData.contactInfo.phone}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, phone: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.website}</label>
+              <input
+                type="url"
+                value={formData.contactInfo.website}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, website: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="https://..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t.address}</label>
+              <input
+                type="text"
+                value={formData.contactInfo.address}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, address: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-slate-700">{t.images}</label>
+              <button
+                type="button"
+                onClick={addImage}
+                className="text-sm text-orange-600 hover:text-orange-700"
+              >
+                + Añadir imagen
+              </button>
+            </div>
+            {formData.images.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img src={image} alt={`Imagen ${index + 1}`} className="w-full h-20 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={formData.isActive}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+            />
+            <label htmlFor="isActive" className="text-sm text-slate-700">Negocio activo</label>
           </div>
           
           <div className="flex justify-end space-x-3 pt-4 border-t">
