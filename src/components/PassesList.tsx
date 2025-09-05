@@ -9,7 +9,6 @@ interface PassesListProps {
   conqueredPassIds: Set<string>;
   onToggleConquest: (passId: string) => void;
   onViewDetails: (pass: MountainPass) => void;
-  onAddPhotos: (passId: string) => void;
   t: Translation;
 }
 
@@ -18,7 +17,6 @@ export const PassesList: React.FC<PassesListProps> = ({
   conqueredPassIds,
   onToggleConquest,
   onViewDetails,
-  onAddPhotos,
   t
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -125,7 +123,6 @@ export const PassesList: React.FC<PassesListProps> = ({
             isConquered={conqueredPassIds.has(pass.id)}
             onToggleConquest={onToggleConquest}
             onViewDetails={onViewDetails}
-            onAddPhotos={onAddPhotos}
             t={t}
           />
         ))}

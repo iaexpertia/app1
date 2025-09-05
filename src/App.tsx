@@ -5,35 +5,27 @@ import { Header } from './components/Header';
 import { PassesList } from './components/PassesList';
 import { PassModal } from './components/PassModal';
 import { InteractiveMap } from './components/InteractiveMap';
-import { PhotosModal } from './components/PhotosModal';
 import { StatsView } from './components/StatsView';
 import { CyclistRegistration } from './components/CyclistRegistration';
 import { AdminPanel } from './components/AdminPanel';
 import { DatabaseView } from './components/DatabaseView';
 import { CollaboratorsView } from './components/CollaboratorsView';
-import { ConqueredPassesView } from './components/ConqueredPassesView';
-import { BrandsView } from './components/BrandsView';
-import { NewsView } from './components/NewsView';
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
   addConquest, 
   removeConquest, 
-  isPassConquered,
-  updateConquestPhotos,
-  getConquestByPassId,
-  updateConquest
+  isPassConquered 
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin } from './utils/cyclistStorage';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators';
 
 function App() {
   const { language, t, changeLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<ActiveTab>('passes');
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
-  const [photosPass, setPhotosPass] = useState<MountainPass | null>(null);
   const [conquests, setConquests] = useState<ConquestData[]>([]);
   const [conqueredPassIds, setConqueredPassIds] = useState<Set<string>>(new Set());
   const [passes, setPasses] = useState<MountainPass[]>(mountainPasses);
@@ -69,20 +61,6 @@ function App() {
     setSelectedPass(pass);
   };
 
-  const handleAddPhotos = (passId: string) => {
-    const pass = passes.find(p => p.id === passId);
-    if (pass) {
-      setPhotosPass(pass);
-    }
-  };
-
-  const handleSavePhotos = (passId: string, photos: string[]) => {
-    updateConquestPhotos(passId, photos);
-    const updatedConquests = loadConquests();
-    setConquests(updatedConquests);
-    setPhotosPass(null);
-  };
-
   const handleRegistrationSuccess = () => {
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 3000);
@@ -109,12 +87,6 @@ function App() {
     const updatedConquests = conquests.filter(c => c.passId !== passId);
     setConquests(updatedConquests);
     setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
-  };
-
-  const handleUpdateConquest = (conquest: ConquestData) => {
-    updateConquest(conquest);
-    const updatedConquests = loadConquests();
-    setConquests(updatedConquests);
   };
 
   const userStats = calculateUserStats(passes, conquests);
@@ -146,7 +118,6 @@ function App() {
             conqueredPassIds={conqueredPassIds}
             onToggleConquest={handleToggleConquest}
             onViewDetails={handleViewDetails}
-            onAddPhotos={handleAddPhotos}
             t={t}
           />
         )}
@@ -198,41 +169,11 @@ function App() {
             t={t}
           />
         )}
-        
-        {activeTab === 'conquered' && (
-          <ConqueredPassesView
-            conqueredPasses={conqueredPasses}
-            conquests={conquests}
-            onUpdateConquest={handleUpdateConquest}
-            onAddPhotos={handleAddPhotos}
-            t={t}
-          />
-        )}
-        
-        {activeTab === 'brands' && (
-          <BrandsView
-            t={t}
-          />
-        )}
-        
-        {activeTab === 'news' && (
-          <NewsView
-            t={t}
-          />
-        )}
       </main>
       
       <PassModal
         pass={selectedPass}
         onClose={() => setSelectedPass(null)}
-        t={t}
-      />
-      
-      <PhotosModal
-        pass={photosPass}
-        conquest={photosPass ? getConquestByPassId(photosPass.id) : null}
-        onClose={() => setPhotosPass(null)}
-        onSavePhotos={handleSavePhotos}
         t={t}
       />
     </div>

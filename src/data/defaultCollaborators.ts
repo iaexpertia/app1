@@ -4,7 +4,7 @@ export const defaultCollaborators: Collaborator[] = [
   {
     id: 'bike-shop-1',
     name: 'Ciclos Montaña Pro',
-    category: 'Tienda de Bicicletas',
+    category: 'Bike Shop',
     description: 'Especialistas en bicicletas de montaña y carretera. Más de 20 años de experiencia sirviendo a la comunidad ciclista.',
     contactInfo: {
       email: 'info@ciclosmontanapro.com',
@@ -40,7 +40,7 @@ export const defaultCollaborators: Collaborator[] = [
   {
     id: 'restaurant-1',
     name: 'Restaurante El Puerto',
-    category: 'Restaurante',
+    category: 'Restaurant',
     description: 'Cocina tradicional con menús especiales para deportistas. Ubicado en la base del Col du Tourmalet.',
     contactInfo: {
       email: 'contacto@elpuerto.fr',
