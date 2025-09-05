@@ -122,6 +122,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     
     if (categoryExists) {
       setCategoryError('Ya existe una categoría con ese nombre');
+      alert('CATEGORÍA EXISTENTE: Ya existe una categoría con ese nombre');
       return;
     }
     
