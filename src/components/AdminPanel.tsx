@@ -54,7 +54,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
-  const [showDatabasePassModal, setShowDatabasePassModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   
   // Edit states
@@ -77,23 +76,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
     description: '', imageUrl: '', category: 'Otros'
-  });
-  
-  const [databasePassData, setDatabasePassData] = useState<Partial<MountainPass>>({
-    name: '',
-    country: '',
-    region: '',
-    maxAltitude: 0,
-    elevationGain: 0,
-    averageGradient: 0,
-    maxGradient: 0,
-    distance: 0,
-    difficulty: 'Cuarta',
-    coordinates: { lat: 0, lng: 0 },
-    description: '',
-    famousWinners: [],
-    imageUrl: '',
-    category: 'Otros'
   });
   
   const [brandForm, setBrandForm] = useState({
@@ -137,6 +119,69 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         setImportPreview(lines);
       };
       reader.readAsText(file);
+    }
+  };
+
+  const handleCreateDatabasePass = async () => {
+    if (!databasePassData.name || !databasePassData.country || !databasePassData.region) {
+      alert('Por favor completa al menos el nombre, país y región');
+      return;
+    }
+
+    try {
+      const passToAdd: MountainPass = {
+        id: `db-${Date.now()}`,
+        name: databasePassData.name!,
+        country: databasePassData.country!,
+        region: databasePassData.region!,
+        maxAltitude: databasePassData.maxAltitude || 0,
+        elevationGain: databasePassData.elevationGain || 0,
+        averageGradient: databasePassData.averageGradient || 0,
+        maxGradient: databasePassData.maxGradient || 0,
+        distance: databasePassData.distance || 0,
+        difficulty: databasePassData.difficulty as any || 'Cuarta',
+        coordinates: databasePassData.coordinates || { lat: 0, lng: 0 },
+        description: databasePassData.description || '',
+        famousWinners: [],
+        imageUrl: databasePassData.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+        category: databasePassData.category || 'Otros'
+      };
+
+      // TODO: Aquí se implementaría la inserción en Supabase
+      // const { data, error } = await supabase
+      //   .from('mountain_passes')
+      //   .insert([passToAdd]);
+      
+      // Por ahora, guardamos en localStorage como respaldo
+      const existingPasses = JSON.parse(localStorage.getItem('admin-mountain-passes') || '[]');
+      existingPasses.push(passToAdd);
+      localStorage.setItem('admin-mountain-passes', JSON.stringify(existingPasses));
+      
+      // También añadimos a la lista local de puertos
+      onUpdatePass(passToAdd);
+      
+      setShowDatabasePassModal(false);
+      setDatabasePassData({
+        name: '',
+        country: '',
+        region: '',
+        maxAltitude: 0,
+        elevationGain: 0,
+        averageGradient: 0,
+        maxGradient: 0,
+        distance: 0,
+        difficulty: 'Cuarta',
+        coordinates: { lat: 0, lng: 0 },
+        description: '',
+        famousWinners: [],
+        imageUrl: '',
+        category: 'Otros'
+      });
+      
+      alert('Puerto añadido a la base de datos exitosamente');
+    } catch (error) {
+      console.error('Error añadiendo puerto a la base de datos:', error);
+      alert('Error al añadir el puerto a la base de datos');
     }
   };
 
