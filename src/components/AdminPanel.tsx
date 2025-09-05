@@ -13,6 +13,14 @@ import {
   Settings, 
   Users, 
   Mountain, 
+import { 
+  loadCollaborators, 
+  addCollaborator, 
+  removeCollaborator, 
+  updateCollaborator,
+  loadCategories,
+  addCategory
+} from '../utils/collaboratorStorage';
   Edit3, 
   Trash2, 
   Save,
