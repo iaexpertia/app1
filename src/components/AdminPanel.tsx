@@ -65,6 +65,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [brandCategories, setBrandCategories] = useState<string[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [showAddCollaborator, setShowAddCollaborator] = useState(false);
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newCollaborator, setNewCollaborator] = useState<Partial<Collaborator>>({
@@ -369,6 +370,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     });
   };
 
+  const handleBrandImageUpload = (event: React.ChangeEvent<HTMLInputElement>, field: 'logo') => {
+    const file = event.target.files?.[0];
+    if (!file || !editingBrand) return;
+
+    // Validar tipo de archivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
+      return;
+    }
+
+    // Validar tamaño (2MB máximo para logos)
+    const maxSize = 2 * 1024 * 1024; // 2MB en bytes
+    if (file.size > maxSize) {
+      alert('El archivo es demasiado grande. El tamaño máximo es 2MB');
+      return;
+    }
+
+    // Convertir a Base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      setEditingBrand({ ...editingBrand, [field]: base64String });
+    };
+    reader.onerror = () => {
+      alert('Error al leer el archivo. Por favor intenta de nuevo.');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'Tienda de Bicicletas': return Store;
@@ -519,6 +550,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                           </div>
                         )}
                       </div>
+                    </div>
                     <div className="flex space-x-2">
                       <button
                         onClick={() => setEditingCyclist(cyclist)}

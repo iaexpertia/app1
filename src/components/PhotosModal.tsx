@@ -60,6 +60,38 @@ export const PhotosModal: React.FC<PhotosModalProps> = ({
     onClose();
   };
 
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
+      return;
+    }
+
+    // Validar tamaño (10MB máximo para fotos)
+    const maxSize = 10 * 1024 * 1024; // 10MB en bytes
+    if (file.size > maxSize) {
+      alert('El archivo es demasiado grande. El tamaño máximo es 10MB');
+      return;
+    }
+
+    // Convertir a Base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target?.result as string;
+      setPhotos([...photos, base64String]);
+      // Reset file input
+      event.target.value = '';
+    };
+    reader.onerror = () => {
+      alert('Error al leer el archivo. Por favor intenta de nuevo.');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const nextPhoto = () => {
     setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
   };
