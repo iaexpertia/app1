@@ -33,6 +33,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     phone: '',
     age: '',
     weight: '',
+    isAdmin: false,
   });
   
   const [bikes, setBikes] = useState<Omit<Bike, 'id'>[]>([]);
@@ -79,7 +80,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: formData.phone.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        isAdmin: false,
+        isAdmin: formData.isAdmin,
         bikes: bikes.map(bike => ({
           ...bike,
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
@@ -122,6 +123,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: '',
         age: '',
         weight: '',
+        isAdmin: false,
       });
       setBikes([]);
       setErrors({});
@@ -167,38 +169,37 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         </div>
 
         {/* Email Status Messages */}
-        {emailStatus === 'sent' && (
+        {(emailStatus === 'sent' || emailStatus === 'failed') && (
           <div className="mb-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
+            {emailStatus === 'sent' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-green-800 font-medium">¡Email de confirmación enviado!</p>
+                  <p className="text-green-600 text-sm">Revisa tu bandeja de entrada en {formData.email}</p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-green-800 font-medium">¡Email de confirmación enviado!</p>
-                <p className="text-green-600 text-sm">Revisa tu bandeja de entrada en {formData.email}</p>
+            )}
+            
+            {emailStatus === 'failed' && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-yellow-800 font-medium">Registro completado</p>
+                  <p className="text-yellow-600 text-sm">No pudimos enviar el email de confirmación, pero tu registro fue exitoso</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
-        
-        {emailStatus === 'failed' && (
-          <div className="mb-6">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-yellow-800 font-medium">Registro completado</p>
-                <p className="text-yellow-600 text-sm">No pudimos enviar el email de confirmación, pero tu registro fue exitoso</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
