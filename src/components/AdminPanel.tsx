@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { MountainPass, Cyclist } from '../types';
 import { Translation } from '../i18n/translations';
+import { Brand, NewsArticle, Collaborator } from '../types';
 import { 
   loadCyclists, 
   saveCyclists, 
   removeCyclist, 
   updateCyclist 
 } from '../utils/cyclistStorage';
+import { 
+  loadBrands, 
+  addBrand, 
+  removeBrand, 
+  updateBrand,
+  loadBrandCategories 
+} from '../utils/brandsStorage';
+import { 
+  loadNews, 
+  addNews, 
+  removeNews, 
+  updateNews 
+} from '../utils/newsStorage';
+import { 
+  loadCollaborators, 
+  addCollaborator, 
+  removeCollaborator, 
+  updateCollaborator,
+  loadCategories 
+} from '../utils/collaboratorStorage';
 import { 
   Settings, 
   Users, 
@@ -27,7 +48,11 @@ import {
   Newspaper,
   UserCheck,
   Download,
-  Upload
+  Upload,
+  Globe,
+  MapPin,
+  Camera,
+  FileText
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -38,8 +63,17 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t }) => {
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [showAddBrandModal, setShowAddBrandModal] = useState(false);
+  const [showAddNewsModal, setShowAddNewsModal] = useState(false);
+  const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'cyclists' | 'passes' | 'brands' | 'news' | 'collaborators'>('cyclists');
   const [importStatus, setImportStatus] = useState<{
     type: 'success' | 'error';
@@ -49,6 +83,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   useEffect(() => {
     setCyclists(loadCyclists());
+    setBrands(loadBrands());
+    setNews(loadNews());
+    setCollaborators(loadCollaborators());
   }, []);
 
   const handleDeleteCyclist = (cyclistId: string) => {
@@ -70,6 +107,84 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     if (editingPass) {
       onUpdatePass(editingPass);
       setEditingPass(null);
+    }
+  };
+
+  // Brand handlers
+  const handleAddBrand = (brand: Omit<Brand, 'id'>) => {
+    const newBrand: Brand = {
+      ...brand,
+      id: Date.now().toString()
+    };
+    addBrand(newBrand);
+    setBrands(loadBrands());
+    setShowAddBrandModal(false);
+  };
+
+  const handleDeleteBrand = (brandId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta marca?')) {
+      removeBrand(brandId);
+      setBrands(loadBrands());
+    }
+  };
+
+  const handleSaveBrand = () => {
+    if (editingBrand) {
+      updateBrand(editingBrand);
+      setBrands(loadBrands());
+      setEditingBrand(null);
+    }
+  };
+
+  // News handlers
+  const handleAddNews = (article: Omit<NewsArticle, 'id'>) => {
+    const newArticle: NewsArticle = {
+      ...article,
+      id: Date.now().toString()
+    };
+    addNews(newArticle);
+    setNews(loadNews());
+    setShowAddNewsModal(false);
+  };
+
+  const handleDeleteNews = (articleId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
+      removeNews(articleId);
+      setNews(loadNews());
+    }
+  };
+
+  const handleSaveNews = () => {
+    if (editingNews) {
+      updateNews(editingNews);
+      setNews(loadNews());
+      setEditingNews(null);
+    }
+  };
+
+  // Collaborator handlers
+  const handleAddCollaborator = (collaborator: Omit<Collaborator, 'id'>) => {
+    const newCollaborator: Collaborator = {
+      ...collaborator,
+      id: Date.now().toString()
+    };
+    addCollaborator(newCollaborator);
+    setCollaborators(loadCollaborators());
+    setShowAddCollaboratorModal(false);
+  };
+
+  const handleDeleteCollaborator = (collaboratorId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este colaborador?')) {
+      removeCollaborator(collaboratorId);
+      setCollaborators(loadCollaborators());
+    }
+  };
+
+  const handleSaveCollaborator = () => {
+    if (editingCollaborator) {
+      updateCollaborator(editingCollaborator);
+      setCollaborators(loadCollaborators());
+      setEditingCollaborator(null);
     }
   };
 
@@ -627,17 +742,63 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <Tag className="h-6 w-6 text-orange-500" />
                   <h3 className="text-xl font-semibold text-slate-800">Gestión de Marcas</h3>
                 </div>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                <button 
+                  onClick={() => setShowAddBrandModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
                   <Plus className="h-4 w-4" />
                   <span>Añadir Marca</span>
                 </button>
               </div>
               
-              <div className="text-center py-12">
-                <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-xl text-slate-600 mb-2">Gestión de Marcas</p>
-                <p className="text-slate-500">Funcionalidad en desarrollo para gestionar marcas de ciclismo</p>
-              </div>
+              {brands.length === 0 ? (
+                <div className="text-center py-12">
+                  <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                  <p className="text-xl text-slate-600 mb-2">No hay marcas registradas</p>
+                  <p className="text-slate-500">Añade la primera marca de ciclismo</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {brands.map(brand => (
+                    <div key={brand.id} className="border border-slate-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-slate-800">{brand.name}</h4>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          brand.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-slate-100 text-slate-800'
+                        }`}>
+                          {brand.featured ? 'Destacada' : 'Normal'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-2">{brand.category}</p>
+                      <p className="text-xs text-slate-500 mb-4 line-clamp-2">{brand.description}</p>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          brand.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {brand.isActive ? 'Activa' : 'Inactiva'}
+                        </span>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => setEditingBrand(brand)}
+                            className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
+                          >
+                            <Edit className="h-3 w-3" />
+                            <span>Editar</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBrand(brand.id)}
+                            className="flex items-center space-x-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span>Eliminar</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -651,17 +812,64 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <Newspaper className="h-6 w-6 text-orange-500" />
                   <h3 className="text-xl font-semibold text-slate-800">Gestión de Noticias</h3>
                 </div>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                <button 
+                  onClick={() => setShowAddNewsModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
                   <Plus className="h-4 w-4" />
                   <span>Nueva Noticia</span>
                 </button>
               </div>
               
-              <div className="text-center py-12">
-                <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-xl text-slate-600 mb-2">Gestión de Noticias</p>
-                <p className="text-slate-500">Funcionalidad en desarrollo para crear y gestionar noticias</p>
-              </div>
+              {news.length === 0 ? (
+                <div className="text-center py-12">
+                  <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                  <p className="text-xl text-slate-600 mb-2">No hay noticias publicadas</p>
+                  <p className="text-slate-500">Crea la primera noticia</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {news.map(article => (
+                    <div key={article.id} className="border border-slate-200 rounded-lg p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="font-semibold text-slate-800 text-lg">{article.title}</h4>
+                            {article.featured && (
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                Destacada
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-slate-600 mb-2">{article.summary}</p>
+                          <div className="flex items-center space-x-4 text-sm text-slate-500">
+                            <span>Por {article.author}</span>
+                            <span>{new Date(article.publishDate).toLocaleDateString('es-ES')}</span>
+                            <span>{article.category}</span>
+                            <span>{article.readTime} min lectura</span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2 ml-4">
+                          <button
+                            onClick={() => setEditingNews(article)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+                          >
+                            <Edit className="h-3 w-3" />
+                            <span>Editar</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteNews(article.id)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span>Eliminar</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -675,17 +883,70 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <UserCheck className="h-6 w-6 text-orange-500" />
                   <h3 className="text-xl font-semibold text-slate-800">Gestión de Colaboradores</h3>
                 </div>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                <button 
+                  onClick={() => setShowAddCollaboratorModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
                   <Plus className="h-4 w-4" />
                   <span>Añadir Colaborador</span>
                 </button>
               </div>
               
-              <div className="text-center py-12">
-                <UserCheck className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-xl text-slate-600 mb-2">Gestión de Colaboradores</p>
-                <p className="text-slate-500">Funcionalidad en desarrollo para gestionar colaboradores y patrocinadores</p>
-              </div>
+              {collaborators.length === 0 ? (
+                <div className="text-center py-12">
+                  <UserCheck className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                  <p className="text-xl text-slate-600 mb-2">No hay colaboradores registrados</p>
+                  <p className="text-slate-500">Añade el primer colaborador</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {collaborators.map(collaborator => (
+                    <div key={collaborator.id} className="border border-slate-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-slate-800">{collaborator.name}</h4>
+                        <div className="flex space-x-2">
+                          {collaborator.featured && (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                              Destacado
+                            </span>
+                          )}
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            collaborator.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {collaborator.isActive ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-2">{collaborator.category}</p>
+                      <p className="text-xs text-slate-500 mb-3 line-clamp-2">{collaborator.description}</p>
+                      
+                      {collaborator.contactInfo.address && (
+                        <div className="flex items-center text-xs text-slate-500 mb-2">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span>{collaborator.contactInfo.address}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => setEditingCollaborator(collaborator)}
+                          className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
+                        >
+                          <Edit className="h-3 w-3" />
+                          <span>Editar</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCollaborator(collaborator.id)}
+                          className="flex items-center space-x-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -901,6 +1162,888 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
             </div>
           </div>
         )}
+
+        {/* Add Brand Modal */}
+        {showAddBrandModal && (
+          <AddBrandModal
+            onClose={() => setShowAddBrandModal(false)}
+            onSave={handleAddBrand}
+          />
+        )}
+
+        {/* Add News Modal */}
+        {showAddNewsModal && (
+          <AddNewsModal
+            onClose={() => setShowAddNewsModal(false)}
+            onSave={handleAddNews}
+          />
+        )}
+
+        {/* Add Collaborator Modal */}
+        {showAddCollaboratorModal && (
+          <AddCollaboratorModal
+            onClose={() => setShowAddCollaboratorModal(false)}
+            onSave={handleAddCollaborator}
+          />
+        )}
+
+        {/* Edit Brand Modal */}
+        {editingBrand && (
+          <EditBrandModal
+            brand={editingBrand}
+            onClose={() => setEditingBrand(null)}
+            onSave={handleSaveBrand}
+            onChange={setEditingBrand}
+          />
+        )}
+
+        {/* Edit News Modal */}
+        {editingNews && (
+          <EditNewsModal
+            article={editingNews}
+            onClose={() => setEditingNews(null)}
+            onSave={handleSaveNews}
+            onChange={setEditingNews}
+          />
+        )}
+
+        {/* Edit Collaborator Modal */}
+        {editingCollaborator && (
+          <EditCollaboratorModal
+            collaborator={editingCollaborator}
+            onClose={() => setEditingCollaborator(null)}
+            onSave={handleSaveCollaborator}
+            onChange={setEditingCollaborator}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Add Brand Modal Component
+const AddBrandModal: React.FC<{
+  onClose: () => void;
+  onSave: (brand: Omit<Brand, 'id'>) => void;
+}> = ({ onClose, onSave }) => {
+  const [formData, setFormData] = useState<Omit<Brand, 'id'>>({
+    name: '',
+    category: 'Bicicletas',
+    description: '',
+    logo: '',
+    website: '',
+    country: '',
+    foundedYear: undefined,
+    specialties: [],
+    isActive: true,
+    featured: false
+  });
+
+  const categories = ['Bicicletas', 'Componentes', 'Ropa', 'Accesorios', 'Nutrición', 'Otros'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.name && formData.description) {
+      onSave(formData);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Marca</h3>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Nombre <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">País</label>
+              <input
+                type="text"
+                value={formData.country || ''}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Año de Fundación</label>
+              <input
+                type="number"
+                value={formData.foundedYear || ''}
+                onChange={(e) => setFormData({ ...formData, foundedYear: e.target.value ? parseInt(e.target.value) : undefined })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                min="1800"
+                max={new Date().getFullYear()}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Descripción <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+              required
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">URL del Logo</label>
+              <input
+                type="url"
+                value={formData.logo || ''}
+                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+              <input
+                type="url"
+                value={formData.website || ''}
+                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Marca Activa</span>
+            </label>
+            
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Marca Destacada</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Guardar Marca</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Add News Modal Component
+const AddNewsModal: React.FC<{
+  onClose: () => void;
+  onSave: (article: Omit<NewsArticle, 'id'>) => void;
+}> = ({ onClose, onSave }) => {
+  const [formData, setFormData] = useState<Omit<NewsArticle, 'id'>>({
+    title: '',
+    summary: '',
+    content: '',
+    author: '',
+    publishDate: new Date().toISOString().split('T')[0],
+    category: 'Noticias',
+    imageUrl: '',
+    readTime: 5,
+    featured: false,
+    externalUrl: ''
+  });
+
+  const categories = ['Competición', 'Equipamiento', 'Rutas', 'Noticias', 'Entrevistas'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.title && formData.summary && formData.author) {
+      onSave(formData);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Crear Nueva Noticia</h3>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Título <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Resumen <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.summary}
+              onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={2}
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Contenido</label>
+            <textarea
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={6}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Autor <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.author}
+                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Tiempo de Lectura (min)</label>
+              <input
+                type="number"
+                value={formData.readTime}
+                onChange={(e) => setFormData({ ...formData, readTime: parseInt(e.target.value) || 5 })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                min="1"
+                max="60"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">URL de Imagen</label>
+              <input
+                type="url"
+                value={formData.imageUrl}
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">URL Externa (opcional)</label>
+              <input
+                type="url"
+                value={formData.externalUrl || ''}
+                onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Noticia Destacada</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Publicar Noticia</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Add Collaborator Modal Component
+const AddCollaboratorModal: React.FC<{
+  onClose: () => void;
+  onSave: (collaborator: Omit<Collaborator, 'id'>) => void;
+}> = ({ onClose, onSave }) => {
+  const [formData, setFormData] = useState<Omit<Collaborator, 'id'>>({
+    name: '',
+    category: 'Tienda de Bicicletas',
+    description: '',
+    contactInfo: {
+      email: '',
+      phone: '',
+      website: '',
+      address: ''
+    },
+    images: [],
+    isActive: true,
+    featured: false
+  });
+
+  const categories = ['Tienda de Bicicletas', 'Hotel', 'Restaurante', 'Guía Turístico', 'Equipamiento', 'Otros'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.name && formData.description) {
+      onSave(formData);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Añadir Nuevo Colaborador</h3>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Nombre <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Descripción <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+              required
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.contactInfo.email || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, email: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+              <input
+                type="tel"
+                value={formData.contactInfo.phone || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, phone: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+              <input
+                type="url"
+                value={formData.contactInfo.website || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, website: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+              <input
+                type="text"
+                value={formData.contactInfo.address || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, address: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Colaborador Activo</span>
+            </label>
+            
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Colaborador Destacado</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Guardar Colaborador</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Edit Brand Modal Component
+const EditBrandModal: React.FC<{
+  brand: Brand;
+  onClose: () => void;
+  onSave: () => void;
+  onChange: (brand: Brand) => void;
+}> = ({ brand, onClose, onSave, onChange }) => {
+  const categories = ['Bicicletas', 'Componentes', 'Ropa', 'Accesorios', 'Nutrición', 'Otros'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Editar Marca</h3>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+              <input
+                type="text"
+                value={brand.name}
+                onChange={(e) => onChange({ ...brand, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={brand.category}
+                onChange={(e) => onChange({ ...brand, category: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+            <textarea
+              value={brand.description}
+              onChange={(e) => onChange({ ...brand, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+            />
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={brand.isActive}
+                onChange={(e) => onChange({ ...brand, isActive: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Marca Activa</span>
+            </label>
+            
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={brand.featured}
+                onChange={(e) => onChange({ ...brand, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Marca Destacada</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Guardar Cambios</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Edit News Modal Component
+const EditNewsModal: React.FC<{
+  article: NewsArticle;
+  onClose: () => void;
+  onSave: () => void;
+  onChange: (article: NewsArticle) => void;
+}> = ({ article, onClose, onSave, onChange }) => {
+  const categories = ['Competición', 'Equipamiento', 'Rutas', 'Noticias', 'Entrevistas'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Editar Noticia</h3>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Título</label>
+            <input
+              type="text"
+              value={article.title}
+              onChange={(e) => onChange({ ...article, title: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Resumen</label>
+            <textarea
+              value={article.summary}
+              onChange={(e) => onChange({ ...article, summary: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={2}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Autor</label>
+              <input
+                type="text"
+                value={article.author}
+                onChange={(e) => onChange({ ...article, author: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={article.category}
+                onChange={(e) => onChange({ ...article, category: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={article.featured}
+                onChange={(e) => onChange({ ...article, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Noticia Destacada</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Guardar Cambios</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Edit Collaborator Modal Component
+const EditCollaboratorModal: React.FC<{
+  collaborator: Collaborator;
+  onClose: () => void;
+  onSave: () => void;
+  onChange: (collaborator: Collaborator) => void;
+}> = ({ collaborator, onClose, onSave, onChange }) => {
+  const categories = ['Tienda de Bicicletas', 'Hotel', 'Restaurante', 'Guía Turístico', 'Equipamiento', 'Otros'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Editar Colaborador</h3>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+              <input
+                type="text"
+                value={collaborator.name}
+                onChange={(e) => onChange({ ...collaborator, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={collaborator.category}
+                onChange={(e) => onChange({ ...collaborator, category: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+            <textarea
+              value={collaborator.description}
+              onChange={(e) => onChange({ ...collaborator, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+            />
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={collaborator.isActive}
+                onChange={(e) => onChange({ ...collaborator, isActive: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Colaborador Activo</span>
+            </label>
+            
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={collaborator.featured}
+                onChange={(e) => onChange({ ...collaborator, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Colaborador Destacado</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Guardar Cambios</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
