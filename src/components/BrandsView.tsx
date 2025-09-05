@@ -132,80 +132,80 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
             <Star className="h-5 w-5 text-yellow-500 mr-2" />
             Marcas Destacadas
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredBrands.map(brand => {
               const Icon = getCategoryIcon(brand.category);
               
               return (
                 <div key={brand.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        {brand.logo && (
-                          <img 
-                            src={brand.logo} 
-                            alt={`${brand.name} logo`}
-                            className="w-16 h-16 object-contain rounded-lg bg-slate-50 p-2"
-                          />
-                        )}
-                        <div>
-                          <h3 className="text-xl font-bold text-slate-800 flex items-center">
-                            {brand.name}
-                            <Star className="h-5 w-5 text-yellow-400 ml-2" />
-                          </h3>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Icon className="h-4 w-4 text-orange-500" />
-                            <span className="text-sm text-slate-600">{brand.category}</span>
-                          </div>
-                        </div>
+                  <div className="relative h-48">
+                    {brand.logo ? (
+                      <img 
+                        src={brand.logo} 
+                        alt={`${brand.name} logo`}
+                        className="w-full h-full object-contain bg-slate-50 p-4"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                        <Icon className="h-16 w-16 text-slate-400" />
                       </div>
+                    )}
+                    <div className="absolute top-3 right-3">
+                      <span className="px-2 py-1 bg-yellow-500 text-white rounded-full text-xs font-medium flex items-center">
+                        <Star className="h-3 w-3 mr-1" />
+                        Destacada
+                      </span>
                     </div>
+                    <div className="absolute top-3 left-3">
+                      <Icon className="h-5 w-5 text-orange-500 bg-white rounded-full p-1" />
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-slate-800 mb-1">{brand.name}</h3>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Icon className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm text-slate-600">{brand.category}</span>
+                    </div>
+                    <p className="text-slate-600 text-sm mb-4 line-clamp-3">{brand.description}</p>
                     
-                    <p className="text-slate-700 mb-4 leading-relaxed">{brand.description}</p>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
                       {brand.country && (
-                        <div className="flex items-center text-slate-600">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          <span>{brand.country}</span>
-                        </div>
+                        <span className="flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {brand.country}
+                        </span>
                       )}
                       {brand.foundedYear && (
-                        <div className="flex items-center text-slate-600">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          <span>Fundada en {brand.foundedYear}</span>
-                        </div>
+                        <span className="flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {brand.foundedYear}
+                        </span>
                       )}
                     </div>
                     
-                    {brand.specialties.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold text-slate-800 mb-2">Especialidades:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {brand.specialties.map((specialty, index) => (
-                            <span 
-                              key={index}
-                              className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs"
-                            >
-                              {specialty}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {brand.website && (
-                      <a
-                        href={brand.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                      >
-                        <Globe className="h-4 w-4" />
-                        <span>Visitar Web</span>
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    )}
+                    <div className="flex items-center justify-between">
+                      {brand.website ? (
+                        <a
+                          href={brand.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                        >
+                          <Globe className="h-4 w-4" />
+                          <span>Visitar Web</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        <div></div>
+                      )}
+                      
+                      {brand.specialties.length > 0 && (
+                        <span className="text-xs text-slate-500">
+                          {brand.specialties.length} especialidad{brand.specialties.length !== 1 ? 'es' : ''}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -220,33 +220,44 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
           <h3 className="text-xl font-semibold text-slate-800 mb-6">
             Todas las Marcas
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {regularBrands.map(brand => {
               const Icon = getCategoryIcon(brand.category);
               
               return (
                 <div key={brand.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        {brand.logo && (
-                          <img 
-                            src={brand.logo} 
-                            alt={`${brand.name} logo`}
-                            className="w-12 h-12 object-contain rounded-lg bg-slate-50 p-1"
-                          />
-                        )}
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-800">{brand.name}</h3>
-                          <div className="flex items-center space-x-1">
-                            <Icon className="h-3 w-3 text-orange-500" />
-                            <span className="text-xs text-slate-600">{brand.category}</span>
-                          </div>
-                        </div>
+                  <div className="relative h-40">
+                    {brand.logo ? (
+                      <img 
+                        src={brand.logo} 
+                        alt={`${brand.name} logo`}
+                        className="w-full h-full object-contain bg-slate-50 p-3"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                        <Icon className="h-12 w-12 text-slate-400" />
                       </div>
+                    )}
+                    <div className="absolute top-3 right-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        brand.category === 'Bicicletas' ? 'bg-blue-100 text-blue-800' :
+                        brand.category === 'Componentes' ? 'bg-green-100 text-green-800' :
+                        brand.category === 'Ropa' ? 'bg-purple-100 text-purple-800' :
+                        brand.category === 'Accesorios' ? 'bg-orange-100 text-orange-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {brand.category}
+                      </span>
                     </div>
-                    
-                    <p className="text-slate-600 text-sm mb-3 line-clamp-3">{brand.description}</p>
+                  </div>
+                  
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-slate-800 mb-1">{brand.name}</h3>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Icon className="h-3 w-3 text-orange-500" />
+                      <span className="text-xs text-slate-600">{brand.category}</span>
+                    </div>
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">{brand.description}</p>
                     
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
                       {brand.country && (
