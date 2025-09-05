@@ -92,6 +92,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     return typeMap[type] || type;
   };
 
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    result.push(current);
+    return result;
+  };
+
   const handleExportCSV = () => {
     const csvHeaders = [
       'id',
@@ -256,33 +283,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     // Limpiar el mensaje después de 10 segundos
     setTimeout(() => setImportStatus(null), 10000);
   };
-  
-  const handleExportCSV = () => {
-    const csvHeaders = [
-      'id',
-      'name',
-      'country',
-      'region',
-      'maxAltitude',
-      'elevationGain',
-      'averageGradient',
-      'maxGradient',
-      'distance',
-      'difficulty',
-      'coordinates_lat',
-      'coordinates_lng',
-      'description',
-      'imageUrl',
-      'category'
-    ];
-    
-    const csvData = passes.map(pass => [
-      pass.id,
-      `"${pass.name}"`,
-      `"${pass.country}"`,
-      `"${pass.region}"`,
-      pass.maxAltitude,
-      pass.elevationGain,
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -547,45 +547,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-slate-800">{t.managePasses}</h3>
                 <div className="flex space-x-3">
-                  <button
-                    onClick={handleExportCSV}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Exportar CSV</span>
-                  </button>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept=".csv"
-                      onChange={handleImportCSV}
-                      className="hidden"
-                      id="csv-import"
-                    />
-                    <label
-                      htmlFor="csv-import"
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors cursor-pointer"
-                    >
-                      <Upload className="h-4 w-4" />
-                      <span>Importar CSV</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              
-              {importStatus && (
-                <div className={`mb-4 p-4 rounded-lg ${
-                  importStatus.type === 'success' 
-                    ? 'bg-green-50 border border-green-200 text-green-800' 
-                    : 'bg-red-50 border border-red-200 text-red-800'
-                }`}>
-                  <p className="font-medium">{importStatus.message}</p>
-                  {importStatus.details && (
-                    <p className="text-sm mt-1">{importStatus.details}</p>
-                  )}
-                </div>
-              )}
-              
                   <button
                     onClick={handleExportCSV}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
