@@ -595,15 +595,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Categoría <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={newCollaborator.category || 'Bike Shop'}
-                  onChange={(e) => setNewCollaborator({ ...newCollaborator, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
+                <div className="flex space-x-2">
+                  <select
+                    value={newCollaborator.category || 'Bike Shop'}
+                    onChange={(e) => setNewCollaborator({ ...newCollaborator, category: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  >
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newCategory = prompt('Introduce el nombre de la nueva categoría:');
+                      if (newCategory && newCategory.trim()) {
+                        const trimmedCategory = newCategory.trim();
+                        const categoryExists = categories.some(cat => 
+                          cat.toLowerCase() === trimmedCategory.toLowerCase()
+                        );
+                        
+                        if (categoryExists) {
+                          alert('CATEGORÍA EXISTENTE: Ya existe una categoría con ese nombre');
+                        } else {
+                          addCategory(trimmedCategory);
+                          setCategories(loadCategories());
+                          setNewCollaborator({ ...newCollaborator, category: trimmedCategory });
+                        }
+                      }
+                    }}
+                    className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    title="Añadir nueva categoría"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
               
               <div>
