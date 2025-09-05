@@ -113,7 +113,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
     
-    // Verificar si la categoría ya existe
+    // Verificar si la categoría ya existe (comparación case-insensitive)
+    const categoryExists = categories.some(cat => 
+      cat.toLowerCase() === trimmedCategory.toLowerCase()
+    );
+    
+    if (categoryExists) {
     if (categories.includes(newCategoryName.trim())) {
       setCategoryError('Ya existe una categoría con ese nombre');
       return;
