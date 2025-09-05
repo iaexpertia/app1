@@ -406,14 +406,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     });
   };
 
-  const handleAddNews = () => {
+      publishDate: publishDate,
+    const today = new Date().toISOString().split('T')[0];
+    const selectedDate = newNews.publishDate || today;
+    
+    // Si la fecha seleccionada es hoy, usar la fecha y hora actual
+    // Si no, usar la fecha seleccionada a las 00:00
+    const publishDate = selectedDate === today ? today : selectedDate;
+    
     const newArticle: NewsArticle = {
       id: Date.now().toString(),
       title: '',
       summary: '',
       content: '',
       author: '',
-      publishDate: new Date().toISOString().split('T')[0],
+      publishDate: today, // Resetear a la fecha actual
       category: 'Noticias',
       imageUrl: '',
       readTime: 5,
@@ -426,7 +433,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const handleSaveNews = () => {
     if (!editingNews) return;
     
+    const today = new Date().toISOString().split('T')[0];
+    const selectedDate = editingNews.publishDate || today;
+    
+    // Si la fecha seleccionada es hoy, mantener la fecha actual
+    // Si no, usar la fecha seleccionada
+    const publishDate = selectedDate === today ? today : selectedDate;
+    
     const updatedNews = showAddNews 
+      publishDate: publishDate,
       ? [...news, editingNews]
       : news.map(article => article.id === editingNews.id ? editingNews : article);
     
