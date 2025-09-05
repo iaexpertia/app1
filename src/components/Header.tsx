@@ -30,7 +30,6 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered') => {
   const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
