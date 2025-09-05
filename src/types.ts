@@ -76,3 +76,17 @@ export interface Collaborator {
   isActive: boolean;
   featured: boolean;
 }
+
+export interface Brand {
+  id: string;
+  name: string;
+  category: 'Bicicletas' | 'Componentes' | 'Ropa' | 'Accesorios' | 'Nutrición' | 'Otros';
+  description: string;
+  logo?: string;
+  website?: string;
+  country?: string;
+  foundedYear?: number;
+  specialties: string[];
+  isActive: boolean;
+  featured: boolean;
+}
