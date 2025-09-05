@@ -41,7 +41,7 @@ function App() {
   const [conqueredPassIds, setConqueredPassIds] = useState<Set<string>>(new Set());
   const [passes, setPasses] = useState<MountainPass[]>(mountainPasses);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(true); // Forzar admin para debug
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
 
   useEffect(() => {
@@ -49,8 +49,8 @@ function App() {
     setConquests(loadedConquests);
     setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
     
-    // Forzar configuración admin
-    setIsAdmin(true);
+    // Verificar si el usuario actual es admin
+    setIsAdmin(isCurrentUserAdmin());
     
     // Si no hay ciclistas registrados, crear un admin por defecto
     const cyclists = loadCyclists();
@@ -68,9 +68,6 @@ function App() {
       addCyclist(defaultAdmin);
       setCurrentUser(defaultAdmin.id);
     }
-    
-    // Asegurar que siempre hay acceso admin
-    setIsAdmin(true);
   }, []);
 
   const handleToggleConquest = (passId: string) => {

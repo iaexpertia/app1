@@ -33,6 +33,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     phone: '',
     age: '',
     weight: '',
+    isAdmin: false,
   });
   
   const [bikes, setBikes] = useState<Omit<Bike, 'id'>[]>([]);
@@ -79,7 +80,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: formData.phone.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        isAdmin: false,
+        isAdmin: formData.isAdmin,
         bikes: bikes.map(bike => ({
           ...bike,
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
@@ -89,8 +90,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       
       addCyclist(newCyclist);
       
-      // Set as current user
-      setCurrentUser(newCyclist.id);
+      // Set as current user only if not admin registration
+      if (!formData.isAdmin) {
+        setCurrentUser(newCyclist.id);
+      }
       
       // Send confirmation email
       setEmailStatus('sending');
@@ -122,6 +125,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: '',
         age: '',
         weight: '',
+        isAdmin: false,
       });
       setBikes([]);
       setErrors({});
@@ -307,6 +311,27 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 max="150"
                 step="0.1"
               />
+            </div>
+          </div>
+          
+          {/* Admin Role Checkbox */}
+          <div className="col-span-full">
+            <div className="flex items-start space-x-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="isAdmin"
+                checked={formData.isAdmin}
+                onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
+                className="mt-1 rounded border-orange-300 text-orange-500 focus:ring-orange-500"
+              />
+              <div className="flex-1">
+                <label htmlFor="isAdmin" className="block text-sm font-medium text-orange-800 cursor-pointer">
+                  {t.adminRole}
+                </label>
+                <p className="text-xs text-orange-700 mt-1">
+                  {t.adminRoleDescription}
+                </p>
+              </div>
             </div>
           </div>
 
