@@ -25,7 +25,8 @@ import {
   updateConquest
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
-import { isCurrentUserAdmin } from './utils/cyclistStorage';
+import { isCurrentUserAdmin, loadCyclists, addCyclist, setCurrentUser } from './utils/cyclistStorage';
+import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
 
@@ -44,7 +45,28 @@ function App() {
     const loadedConquests = loadConquests();
     setConquests(loadedConquests);
     setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
-    setIsAdmin(isCurrentUserAdmin());
+    
+    // Configurar acceso admin inicial
+    const currentAdmin = isCurrentUserAdmin();
+    setIsAdmin(currentAdmin);
+    
+    // Si no hay ciclistas registrados, crear un admin por defecto
+    const cyclists = loadCyclists();
+    if (cyclists.length === 0) {
+      const defaultAdmin: Cyclist = {
+        id: 'admin-default',
+        name: 'Administrador',
+        alias: 'Admin',
+        email: 'admin@puertosconquistados.com',
+        phone: '+34 000 000 000',
+        bikes: [],
+        registrationDate: new Date().toISOString().split('T')[0],
+        isAdmin: true
+      };
+      addCyclist(defaultAdmin);
+      setCurrentUser(defaultAdmin.id);
+      setIsAdmin(true);
+    }
   }, []);
 
   const handleToggleConquest = (passId: string) => {
