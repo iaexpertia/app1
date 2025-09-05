@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save, Upload } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
 import { 
@@ -54,6 +54,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   
   // Edit states
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
@@ -61,6 +62,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+
+  // Import states
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPreview, setImportPreview] = useState<string[]>([]);
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
@@ -98,6 +103,74 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setBrands(loadBrands());
     setCollaborators(loadCollaborators());
     setNews(loadNews());
+  };
+
+  // Import handlers
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setImportFile(file);
+      
+      // Read file preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').slice(0, 6); // First 6 lines (header + 5 data rows)
+        setImportPreview(lines);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleImportCSV = async () => {
+    if (!importFile) return;
+
+    try {
+      const text = await importFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',');
+      
+      const newPasses: MountainPass[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',');
+        if (values.length >= headers.length) {
+          const pass: MountainPass = {
+            id: values[0] || `imported-${Date.now()}-${i}`,
+            name: values[1] || '',
+            country: values[2] || '',
+            region: values[3] || '',
+            maxAltitude: parseInt(values[4]) || 0,
+            elevationGain: parseInt(values[5]) || 0,
+            averageGradient: parseFloat(values[6]) || 0,
+            maxGradient: parseFloat(values[7]) || 0,
+            distance: parseFloat(values[8]) || 0,
+            difficulty: values[9] as any || 'Cuarta',
+            coordinates: {
+              lat: parseFloat(values[10]) || 0,
+              lng: parseFloat(values[11]) || 0
+            },
+            description: values[12] || '',
+            imageUrl: values[13] || '',
+            category: values[14] || 'Otros'
+          };
+          newPasses.push(pass);
+        }
+      }
+
+      // Update passes through parent component
+      newPasses.forEach(pass => {
+        onUpdatePass(pass);
+      });
+
+      alert(`Se han importado ${newPasses.length} puertos correctamente.`);
+      setShowImportModal(false);
+      setImportFile(null);
+      setImportPreview([]);
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      alert('Error al importar el archivo CSV. Verifica el formato.');
+    }
   };
 
   // Export handlers
@@ -404,99 +477,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setEditingNews(null);
     resetNewsForm();
   };
-  const handleImportCSV = () => {
-    if (!importFile) {
-      alert('Por favor selecciona un archivo CSV');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const lines = text.split('\n');
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-      
-      const importedPasses: MountainPass[] = [];
-      
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        
-        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-        
-        if (values.length >= headers.length) {
-          const pass: MountainPass = {
-            id: values[0] || `imported-${Date.now()}-${i}`,
-            name: values[1] || '',
-            country: values[2] || '',
-            region: values[3] || '',
-            maxAltitude: parseInt(values[4]) || 0,
-            elevationGain: parseInt(values[5]) || 0,
-            averageGradient: parseFloat(values[6]) || 0,
-            maxGradient: parseFloat(values[7]) || 0,
-            distance: parseFloat(values[8]) || 0,
-            difficulty: (values[9] as any) || 'Cuarta',
-            coordinates: {
-              lat: parseFloat(values[10]) || 0,
-              lng: parseFloat(values[11]) || 0
-            },
-            description: values[12] || '',
-            imageUrl: values[13] || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
-            category: values[14] || 'Otros',
-            famousWinners: []
-          };
-          
-          if (pass.name && pass.country) {
-            importedPasses.push(pass);
-          }
-        }
-      }
-      
-      if (importedPasses.length > 0) {
-        const updatedPasses = [...passes];
-        let addedCount = 0;
-        
-        importedPasses.forEach(newPass => {
-          const existingIndex = updatedPasses.findIndex(p => p.id === newPass.id || p.name === newPass.name);
-          if (existingIndex >= 0) {
-            updatedPasses[existingIndex] = newPass;
-          } else {
-            updatedPasses.push(newPass);
-            addedCount++;
-          }
-        });
-        
-        setPasses(updatedPasses);
-        alert(`Importación completada: ${addedCount} puertos nuevos añadidos, ${importedPasses.length - addedCount} actualizados`);
-        setShowImportModal(false);
-        setImportFile(null);
-        setImportPreview([]);
-      } else {
-        alert('No se pudieron importar puertos. Verifica el formato del archivo.');
-      }
-    };
-    
-    reader.readAsText(importFile);
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
-      setImportFile(file);
-      
-      // Preview first few lines
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const lines = text.split('\n').slice(0, 6); // First 5 lines + header
-        setImportPreview(lines);
-      };
-      reader.readAsText(file);
-    } else {
-      alert('Por favor selecciona un archivo CSV válido');
-    }
-  };
-
 
   const handleDeleteNews = (articleId: string) => {
     if (confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
@@ -632,13 +612,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
-              <button
-                onClick={() => exportMountainPasses(passes)}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar Excel</span>
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowImportModal(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  Importar CSV
+                </button>
+                <button
+                  onClick={() => exportMountainPasses(passes)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Exportar Excel</span>
+                </button>
+              </div>
             </div>
             
             {/* Passes Table */}
@@ -1483,6 +1472,118 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               >
                 <Save className="w-4 h-4" />
                 {editingNews ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import CSV Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Upload className="h-6 w-6 text-purple-500" />
+                <h3 className="text-xl font-semibold text-slate-800">Importar Puertos desde CSV</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportFile(null);
+                  setImportPreview([]);
+                }}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">📋 Formato del archivo CSV</h4>
+                <p className="text-blue-700 text-sm mb-3">
+                  El archivo debe tener las siguientes columnas en este orden:
+                </p>
+                <div className="bg-white rounded border p-3 font-mono text-xs overflow-x-auto">
+                  <div className="text-blue-600">
+                    id,name,country,region,maxAltitude,elevationGain,averageGradient,maxGradient,distance,difficulty,coordinates_lat,coordinates_lng,description,imageUrl,category
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-blue-700">
+                  <div>• <strong>id:</strong> Identificador único</div>
+                  <div>• <strong>name:</strong> Nombre del puerto</div>
+                  <div>• <strong>country:</strong> País</div>
+                  <div>• <strong>region:</strong> Región</div>
+                  <div>• <strong>maxAltitude:</strong> Altitud máxima (m)</div>
+                  <div>• <strong>elevationGain:</strong> Desnivel (m)</div>
+                  <div>• <strong>averageGradient:</strong> Pendiente media (%)</div>
+                  <div>• <strong>maxGradient:</strong> Pendiente máxima (%)</div>
+                  <div>• <strong>distance:</strong> Distancia (km)</div>
+                  <div>• <strong>difficulty:</strong> Cuarta/Tercera/Segunda/Primera/Especial</div>
+                  <div>• <strong>coordinates_lat:</strong> Latitud</div>
+                  <div>• <strong>coordinates_lng:</strong> Longitud</div>
+                  <div>• <strong>description:</strong> Descripción</div>
+                  <div>• <strong>imageUrl:</strong> URL de imagen</div>
+                  <div>• <strong>category:</strong> Categoría del puerto</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Seleccionar archivo CSV
+                </label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileSelect}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {importPreview.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-slate-800 mb-3">Vista previa del archivo:</h4>
+                  <div className="bg-slate-50 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap">
+                      {importPreview.join('\n')}
+                    </pre>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">
+                    Mostrando las primeras 5 filas del archivo...
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Importante</h4>
+                <ul className="text-yellow-700 text-sm space-y-1">
+                  <li>• Los puertos existentes con el mismo ID o nombre serán actualizados</li>
+                  <li>• Los puertos nuevos serán añadidos a la base de datos</li>
+                  <li>• Asegúrate de que el formato del CSV sea correcto</li>
+                  <li>• Se recomienda hacer una copia de seguridad antes de importar</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 p-6 border-t">
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportFile(null);
+                  setImportPreview([]);
+                }}
+                className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleImportCSV}
+                disabled={!importFile}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                <span>Importar Puertos</span>
               </button>
             </div>
           </div>
