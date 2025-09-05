@@ -113,18 +113,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
     
+    const trimmedCategory = newCategoryName.trim();
+    
     // Verificar si la categoría ya existe
     const categoryExists = categories.some(cat => cat.toLowerCase() === trimmedCategory.toLowerCase());
     
     if (categoryExists) {
       alert('CATEGORÍA EXISTENTE: Ya existe una categoría con ese nombre');
+      return;
+    }
     
     // Verificar si la categoría ya existe (comparación case-insensitive)
-    const categoryExists = categories.some(cat => 
+    const categoryExists2 = categories.some(cat => 
       cat.toLowerCase() === trimmedCategory.toLowerCase()
     );
     
-    if (categoryExists) {
+    if (categoryExists2) {
       setCategoryError('Ya existe una categoría con ese nombre');
       alert('CATEGORÍA EXISTENTE: Ya existe una categoría con ese nombre');
       return;
@@ -137,7 +141,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setShowAddCategoryModal(false);
   };
 
-      alert('Error al añadir la categoría');
   const handleRemoveCategory = (categoryToRemove: string) => {
     if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${getCategoryText(categoryToRemove)}"?`)) {
       const { removeCategory } = require('../utils/collaboratorStorage');
