@@ -54,6 +54,16 @@ export const removeConquest = (passId: string): void => {
   saveConquests(filteredConquests);
 };
 
+export const updateConquest = (conquest: ConquestData): void => {
+  const conquests = loadConquests();
+  const index = conquests.findIndex(c => c.passId === conquest.passId);
+  
+  if (index >= 0) {
+    conquests[index] = conquest;
+    saveConquests(conquests);
+  }
+};
+
 export const isPassConquered = (passId: string): boolean => {
   const conquests = loadConquests();
   return conquests.some(c => c.passId === passId);

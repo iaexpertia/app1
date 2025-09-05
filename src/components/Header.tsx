@@ -4,8 +4,8 @@ import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
 
 interface HeaderProps {
-  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators';
-  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators') => void;
+  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered';
+  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered') => void;
   conqueredCount: number;
   totalCount: number;
   t: Translation;
@@ -30,13 +30,14 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators') => {
+  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
 
   const navigationItems = [
     { key: 'passes', icon: Mountain, label: t.passes },
+    { key: 'conquered', icon: Award, label: 'Conquistados' },
     { key: 'map', icon: Map, label: t.map },
     { key: 'stats', icon: Award, label: t.stats },
     { key: 'collaborators', icon: Users, label: t.collaborators },

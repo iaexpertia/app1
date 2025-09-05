@@ -11,6 +11,7 @@ import { CyclistRegistration } from './components/CyclistRegistration';
 import { AdminPanel } from './components/AdminPanel';
 import { DatabaseView } from './components/DatabaseView';
 import { CollaboratorsView } from './components/CollaboratorsView';
+import { ConqueredPassesView } from './components/ConqueredPassesView';
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
@@ -18,12 +19,13 @@ import {
   removeConquest, 
   isPassConquered,
   updateConquestPhotos,
-  getConquestByPassId
+  getConquestByPassId,
+  updateConquest
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin } from './utils/cyclistStorage';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered';
 
 function App() {
   const { language, t, changeLanguage } = useLanguage();
@@ -107,6 +109,12 @@ function App() {
     setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
   };
 
+  const handleUpdateConquest = (conquest: ConquestData) => {
+    updateConquest(conquest);
+    const updatedConquests = loadConquests();
+    setConquests(updatedConquests);
+  };
+
   const userStats = calculateUserStats(passes, conquests);
   const conqueredPasses = mountainPasses.filter(pass => conqueredPassIds.has(pass.id));
 
@@ -185,6 +193,15 @@ function App() {
         
         {activeTab === 'collaborators' && (
           <CollaboratorsView
+            t={t}
+          />
+        )}
+        
+        {activeTab === 'conquered' && (
+          <ConqueredPassesView
+            conqueredPasses={conqueredPasses}
+            conquests={conquests}
+            onUpdateConquest={handleUpdateConquest}
             t={t}
           />
         )}
