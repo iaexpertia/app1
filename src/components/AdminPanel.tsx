@@ -1017,6 +1017,7 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
                     {getCategoryText(category)}
                   </option>
                 ))}
+              </select>
             </div>
           </div>
           
