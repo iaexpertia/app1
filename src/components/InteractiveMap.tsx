@@ -151,7 +151,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const centerLng = passes.reduce((sum, pass) => sum + pass.coordinates.lng, 0) / passes.length;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-800 mb-4">{t.mapTitle}</h2>
         <p className="text-slate-600">{t.mapDescription}</p>
@@ -368,6 +369,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

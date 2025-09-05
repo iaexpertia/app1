@@ -122,7 +122,8 @@ export const Header: React.FC<HeaderProps> = ({
             ? 'max-h-96 opacity-100 pb-4' 
             : 'max-h-0 opacity-0 overflow-hidden'
         }`}>
-          <nav className="flex flex-col space-y-2">
+          <div className="bg-white border-t border-slate-200 mx-4 rounded-lg shadow-lg mt-2">
+            <nav className="flex flex-col space-y-2 p-4">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -140,14 +141,15 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               );
             })}
-          </nav>
+            </nav>
           
-          {/* Mobile Language Selector */}
-          <div className="mt-4 pt-4 border-t border-slate-200 sm:hidden">
-            <LanguageSelector
-              currentLanguage={language}
-              onLanguageChange={onLanguageChange}
-            />
+            {/* Mobile Language Selector */}
+            <div className="px-4 pb-4 pt-2 border-t border-slate-200 sm:hidden">
+              <LanguageSelector
+                currentLanguage={language}
+                onLanguageChange={onLanguageChange}
+              />
+            </div>
           </div>
         </div>
       </div>

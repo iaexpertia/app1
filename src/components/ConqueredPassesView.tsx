@@ -93,18 +93,21 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
 
   if (conqueredPasses.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center py-12">
           <Award className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <p className="text-xl text-slate-600 mb-2">No has conquistado ningún puerto todavía</p>
           <p className="text-slate-500">¡Empieza a conquistar puertos para verlos aquí!</p>
         </div>
       </div>
+        </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <div className="flex items-center mb-4">
           <Award className="h-8 w-8 text-orange-500 mr-3" />
@@ -374,6 +377,7 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

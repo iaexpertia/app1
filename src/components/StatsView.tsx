@@ -32,7 +32,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
   }, {} as Record<string, number>);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-800 mb-4">{t.statsTitle}</h2>
         <p className="text-slate-600">{t.statsDescription}</p>
@@ -223,6 +224,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

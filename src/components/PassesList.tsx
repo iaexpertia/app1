@@ -58,7 +58,8 @@ export const PassesList: React.FC<PassesListProps> = ({
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -138,6 +139,7 @@ export const PassesList: React.FC<PassesListProps> = ({
           <p className="text-slate-500">{t.noPassesFoundDesc}</p>
         </div>
       )}
+    </div>
     </div>
   );
 };
