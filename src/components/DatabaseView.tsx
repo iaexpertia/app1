@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
+import { exportMountainPasses } from '../utils/excelExport';
 import { 
   Database, 
   Plus, 
@@ -13,7 +14,8 @@ import {
   MapPin,
   Flag,
   X,
-  Save
+  Save,
+  Download
 } from 'lucide-react';
 
 interface DatabaseViewProps {
@@ -197,10 +199,21 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <Database className="h-8 w-8 text-orange-500 mr-3" />
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">{t.databaseTitle}</h2>
-            <p className="text-slate-600">{t.databaseDescription}</p>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Database className="h-8 w-8 text-orange-500 mr-3" />
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">{t.databaseTitle}</h2>
+                <p className="text-slate-600">{t.databaseDescription}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => exportMountainPasses(allPasses)}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar Excel</span>
+            </button>
           </div>
         </div>
         

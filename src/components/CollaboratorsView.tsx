@@ -3,6 +3,7 @@ import { Collaborator } from '../types';
 import { Translation } from '../i18n/translations';
 import { loadCollaborators, loadCategories, addCategory, removeCategory } from '../utils/collaboratorStorage';
 import { defaultCollaborators } from '../data/defaultCollaborators';
+import { exportCollaborators } from '../utils/excelExport';
 import { 
   Store, 
   Hotel, 
@@ -17,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Filter
+  Filter,
+  Download
 } from 'lucide-react';
 
 interface CollaboratorsViewProps {
@@ -147,10 +149,21 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <Users className="h-8 w-8 text-orange-500 mr-3" />
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">{t.collaborators}</h2>
-            <p className="text-slate-600">{t.collaboratorsDescription}</p>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-orange-500 mr-3" />
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">{t.collaborators}</h2>
+                <p className="text-slate-600">{t.collaboratorsDescription}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => exportCollaborators(collaborators)}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar Excel</span>
+            </button>
           </div>
         </div>
         

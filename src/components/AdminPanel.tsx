@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MountainPass, Cyclist } from '../types';
 import { Translation } from '../i18n/translations';
 import { Brand, NewsArticle, Collaborator } from '../types';
+import { exportCyclists, exportMountainPasses } from '../utils/excelExport';
 import { 
   loadCyclists, 
   saveCyclists, 
@@ -487,9 +488,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-slate-800">{t.registeredCyclists}</h3>
-                <span className="text-sm text-slate-600">
-                  {cyclists.length} {t.totalCyclists}
-                </span>
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-slate-600">
+                    {cyclists.length} {t.totalCyclists}
+                  </span>
+                  <button
+                    onClick={() => exportCyclists(cyclists)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Exportar Excel</span>
+                  </button>
+                </div>
               </div>
               
               {cyclists.length === 0 ? (
@@ -663,6 +673,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-slate-800">{t.managePasses}</h3>
                 <div className="flex space-x-3">
+                  <button
+                    onClick={() => exportMountainPasses(passes)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Exportar Excel</span>
+                  </button>
                   <button
                     onClick={handleExportCSV}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
