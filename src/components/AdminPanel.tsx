@@ -72,6 +72,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
   const [showAddBrandModal, setShowAddBrandModal] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState('');
   const [showAddNewsModal, setShowAddNewsModal] = useState(false);
   const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'cyclists' | 'passes' | 'brands' | 'news' | 'collaborators'>('cyclists');
@@ -728,6 +729,151 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </div>
                   </div>
                 ))}
+                  {/* Images Section */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-3">
+                      Imágenes del Colaborador
+                    </label>
+                    
+                    {/* Current Images */}
+                    {newCollaborator.images.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-sm text-slate-600 mb-2">Imágenes actuales ({newCollaborator.images.length}):</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {newCollaborator.images.map((image, index) => (
+                            <div key={index} className="relative group">
+                              <img 
+                                src={image} 
+                                alt={`Imagen ${index + 1}`}
+                                className="w-full h-24 object-cover rounded-lg border border-slate-300"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updatedImages = newCollaborator.images.filter((_, i) => i !== index);
+                                  setNewCollaborator({ ...newCollaborator, images: updatedImages });
+                                }}
+                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Add Image by URL */}
+                    <div className="space-y-3">
+                      <div className="flex space-x-3">
+                        <input
+                          type="url"
+                          value={newImageUrl}
+                          onChange={(e) => setNewImageUrl(e.target.value)}
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (newImageUrl.trim()) {
+                              setNewCollaborator({
+                                ...newCollaborator,
+                                images: [...newCollaborator.images, newImageUrl.trim()]
+                              });
+                              setNewImageUrl('');
+                            }
+                          }}
+                          disabled={!newImageUrl.trim()}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span>Añadir</span>
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-1 h-px bg-slate-300"></div>
+                        <span className="text-sm text-slate-500">o</span>
+                        <div className="flex-1 h-px bg-slate-300"></div>
+                      </div>
+                      
+                      {/* Upload Image File */}
+                      <div>
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.webp"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+
+                            // Validar tipo de archivo
+                            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                            if (!validTypes.includes(file.type)) {
+                              alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
+                              return;
+                            }
+
+                            // Validar tamaño (5MB máximo)
+                            const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+                            if (file.size > maxSize) {
+                              alert('El archivo es demasiado grande. El tamaño máximo es 5MB');
+                              return;
+                            }
+
+                            // Convertir a Base64
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const base64String = event.target?.result as string;
+                              setNewCollaborator({
+                                ...newCollaborator,
+                                images: [...newCollaborator.images, base64String]
+                              });
+                              // Reset file input
+                              e.target.value = '';
+                            };
+                            reader.onerror = () => {
+                              alert('Error al leer el archivo. Por favor intenta de nuevo.');
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                          className="hidden"
+                          id="collaborator-image-upload"
+                        />
+                        <label
+                          htmlFor="collaborator-image-upload"
+                          className="w-full flex items-center justify-center px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
+                        >
+                          <div className="text-center">
+                            <Camera className="mx-auto h-8 w-8 text-slate-400 mb-2" />
+                            <p className="text-sm text-slate-600">
+                              <span className="font-medium text-blue-600">Subir imagen</span> o arrastra aquí
+                            </p>
+                            <p className="text-xs text-slate-500">JPG, PNG, WEBP hasta 5MB</p>
+                          </div>
+                        </label>
+                      </div>
+                      
+                      {/* Tips */}
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start">
+                          <Camera className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                          <div className="text-sm text-blue-700">
+                            <p className="font-medium mb-1">Consejos para las imágenes:</p>
+                            <ul className="list-disc list-inside space-y-1 text-xs">
+                              <li>Añade mínimo 2 imágenes para crear un carrusel</li>
+                              <li>Usa imágenes de buena calidad (mínimo 800x600px)</li>
+                              <li>Las imágenes se mostrarán en el orden que las añadas</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
               </div>
             </div>
           </div>
