@@ -22,7 +22,9 @@ import {
   Calendar,
   Weight,
   Bike,
-  Shield
+  Shield,
+  Tag,
+  Newspaper
 } from 'lucide-react';
 
 interface AdminPanelProps {
