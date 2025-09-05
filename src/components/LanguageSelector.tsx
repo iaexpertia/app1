@@ -46,7 +46,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               } ${lang === languages[0] ? 'rounded-t-lg' : ''} ${lang === languages[languages.length - 1] ? 'rounded-b-lg' : ''}`}
             >
               <span className="text-lg">{lang.flag}</span>
-              <span className="text-sm font-medium">{lang.name}</span>
+              <span className="text-sm font-medium">{lang.code.toUpperCase()}</span>
             </button>
           ))}
         </div>
