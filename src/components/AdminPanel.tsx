@@ -112,7 +112,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setShowAddCollaborator(false);
     setNewCollaborator({
       name: '',
-      category: 'Bike Shop',
+      category: 'Tienda de Bicicletas',
       description: '',
       contactInfo: {},
       images: [],
