@@ -16,9 +16,8 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
-  Plus,
-  X,
-  Save
+  Search,
+  Filter
 } from 'lucide-react';
 
 interface CollaboratorsViewProps {
@@ -29,6 +28,8 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -59,6 +60,19 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  // Extract unique cities from collaborators
+  const cities = [...new Set(
+    collaborators
+      .filter(c => c.contactInfo.address)
+      .map(c => {
+        const address = c.contactInfo.address!;
+        // Extract city from address (assuming format: "Street, City" or "Street, City, Country")
+        const parts = address.split(',');
+        return parts.length > 1 ? parts[parts.length - 1].trim() : parts[0].trim();
+      })
+      .filter(city => city.length > 0)
+  )].sort();
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -91,7 +105,16 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
   const filteredCollaborators = collaborators.filter(collaborator => {
     const isActive = collaborator.isActive;
     const matchesCategory = selectedCategory === 'all' || collaborator.category === selectedCategory;
-    return isActive && matchesCategory;
+    
+    const matchesCity = selectedCity === 'all' || (collaborator.contactInfo.address && 
+      collaborator.contactInfo.address.toLowerCase().includes(selectedCity.toLowerCase()));
+    
+    const matchesSearch = searchTerm === '' || 
+      collaborator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      collaborator.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (collaborator.contactInfo.address && collaborator.contactInfo.address.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    return isActive && matchesCategory && matchesCity && matchesSearch;
   });
 
   const featuredCollaborators = filteredCollaborators.filter(c => c.featured);
@@ -123,8 +146,55 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
           </div>
         </div>
         
-        {/* Category Filter */}
+        {/* Search and Filters */}
         <div className="mb-6">
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar colaboradores por nombre, descripción o ubicación..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+            />
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-slate-500" />
+              <span className="text-sm font-medium text-slate-700">Filtros:</span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="all">Todas las Categorías</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {getCategoryText(category)}
+                  </option>
+                ))}
+              </select>
+              
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="all">Todas las Ciudades</option>
+                {cities.map(city => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          {/* Category Pills */}
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-slate-800">CATEGORÍAS</h3>
           </div>
