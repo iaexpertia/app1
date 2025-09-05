@@ -224,6 +224,3 @@ export const exportMountainPasses = (passes: any[]): void => {
   const filename = `puertos_montana_${new Date().toISOString().split('T')[0]}.csv`;
   downloadCSV(csvContent, filename);
 };
-
-// Alias for backward compatibility
-export const exportPasses = exportMountainPasses;

@@ -76,6 +76,3 @@ export const removeCategory = (category: string): void => {
   const filteredCategories = categories.filter(c => c !== category);
   saveCategories(filteredCategories);
 };
-
-// Alias for getCollaborators (for compatibility)
-export const getCollaborators = loadCollaborators;
