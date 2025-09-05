@@ -24,6 +24,30 @@ export const addConquest = (conquest: ConquestData): void => {
   saveConquests(conquests);
 };
 
+export const updateConquestPhotos = (passId: string, photos: string[]): void => {
+  const conquests = loadConquests();
+  const existingIndex = conquests.findIndex(c => c.passId === passId);
+  
+  if (existingIndex >= 0) {
+    conquests[existingIndex] = { ...conquests[existingIndex], photos };
+  } else {
+    // Si no existe la conquista, la creamos
+    const newConquest: ConquestData = {
+      passId,
+      dateCompleted: new Date().toISOString().split('T')[0],
+      photos
+    };
+    conquests.push(newConquest);
+  }
+  
+  saveConquests(conquests);
+};
+
+export const getConquestByPassId = (passId: string): ConquestData | null => {
+  const conquests = loadConquests();
+  return conquests.find(c => c.passId === passId) || null;
+};
+
 export const removeConquest = (passId: string): void => {
   const conquests = loadConquests();
   const filteredConquests = conquests.filter(c => c.passId !== passId);

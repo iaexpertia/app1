@@ -29,6 +29,7 @@ export interface ConquestData {
   dateCompleted: string;
   timeCompleted?: string;
   personalNotes?: string;
+  photos?: string[];
 }
 
 export interface UserStats {
