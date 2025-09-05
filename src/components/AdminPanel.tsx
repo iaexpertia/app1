@@ -24,7 +24,8 @@ import {
   Bike,
   Shield,
   Tag,
-  Newspaper
+  Newspaper,
+  UserCheck
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -37,7 +38,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
-  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes'>('cyclists');
+  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes' | 'brands' | 'news' | 'collaborators'>('cyclists');
 
   useEffect(() => {
     setCyclists(loadCyclists());
@@ -92,33 +93,75 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
             <Settings className="h-8 w-8 text-orange-500 mr-3" />
             <div>
               <h2 className="text-2xl font-bold text-slate-800">{t.adminPanel}</h2>
-              <p className="text-slate-600">Gestiona ciclistas y puertos de montaña</p>
+              <p className="text-slate-600">Gestiona todos los aspectos de la plataforma</p>
             </div>
           </div>
           
           {/* Tab Navigation */}
-          <div className="flex space-x-1 bg-slate-200 rounded-lg p-1">
+          <div className="flex flex-wrap gap-1 bg-slate-200 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('cyclists')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+              className={`flex items-center space-x-2 py-2 px-4 rounded-md transition-colors ${
                 activeTab === 'cyclists'
                   ? 'bg-white text-orange-600 shadow-sm'
                   : 'text-slate-600 hover:text-slate-800'
               }`}
             >
-              <Users className="h-4 w-4 inline mr-2" />
-              {t.manageCyclists}
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.manageCyclists}</span>
+              <span className="sm:hidden">Ciclistas</span>
             </button>
+            
             <button
               onClick={() => setActiveTab('passes')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+              className={`flex items-center space-x-2 py-2 px-4 rounded-md transition-colors ${
                 activeTab === 'passes'
                   ? 'bg-white text-orange-600 shadow-sm'
                   : 'text-slate-600 hover:text-slate-800'
               }`}
             >
-              <Mountain className="h-4 w-4 inline mr-2" />
-              {t.managePasses}
+              <Mountain className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.managePasses}</span>
+              <span className="sm:hidden">Puertos</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('brands')}
+              className={`flex items-center space-x-2 py-2 px-4 rounded-md transition-colors ${
+                activeTab === 'brands'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              <Tag className="h-4 w-4" />
+              <span className="hidden sm:inline">Marcas</span>
+              <span className="sm:hidden">Marcas</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`flex items-center space-x-2 py-2 px-4 rounded-md transition-colors ${
+                activeTab === 'news'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              <Newspaper className="h-4 w-4" />
+              <span className="hidden sm:inline">Noticias</span>
+              <span className="sm:hidden">Noticias</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveTab('collaborators')}
+              className={`flex items-center space-x-2 py-2 px-4 rounded-md transition-colors ${
+                activeTab === 'collaborators'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              <UserCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Colaboradores</span>
+              <span className="sm:hidden">Colab.</span>
             </button>
           </div>
         </div>
@@ -331,6 +374,78 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Brands Tab */}
+        {activeTab === 'brands' && (
+          <div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <Tag className="h-6 w-6 text-orange-500" />
+                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Marcas</h3>
+                </div>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                  <Plus className="h-4 w-4" />
+                  <span>Añadir Marca</span>
+                </button>
+              </div>
+              
+              <div className="text-center py-12">
+                <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-xl text-slate-600 mb-2">Gestión de Marcas</p>
+                <p className="text-slate-500">Funcionalidad en desarrollo para gestionar marcas de ciclismo</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* News Tab */}
+        {activeTab === 'news' && (
+          <div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <Newspaper className="h-6 w-6 text-orange-500" />
+                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Noticias</h3>
+                </div>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                  <Plus className="h-4 w-4" />
+                  <span>Nueva Noticia</span>
+                </button>
+              </div>
+              
+              <div className="text-center py-12">
+                <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-xl text-slate-600 mb-2">Gestión de Noticias</p>
+                <p className="text-slate-500">Funcionalidad en desarrollo para crear y gestionar noticias</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Collaborators Tab */}
+        {activeTab === 'collaborators' && (
+          <div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <UserCheck className="h-6 w-6 text-orange-500" />
+                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Colaboradores</h3>
+                </div>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                  <Plus className="h-4 w-4" />
+                  <span>Añadir Colaborador</span>
+                </button>
+              </div>
+              
+              <div className="text-center py-12">
+                <UserCheck className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-xl text-slate-600 mb-2">Gestión de Colaboradores</p>
+                <p className="text-slate-500">Funcionalidad en desarrollo para gestionar colaboradores y patrocinadores</p>
               </div>
             </div>
           </div>
