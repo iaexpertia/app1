@@ -58,6 +58,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   });
   const [newCategoryName, setNewCategoryName] = useState('');
   const [categoryError, setCategoryError] = useState('');
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryInput, setNewCategoryInput] = useState('');
+  const [newCategoryError, setNewCategoryError] = useState('');
 
   useEffect(() => {
     setCyclists(loadCyclists());
@@ -148,6 +151,44 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       setCategories(loadCategories());
       setNewCategoryName('');
       setCategoryError('');
+    } catch (error) {
+      console.error('Error adding category:', error);
+      alert('Error al añadir la categoría');
+    }
+  };
+
+  const handleAddCategoryFromModal = () => {
+    console.log('handleAddCategoryFromModal called with:', newCategoryInput);
+    console.log('Current categories:', categories);
+    
+    const trimmedCategory = newCategoryInput.trim();
+    
+    if (!trimmedCategory) {
+      setNewCategoryError('El nombre de la categoría es obligatorio');
+      return;
+    }
+
+    // Verificar si la categoría ya existe (case-insensitive)
+    const categoryExists = categories.some(cat => 
+      cat.toLowerCase() === trimmedCategory.toLowerCase()
+    );
+    
+    console.log('Category exists:', categoryExists);
+
+    if (categoryExists) {
+      console.log('Showing alert for duplicate category');
+      alert('CATEGORÍA EXISTENTE: Ya existe una categoría con ese nombre');
+      setNewCategoryError('Ya existe una categoría con ese nombre');
+      return;
+    }
+
+    try {
+      addCategory(trimmedCategory);
+      setCategories(loadCategories());
+      setNewCollaborator({ ...newCollaborator, category: trimmedCategory });
+      setShowAddCategoryModal(false);
+      setNewCategoryInput('');
+      setNewCategoryError('');
     } catch (error) {
       console.error('Error adding category:', error);
       alert('Error al añadir la categoría');
@@ -608,23 +649,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <button
                     type="button"
                     onClick={() => {
-                      const newCategory = prompt('Introduce el nombre de la nueva categoría:');
-                      if (newCategory && newCategory.trim()) {
-                        const trimmedCategory = newCategory.trim();
-                        const categoryExists = categories.some(cat => 
-                          cat.toLowerCase() === trimmedCategory.toLowerCase()
-                        );
-                        
-                        if (categoryExists) {
-                          alert('CATEGORÍA EXISTENTE: Ya existe una categoría con ese nombre');
-                        } else {
-                          addCategory(trimmedCategory);
-                          setCategories(loadCategories());
-                          setNewCollaborator({ ...newCollaborator, category: trimmedCategory });
-                        }
-                      }
+                      setShowAddCategoryModal(true);
                     }}
-                    className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"
                     title="Añadir nueva categoría"
                   >
                     <Plus className="h-4 w-4" />
@@ -728,6 +755,97 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 >
                   <Save className="h-4 w-4" />
                   <span>Añadir Colaborador</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800 flex items-center">
+                <Plus className="h-5 w-5 text-green-500 mr-2" />
+                Nueva Categoría
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddCategoryModal(false);
+                  setNewCategoryInput('');
+                  setNewCategoryError('');
+                }}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre de la Categoría <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newCategoryInput}
+                  onChange={(e) => {
+                    setNewCategoryInput(e.target.value);
+                    setNewCategoryError('');
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 ${
+                    newCategoryError ? 'border-red-500' : 'border-slate-300'
+                  }`}
+                  placeholder="Ej: Mecánico, Nutrición, Alojamiento..."
+                  autoFocus
+                />
+                {newCategoryError && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center">
+                    <X className="h-4 w-4 mr-1" />
+                    {newCategoryError}
+                  </p>
+                )}
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-700">
+                      <strong>Consejo:</strong> Usa nombres descriptivos como "Tienda de Bicicletas", "Alojamiento Rural", etc.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowAddCategoryModal(false);
+                    setNewCategoryInput('');
+                    setNewCategoryError('');
+                  }}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddCategoryFromModal}
+                  disabled={!!newCategoryError}
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                    newCategoryError
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-green-500 text-white hover:bg-green-600'
+                  }`}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Crear Categoría</span>
                 </button>
               </div>
             </div>
