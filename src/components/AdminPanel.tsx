@@ -638,3 +638,508 @@ const EditPassModal: React.FC<EditPassModalProps> = ({
     </div>
   );
 };
+
+// Add Collaborator Modal Component
+interface AddCollaboratorModalProps {
+  onSave: (collaborator: Collaborator) => void;
+  onClose: () => void;
+  t: Translation;
+}
+
+const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({ 
+  onSave, 
+  onClose, 
+  t 
+}) => {
+  const [formData, setFormData] = useState<Partial<Collaborator>>({
+    name: '',
+    category: 'Bike Shop',
+    description: '',
+    contactInfo: {
+      email: '',
+      phone: '',
+      website: '',
+      address: ''
+    },
+    images: [],
+    isActive: true,
+    featured: false
+  });
+  const [imageUrl, setImageUrl] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.description) {
+      alert('Por favor completa al menos el nombre y la descripción');
+      return;
+    }
+
+    const newCollaborator: Collaborator = {
+      id: Date.now().toString(),
+      name: formData.name!,
+      category: formData.category as any || 'Other',
+      description: formData.description!,
+      contactInfo: formData.contactInfo || {},
+      images: formData.images || [],
+      isActive: formData.isActive || true,
+      featured: formData.featured || false
+    };
+
+    onSave(newCollaborator);
+  };
+
+  const addImage = () => {
+    if (imageUrl.trim()) {
+      setFormData({
+        ...formData,
+        images: [...(formData.images || []), imageUrl.trim()]
+      });
+      setImageUrl('');
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData({
+      ...formData,
+      images: formData.images?.filter((_, i) => i !== index) || []
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Añadir Nuevo Colaborador</h3>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Nombre del Colaborador <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.name || ''}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="Ej: Ciclos Montaña Pro"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={formData.category || 'Other'}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="Bike Shop">Tienda de Bicicletas</option>
+                <option value="Hotel">Hotel</option>
+                <option value="Restaurant">Restaurante</option>
+                <option value="Tour Guide">Guía Turístico</option>
+                <option value="Equipment">Equipamiento</option>
+                <option value="Other">Otros</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Descripción <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+              placeholder="Descripción del negocio y servicios que ofrece..."
+              required
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.contactInfo?.email || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, email: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="contacto@negocio.com"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+              <input
+                type="tel"
+                value={formData.contactInfo?.phone || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, phone: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="+34 123 456 789"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Website</label>
+              <input
+                type="url"
+                value={formData.contactInfo?.website || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, website: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="https://www.negocio.com"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+              <input
+                type="text"
+                value={formData.contactInfo?.address || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, address: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="Calle Principal 123, Ciudad"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Imágenes</label>
+            <div className="flex space-x-2 mb-2">
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="https://images.pexels.com/..."
+              />
+              <button
+                type="button"
+                onClick={addImage}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Añadir
+              </button>
+            </div>
+            
+            {formData.images && formData.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {formData.images.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img 
+                      src={img} 
+                      alt={`Imagen ${index + 1}`}
+                      className="w-full h-20 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.isActive || false}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Activo</span>
+            </label>
+            
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.featured || false}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Destacado</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Añadir Colaborador</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Edit Collaborator Modal Component
+interface EditCollaboratorModalProps {
+  collaborator: Collaborator;
+  onSave: (collaborator: Collaborator) => void;
+  onClose: () => void;
+  t: Translation;
+}
+
+const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({ 
+  collaborator, 
+  onSave, 
+  onClose, 
+  t 
+}) => {
+  const [formData, setFormData] = useState(collaborator);
+  const [imageUrl, setImageUrl] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const addImage = () => {
+    if (imageUrl.trim()) {
+      setFormData({
+        ...formData,
+        images: [...formData.images, imageUrl.trim()]
+      });
+      setImageUrl('');
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData({
+      ...formData,
+      images: formData.images.filter((_, i) => i !== index)
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-slate-800">Editar Colaborador</h3>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Nombre del Colaborador <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="Bike Shop">Tienda de Bicicletas</option>
+                <option value="Hotel">Hotel</option>
+                <option value="Restaurant">Restaurante</option>
+                <option value="Tour Guide">Guía Turístico</option>
+                <option value="Equipment">Equipamiento</option>
+                <option value="Other">Otros</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Descripción <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              rows={3}
+              required
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.contactInfo.email || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, email: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+              <input
+                type="tel"
+                value={formData.contactInfo.phone || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, phone: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Website</label>
+              <input
+                type="url"
+                value={formData.contactInfo.website || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, website: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+              <input
+                type="text"
+                value={formData.contactInfo.address || ''}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  contactInfo: { ...formData.contactInfo, address: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Imágenes</label>
+            <div className="flex space-x-2 mb-2">
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="https://images.pexels.com/..."
+              />
+              <button
+                type="button"
+                onClick={addImage}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Añadir
+              </button>
+            </div>
+            
+            {formData.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {formData.images.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img 
+                      src={img} 
+                      alt={`Imagen ${index + 1}`}
+                      className="w-full h-20 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Activo</span>
+            </label>
+            
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+              />
+              <span className="text-sm text-slate-700">Destacado</span>
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              <Save className="h-4 w-4" />
+              <span>Guardar Cambios</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
