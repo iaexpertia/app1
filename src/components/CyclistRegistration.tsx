@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
 import { addCyclist } from '../utils/cyclistStorage';
