@@ -466,13 +466,59 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-semibold text-slate-800">{cyclist.name}</h4>
-                      <p className="text-sm text-slate-600">{cyclist.email}</p>
-                      {cyclist.isAdmin && (
-                        <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full mt-1">
-                          Administrador
-                        </span>
-                      )}
-                    </div>
+                      <div className="space-y-3">
+                        <input
+                          type="url"
+                          value={editingBrand?.logo || ''}
+                          onChange={(e) => setEditingBrand(editingBrand ? { ...editingBrand, logo: e.target.value } : null)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                          placeholder="https://ejemplo.com/logo.png"
+                        />
+                        
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-1 h-px bg-slate-300"></div>
+                          <span className="text-sm text-slate-500">o</span>
+                          <div className="flex-1 h-px bg-slate-300"></div>
+                        </div>
+                        
+                        <div>
+                          <input
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.webp"
+                            onChange={(e) => handleBrandImageUpload(e, 'logo')}
+                            className="hidden"
+                            id="brand-logo-upload"
+                          />
+                          <label
+                            htmlFor="brand-logo-upload"
+                            className="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer"
+                          >
+                            <div className="text-center">
+                              <svg className="mx-auto h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                              <p className="text-xs text-slate-600">
+                                <span className="font-medium text-orange-600">Subir logo</span>
+                              </p>
+                              <p className="text-xs text-slate-500">JPG, PNG, WEBP</p>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        {editingBrand?.logo && (
+                          <div className="mt-2">
+                            <p className="text-sm text-slate-600 mb-1">Vista previa:</p>
+                            <img 
+                              src={editingBrand.logo} 
+                              alt="Logo preview"
+                              className="w-16 h-16 object-contain rounded-lg border border-slate-300 bg-slate-50"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     <div className="flex space-x-2">
                       <button
                         onClick={() => setEditingCyclist(cyclist)}
