@@ -67,39 +67,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [showAddCollaborator, setShowAddCollaborator] = useState(false);
-
-  const handleEditPassImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !editingPass) return;
-
-    // Validar tipo de archivo
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
-      return;
-    }
-
-    // Validar tamaño (5MB máximo)
-    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-    if (file.size > maxSize) {
-      alert('El archivo es demasiado grande. El tamaño máximo es 5MB');
-      return;
-    }
-
-    // Convertir a Base64
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64String = e.target?.result as string;
-      setEditingPass({ ...editingPass, imageUrl: base64String });
-    };
-    reader.onerror = () => {
-      alert('Error al leer el archivo. Por favor intenta de nuevo.');
-    };
-    reader.readAsDataURL(file);
-
-    // Reset file input
-    event.target.value = '';
-  };
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newCollaborator, setNewCollaborator] = useState<Partial<Collaborator>>({
     name: '',
@@ -684,59 +651,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                         <h4 className="font-semibold text-slate-800">{collaborator.name}</h4>
                         <p className="text-sm text-slate-600">{collaborator.category}</p>
                         <p className="text-sm text-slate-500">{collaborator.description}</p>
-                        <div className="space-y-3">
-                          <input
-                            type="url"
-                            value={editingPass.imageUrl}
-                            onChange={(e) => setEditingPass({ ...editingPass, imageUrl: e.target.value })}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                            placeholder="https://images.pexels.com/..."
-                          />
-                          
-                          <div className="flex items-center space-x-2">
-                            <div className="flex-1 h-px bg-slate-300"></div>
-                            <span className="text-sm text-slate-500">o</span>
-                            <div className="flex-1 h-px bg-slate-300"></div>
-                          </div>
-                          
-                          <div>
-                            <input
-                              type="file"
-                              accept=".jpg,.jpeg,.png,.webp"
-                              onChange={(e) => handleEditPassImageUpload(e)}
-                              className="hidden"
-                              id="edit-pass-image-upload"
-                            />
-                            <label
-                              htmlFor="edit-pass-image-upload"
-                              className="w-full flex items-center justify-center px-4 py-2 border-2 border-dashed border-slate-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors cursor-pointer"
-                            >
-                              <div className="text-center">
-                                <svg className="mx-auto h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                                <p className="text-sm text-slate-600">
-                                  <span className="font-medium text-orange-600">Subir imagen</span> o arrastra aquí
-                                </p>
-                                <p className="text-xs text-slate-500">JPG, PNG, WEBP hasta 5MB</p>
-                              </div>
-                            </label>
-                          </div>
-                          
-                          {editingPass.imageUrl && (
-                            <div className="mt-3">
-                              <p className="text-sm text-slate-600 mb-2">Vista previa:</p>
-                              <img 
-                                src={editingPass.imageUrl} 
-                                alt="Vista previa"
-                                className="w-full h-32 object-cover rounded-lg border border-slate-300"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => removeCollaborator(collaborator.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
