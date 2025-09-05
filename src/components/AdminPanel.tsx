@@ -895,16 +895,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         {/* Collaborators Tab */}
         {activeTab === 'collaborators' && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-slate-800">Gestión de Colaboradores</h3>
-              <button
-                onClick={handleExportCollaborators}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar Excel</span>
-              </button>
-            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
                   <UserCheck className="h-6 w-6 text-orange-500" />
