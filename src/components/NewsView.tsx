@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Translation } from '../i18n/translations';
+import { NewsArticle } from '../types';
+import { loadNews } from '../utils/newsStorage';
 import { 
   Newspaper, 
   Calendar, 
@@ -13,20 +15,6 @@ import {
   Award,
   Mountain
 } from 'lucide-react';
-
-interface NewsArticle {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  author: string;
-  publishDate: string;
-  category: 'Competición' | 'Equipamiento' | 'Rutas' | 'Noticias' | 'Entrevistas';
-  imageUrl: string;
-  readTime: number;
-  featured: boolean;
-  externalUrl?: string;
-}
 
 interface NewsViewProps {
   t: Translation;
@@ -96,12 +84,33 @@ const defaultNews: NewsArticle[] = [
 ];
 
 export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
-  const [news, setNews] = useState<NewsArticle[]>(defaultNews);
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
 
   const categories = ['Competición', 'Equipamiento', 'Rutas', 'Noticias', 'Entrevistas'];
+
+  useEffect(() => {
+    const loadedNews = loadNews();
+    if (loadedNews.length === 0) {
+      setNews(defaultNews);
+    } else {
+      setNews(loadedNews);
+    }
+    
+    // Escuchar cambios en las noticias
+    const handleNewsUpdate = () => {
+      const updatedNews = loadNews();
+      setNews(updatedNews.length > 0 ? updatedNews : defaultNews);
+    };
+    
+    window.addEventListener('newsUpdated', handleNewsUpdate);
+    
+    return () => {
+      window.removeEventListener('newsUpdated', handleNewsUpdate);
+    };
+  }, []);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {

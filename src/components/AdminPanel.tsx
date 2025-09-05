@@ -28,6 +28,8 @@ import {
   addBrandCategory,
   removeBrandCategory
 } from '../utils/brandsStorage';
+import { loadNews, addNews, removeNews, updateNews } from '../utils/newsStorage';
+import { NewsArticle } from '../types';
 import { defaultBrands } from '../data/defaultBrands';
 import { 
   Settings, 
@@ -132,10 +134,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     }
     setCategories(loadCategories());
     setBrandCategories(loadBrandCategories());
-    loadNews();
+    setNews(loadNews());
   }, []);
 
-  const loadNews = () => {
+  const loadNewsData = () => {
     const stored = localStorage.getItem('cycling-news');
     if (stored) {
       setNews(JSON.parse(stored));
@@ -435,19 +437,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     // Si no, usar la fecha seleccionada
     const publishDate = selectedDate === today ? today : selectedDate;
     
-    const updatedNews = showAddNews 
-      ? [...news, { ...editingNews, publishDate: publishDate }]
-      : news.map(article => article.id === editingNews.id ? { ...editingNews, publishDate: publishDate } : article);
+    if (showAddNews) {
+      const newsToAdd: NewsArticle = {
+        ...editingNews,
+        publishDate: publishDate
+      };
+      
+      addNews(newsToAdd);
+      setNews(loadNews()); // Recargar la lista
+    } else {
+      const updatedNews: NewsArticle = {
+        ...editingNews,
+        publishDate: publishDate
+      };
+      
+      updateNews(updatedNews);
+      setNews(loadNews()); // Recargar la lista
+    }
     
-    saveNews(updatedNews);
     setEditingNews(null);
     setShowAddNews(false);
   };
 
   const handleDeleteNews = (newsId: string) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
-      const updatedNews = news.filter(article => article.id !== newsId);
-      saveNews(updatedNews);
+      removeNews(newsId);
+      setNews(loadNews()); // Recargar la lista
     }
   };
 
