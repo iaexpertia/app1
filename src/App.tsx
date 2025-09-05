@@ -14,6 +14,8 @@ import { CollaboratorsView } from './components/CollaboratorsView';
 import { ConqueredPassesView } from './components/ConqueredPassesView';
 import { BrandsView } from './components/BrandsView';
 import { NewsView } from './components/NewsView';
+import { Footer } from './components/Footer';
+import { LegalModal } from './components/LegalModals';
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
@@ -40,6 +42,7 @@ function App() {
   const [passes, setPasses] = useState<MountainPass[]>(mountainPasses);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true); // Forzar admin para debug
+  const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
 
   useEffect(() => {
     const loadedConquests = loadConquests();
@@ -267,6 +270,18 @@ function App() {
         onClose={() => setPhotosPass(null)}
         onSavePhotos={handleSavePhotos}
         t={t}
+      />
+      
+      <Footer
+        onShowPrivacy={() => setShowLegalModal('privacy')}
+        onShowLegal={() => setShowLegalModal('legal')}
+        onShowCookies={() => setShowLegalModal('cookies')}
+      />
+      
+      <LegalModal
+        isOpen={showLegalModal !== null}
+        onClose={() => setShowLegalModal(null)}
+        type={showLegalModal || 'privacy'}
       />
     </div>
   );
