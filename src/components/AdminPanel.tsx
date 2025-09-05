@@ -137,6 +137,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     }
   };
 
+  const handleBrandImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+    // Handle brand image upload logic here
+  };
+
   const handleAddCollaborator = () => {
     if (!newCollaborator.name || !newCollaborator.category || !newCollaborator.description) {
       alert('Por favor completa todos los campos obligatorios');
@@ -368,36 +372,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       ...newBrand,
       specialties: newBrand.specialties?.filter(s => s !== specialty) || []
     });
-  };
-
-  const handleBrandImageUpload = (event: React.ChangeEvent<HTMLInputElement>, field: 'logo') => {
-    const file = event.target.files?.[0];
-    if (!file || !editingBrand) return;
-
-    // Validar tipo de archivo
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
-      return;
-    }
-
-    // Validar tamaño (2MB máximo para logos)
-    const maxSize = 2 * 1024 * 1024; // 2MB en bytes
-    if (file.size > maxSize) {
-      alert('El archivo es demasiado grande. El tamaño máximo es 2MB');
-      return;
-    }
-
-    // Convertir a Base64
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64String = e.target?.result as string;
-      setEditingBrand({ ...editingBrand, [field]: base64String });
-    };
-    reader.onerror = () => {
-      alert('Error al leer el archivo. Por favor intenta de nuevo.');
-    };
-    reader.readAsDataURL(file);
   };
 
   const getCategoryIcon = (category: string) => {
