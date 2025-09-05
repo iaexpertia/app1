@@ -56,7 +56,7 @@ export const PassModal: React.FC<PassModalProps> = ({ pass, onClose, t }) => {
       'Asturias': 'asturias',
       'Lake District': 'lakeDistrict',
       'Friuli': 'friuli',
-      'Sierra Nevada': 'sierraNevada'
+      'Sierra Nevada': 'sierraNevada',
       'Pirineos': 'pirineos'
     };
     return t[regionMap[region]] || region;
