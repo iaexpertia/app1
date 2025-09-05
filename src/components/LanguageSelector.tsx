@@ -27,7 +27,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 transition-colors duration-200"
       >
         <Globe className="h-4 w-4 text-slate-600" />
-        <span className="text-sm font-medium text-slate-700">{currentLang.flag} {currentLang.code.toUpperCase()}</span>
+        <span className="text-lg">{currentLang.flag}</span>
         <ChevronDown className={`h-4 w-4 text-slate-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -45,7 +45,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               } ${lang === languages[0] ? 'rounded-t-lg' : ''} ${lang === languages[languages.length - 1] ? 'rounded-b-lg' : ''}`}
             >
               <span className="text-lg">{lang.flag}</span>
-              <span className="text-sm font-medium">{lang.code.toUpperCase()}</span>
+              <span className="text-sm font-medium">{lang.name}</span>
             </button>
           ))}
         </div>
