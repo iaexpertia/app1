@@ -12,6 +12,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { DatabaseView } from './components/DatabaseView';
 import { CollaboratorsView } from './components/CollaboratorsView';
 import { ConqueredPassesView } from './components/ConqueredPassesView';
+import { BrandsView } from './components/BrandsView';
+import { NewsView } from './components/NewsView';
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
@@ -25,7 +27,7 @@ import {
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin } from './utils/cyclistStorage';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
 
 function App() {
   const { language, t, changeLanguage } = useLanguage();
@@ -203,6 +205,18 @@ function App() {
             conquests={conquests}
             onUpdateConquest={handleUpdateConquest}
             onAddPhotos={handleAddPhotos}
+            t={t}
+          />
+        )}
+        
+        {activeTab === 'brands' && (
+          <BrandsView
+            t={t}
+          />
+        )}
+        
+        {activeTab === 'news' && (
+          <NewsView
             t={t}
           />
         )}
