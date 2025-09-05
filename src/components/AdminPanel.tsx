@@ -49,7 +49,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [showAddCollaborator, setShowAddCollaborator] = useState(false);
   const [newCollaborator, setNewCollaborator] = useState<Partial<Collaborator>>({
     name: '',
-    category: 'Bike Shop',
+    category: 'Tienda de Bicicletas',
     description: '',
     contactInfo: {},
     images: [],
@@ -204,10 +204,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'Bike Shop': return Store;
+      case 'Tienda de Bicicletas': return Store;
       case 'Hotel': return Hotel;
-      case 'Restaurant': return UtensilsCrossed;
-      case 'Tour Guide': return MapPin;
+      case 'Restaurante': return UtensilsCrossed;
+      case 'Guía Turístico': return MapPin;
       default: return Store;
     }
   };
@@ -638,7 +638,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 </label>
                 <div className="flex space-x-2">
                   <select
-                    value={newCollaborator.category || 'Bike Shop'}
+                    value={newCollaborator.category || 'Tienda de Bicicletas'}
                     onChange={(e) => setNewCollaborator({ ...newCollaborator, category: e.target.value })}
                     className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                   >

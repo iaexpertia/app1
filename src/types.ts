@@ -63,7 +63,7 @@ export interface Bike {
 export interface Collaborator {
   id: string;
   name: string;
-  category: 'Bike Shop' | 'Hotel' | 'Restaurant' | 'Tour Guide' | 'Equipment' | 'Other';
+  category: 'Tienda de Bicicletas' | 'Hotel' | 'Restaurante' | 'Guía Turístico' | 'Equipamiento' | 'Otros';
   description: string;
   contactInfo: {
     email?: string;

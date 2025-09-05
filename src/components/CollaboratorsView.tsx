@@ -62,22 +62,22 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'Bike Shop': return Store;
+      case 'Tienda de Bicicletas': return Store;
       case 'Hotel': return Hotel;
-      case 'Restaurant': return UtensilsCrossed;
-      case 'Tour Guide': return MapPin;
+      case 'Restaurante': return UtensilsCrossed;
+      case 'Guía Turístico': return MapPin;
       default: return Store;
     }
   };
 
   const getCategoryText = (category: string) => {
     const categoryMap: Record<string, string> = {
-      'Bike Shop': 'Tienda de Bicicletas',
+      'Tienda de Bicicletas': 'Tienda de Bicicletas',
       'Hotel': 'Hotel',
-      'Restaurant': 'Restaurante',
-      'Tour Guide': 'Guía Turístico',
-      'Equipment': 'Equipamiento',
-      'Other': 'Otros'
+      'Restaurante': 'Restaurante',
+      'Guía Turístico': 'Guía Turístico',
+      'Equipamiento': 'Equipamiento',
+      'Otros': 'Otros'
     };
     return categoryMap[category] || category;
   };
