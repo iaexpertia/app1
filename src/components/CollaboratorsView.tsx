@@ -262,82 +262,95 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
               )}
             </div>
             
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredCollaborators.slice(featuredSlideIndex * 3, (featuredSlideIndex * 3) + 3).map(collaborator => {
                 const Icon = getCategoryIcon(collaborator.category);
                 const currentIndex = currentImageIndex[collaborator.id] || 0;
                 
                 return (
-                  <div key={collaborator.id} className="flex items-center space-x-4 p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow">
-                    {collaborator.images.length > 0 && (
-                      <div className="relative">
-                        <img 
-                          src={collaborator.images[currentIndex]} 
-                          alt={collaborator.name}
-                          className="w-16 h-16 object-cover rounded-lg"
-                        />
-                        {collaborator.images.length > 1 && (
-                          <>
-                            <button
-                              onClick={() => prevImage(collaborator.id, collaborator.images.length)}
-                              className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70 transition-opacity"
-                            >
-                              <ChevronLeft className="h-3 w-3" />
-                            </button>
-                            <button
-                              onClick={() => nextImage(collaborator.id, collaborator.images.length)}
-                              className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70 transition-opacity"
-                            >
-                              <ChevronRight className="h-3 w-3" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Icon className="h-5 w-5 text-orange-500" />
-                        <h4 className="font-semibold text-slate-800">{collaborator.name}</h4>
-                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                  <div key={collaborator.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div className="relative h-48">
+                      {collaborator.images.length > 0 && (
+                        <>
+                          <img 
+                            src={collaborator.images[currentIndex]} 
+                            alt={collaborator.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {collaborator.images.length > 1 && (
+                            <>
+                              <button
+                                onClick={() => prevImage(collaborator.id, collaborator.images.length)}
+                                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70 transition-opacity"
+                              >
+                                <ChevronLeft className="h-3 w-3" />
+                              </button>
+                              <button
+                                onClick={() => nextImage(collaborator.id, collaborator.images.length)}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70 transition-opacity"
+                              >
+                                <ChevronRight className="h-3 w-3" />
+                              </button>
+                            </>
+                          )}
+                        </>
+                      )}
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-1 bg-orange-500 text-white rounded-full text-xs font-medium">
                           Destacado
                         </span>
                       </div>
-                      <p className="text-sm text-slate-600 mb-1">{getCategoryText(collaborator.category)}</p>
-                      <p className="text-xs text-slate-500 line-clamp-2">{collaborator.description}</p>
+                      <div className="absolute top-3 left-3">
+                        <Icon className="h-5 w-5 text-orange-500 bg-white rounded-full p-1" />
+                      </div>
+                    </div>
+                    
+                    <div className="p-4">
+                      <h3 className="text-lg font-bold text-slate-800 mb-1">{collaborator.name}</h3>
+                      <p className="text-sm text-slate-600 mb-2">{getCategoryText(collaborator.category)}</p>
+                      <p className="text-xs text-slate-500 mb-3 line-clamp-2">{collaborator.description}</p>
+                      
                       {collaborator.contactInfo.address && (
-                        <p className="text-xs text-slate-500 mt-1 flex items-center">
+                        <p className="text-xs text-slate-500 mb-3 flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
                           {collaborator.contactInfo.address}
                         </p>
                       )}
-                    </div>
-                    <div className="flex space-x-2">
-                      {collaborator.contactInfo.website && (
-                        <a
-                          href={collaborator.contactInfo.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 text-orange-500 hover:text-orange-600 transition-colors"
-                        >
-                          <Globe className="h-4 w-4" />
-                        </a>
-                      )}
-                      {collaborator.contactInfo.phone && (
-                        <a
-                          href={`tel:${collaborator.contactInfo.phone}`}
-                          className="p-2 text-orange-500 hover:text-orange-600 transition-colors"
-                        >
-                          <Phone className="h-4 w-4" />
-                        </a>
-                      )}
-                      {collaborator.contactInfo.email && (
-                        <a
-                          href={`mailto:${collaborator.contactInfo.email}`}
-                          className="p-2 text-orange-500 hover:text-orange-600 transition-colors"
-                        >
-                          <Mail className="h-4 w-4" />
-                        </a>
-                      )}
+                      
+                      <div className="flex items-center justify-between">
+                        {collaborator.contactInfo.website ? (
+                          <a
+                            href={collaborator.contactInfo.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                          >
+                            <Globe className="h-3 w-3" />
+                            <span>Web</span>
+                          </a>
+                        ) : (
+                          <div></div>
+                        )}
+                        
+                        <div className="flex space-x-2">
+                          {collaborator.contactInfo.phone && (
+                            <a
+                              href={`tel:${collaborator.contactInfo.phone}`}
+                              className="text-slate-500 hover:text-orange-500 transition-colors"
+                            >
+                              <Phone className="h-4 w-4" />
+                            </a>
+                          )}
+                          {collaborator.contactInfo.email && (
+                            <a
+                              href={`mailto:${collaborator.contactInfo.email}`}
+                              className="text-slate-500 hover:text-orange-500 transition-colors"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
