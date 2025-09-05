@@ -172,16 +172,6 @@ export const PassCard: React.FC<PassCardProps> = ({
             <span>{isConquered ? t.conquered : t.markAsDone}</span>
           </button>
           
-          {isConquered && onAddPhotos && (
-            <button
-              onClick={() => onAddPhotos(pass.id)}
-              className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
-              title="Añadir fotos de la ruta"
-            >
-              <Camera className="h-4 w-4" />
-            </button>
-          )}
-          
           <button
             onClick={() => onViewDetails(pass)}
             className="px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200"

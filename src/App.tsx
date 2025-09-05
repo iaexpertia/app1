@@ -202,6 +202,7 @@ function App() {
             conqueredPasses={conqueredPasses}
             conquests={conquests}
             onUpdateConquest={handleUpdateConquest}
+            onAddPhotos={handleAddPhotos}
             t={t}
           />
         )}
