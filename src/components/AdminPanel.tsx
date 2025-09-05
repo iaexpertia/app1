@@ -257,6 +257,171 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setTimeout(() => setImportStatus(null), 10000);
   };
   
+  const handleExportCSV = () => {
+    const csvHeaders = [
+      'id',
+      'name',
+      'country',
+      'region',
+      'maxAltitude',
+      'elevationGain',
+      'averageGradient',
+      'maxGradient',
+      'distance',
+      'difficulty',
+      'coordinates_lat',
+      'coordinates_lng',
+      'description',
+      'imageUrl',
+      'category'
+    ];
+    
+    const csvData = passes.map(pass => [
+      pass.id,
+      `"${pass.name}"`,
+      `"${pass.country}"`,
+      `"${pass.region}"`,
+      pass.maxAltitude,
+      pass.elevationGain,
+      pass.averageGradient,
+      pass.maxGradient,
+      pass.distance,
+      `"${pass.difficulty}"`,
+      pass.coordinates.lat,
+      pass.coordinates.lng,
+      `"${pass.description.replace(/"/g, '""')}"`,
+      `"${pass.imageUrl}"`,
+      `"${pass.category}"`
+    ]);
+    
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `mountain_passes_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setImportStatus({
+      type: 'success',
+      message: 'CSV exportado correctamente',
+      details: `${passes.length} puertos exportados`
+    });
+    
+    setTimeout(() => setImportStatus(null), 5000);
+  };
+
+  const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error('El archivo CSV debe tener al menos una fila de datos');
+      }
+      
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const expectedHeaders = [
+        'id', 'name', 'country', 'region', 'maxAltitude', 'elevationGain',
+        'averageGradient', 'maxGradient', 'distance', 'difficulty',
+        'coordinates_lat', 'coordinates_lng', 'description', 'imageUrl', 'category'
+      ];
+      
+      // Verificar que todos los headers necesarios estén presentes
+      const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+      if (missingHeaders.length > 0) {
+        throw new Error(`Faltan las siguientes columnas: ${missingHeaders.join(', ')}`);
+      }
+      
+      const newPasses: MountainPass[] = [];
+      let errorCount = 0;
+      
+      for (let i = 1; i < lines.length; i++) {
+        try {
+          const values = parseCSVLine(lines[i]);
+          
+          if (values.length !== headers.length) {
+            console.warn(`Fila ${i + 1}: Número incorrecto de columnas`);
+            errorCount++;
+            continue;
+          }
+          
+          const rowData: Record<string, string> = {};
+          headers.forEach((header, index) => {
+            rowData[header] = values[index]?.replace(/^"|"$/g, '') || '';
+          });
+          
+          const pass: MountainPass = {
+            id: rowData.id || `imported-${Date.now()}-${i}`,
+            name: rowData.name,
+            country: rowData.country,
+            region: rowData.region,
+            maxAltitude: parseInt(rowData.maxAltitude) || 0,
+            elevationGain: parseInt(rowData.elevationGain) || 0,
+            averageGradient: parseFloat(rowData.averageGradient) || 0,
+            maxGradient: parseFloat(rowData.maxGradient) || 0,
+            distance: parseFloat(rowData.distance) || 0,
+            difficulty: (rowData.difficulty as any) || 'Cuarta',
+            coordinates: {
+              lat: parseFloat(rowData.coordinates_lat) || 0,
+              lng: parseFloat(rowData.coordinates_lng) || 0
+            },
+            description: rowData.description || '',
+            famousWinners: [],
+            imageUrl: rowData.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+            category: rowData.category || 'Otros'
+          };
+          
+          // Validaciones básicas
+          if (!pass.name || !pass.country || !pass.region) {
+            console.warn(`Fila ${i + 1}: Faltan datos obligatorios (nombre, país, región)`);
+            errorCount++;
+            continue;
+          }
+          
+          newPasses.push(pass);
+        } catch (error) {
+          console.error(`Error procesando fila ${i + 1}:`, error);
+          errorCount++;
+        }
+      }
+      
+      // Actualizar los puertos (esto debería integrarse con el sistema de gestión de puertos)
+      newPasses.forEach(pass => {
+        onUpdatePass(pass);
+      });
+      
+      setImportStatus({
+        type: 'success',
+        message: `Importación completada: ${newPasses.length} puertos importados`,
+        details: errorCount > 0 ? `${errorCount} filas con errores fueron omitidas` : undefined
+      });
+      
+    } catch (error) {
+      setImportStatus({
+        type: 'error',
+        message: 'Error al importar el archivo CSV',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+    
+    // Limpiar el input
+    event.target.value = '';
+    
+    // Limpiar el mensaje después de 10 segundos
+    setTimeout(() => setImportStatus(null), 10000);
+  };
+  
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
     let current = '';
@@ -547,6 +712,45 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-slate-800">{t.managePasses}</h3>
                 <div className="flex space-x-3">
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Exportar CSV</span>
+                  </button>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleImportCSV}
+                      className="hidden"
+                      id="csv-import"
+                    />
+                    <label
+                      htmlFor="csv-import"
+                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors cursor-pointer"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>Importar CSV</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
+              {importStatus && (
+                <div className={`mb-4 p-4 rounded-lg ${
+                  importStatus.type === 'success' 
+                    ? 'bg-green-50 border border-green-200 text-green-800' 
+                    : 'bg-red-50 border border-red-200 text-red-800'
+                }`}>
+                  <p className="font-medium">{importStatus.message}</p>
+                  {importStatus.details && (
+                    <p className="text-sm mt-1">{importStatus.details}</p>
+                  )}
+                </div>
+              )}
+              
                   <button
                     onClick={handleExportCSV}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
