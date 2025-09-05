@@ -55,6 +55,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showNewPassModal, setShowNewPassModal] = useState(false);
   
   // Edit states
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
@@ -613,6 +614,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
               <div className="flex gap-3">
+                <button
+                  onClick={() => setShowNewPassModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  <Mountain className="h-4 w-4" />
+                  <span>Nuevo Puerto</span>
+                </button>
                 <button
                   onClick={() => setShowImportModal(true)}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -1395,6 +1403,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
                   <select
+                    value={newsForm.category}
+                    onChange={(e) => setNewsForm({...newsForm, category: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
                     <option value="Noticias">Noticias</option>
                     <option value="Entrevistas">Entrevistas</option>
                   </select>
