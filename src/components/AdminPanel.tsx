@@ -285,16 +285,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               <h3 className="text-xl font-semibold text-slate-800">Gestionar Colaboradores</h3>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-slate-700">Categorías</span>
-                <button
-                  onClick={() => setShowAddCategoryModal(true)}
-                  className="p-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
-                  title="Añadir nueva categoría"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-slate-600">{collaborators.length} colaboradores totales</span>
@@ -834,17 +824,27 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
             
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-              <select
-                value={formData.category || 'Other'}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {getCategoryText(category)}
-                  </option>
-                ))}
-              </select>
+              <div className="flex space-x-2">
+                <select
+                  value={formData.category || 'Other'}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category}>
+                      {getCategoryText(category)}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCategoryModal(true)}
+                  className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  title="Añadir nueva categoría"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
           
@@ -1087,17 +1087,27 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
             
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {getCategoryText(category)}
-                  </option>
-                ))}
-              </select>
+              <div className="flex space-x-2">
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category}>
+                      {getCategoryText(category)}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCategoryModal(true)}
+                  className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  title="Añadir nueva categoría"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
           
