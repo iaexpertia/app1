@@ -605,7 +605,10 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Retirer de Mes Cols',
     alreadyInMyPasses: 'Déjà dans Mes Cols',
     availablePasses: 'Cols Disponibles',
-    mySelectedPasses: 'Mes Cols Sélectionnés'
+    mySelectedPasses: 'Mes Cols Sélectionnés',
+    
+    // Collaborators
+    collaboratorsDescription: 'Découvrez nos collaborateurs et sponsors qui soutiennent la communauté cycliste'
   },
   
   it: {
