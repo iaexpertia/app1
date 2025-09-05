@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { MountainPass, Cyclist } from '../types';
+import { MountainPass, Cyclist, Collaborator } from '../types';
 import { Translation } from '../i18n/translations';
 import { loadCyclists, updateCyclist, removeCyclist } from '../utils/cyclistStorage';
+import { 
+  loadCollaborators, 
+  addCollaborator, 
+  updateCollaborator, 
+  removeCollaborator 
+} from '../utils/collaboratorStorage';
 import { 
   Settings, 
   Users, 
@@ -11,7 +17,15 @@ import {
   Save,
   Upload,
   Eye,
-  EyeOff
+  EyeOff,
+  Store,
+  Plus,
+  X,
+  Star,
+  Globe,
+  Mail,
+  Phone,
+  MapPin
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -25,14 +39,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdatePass, 
   t 
 }) => {
-  const [activeSection, setActiveSection] = useState<'cyclists' | 'passes'>('cyclists');
+  const [activeSection, setActiveSection] = useState<'cyclists' | 'passes' | 'collaborators'>('cyclists');
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
 
   useEffect(() => {
     setCyclists(loadCyclists());
+    setCollaborators(loadCollaborators());
   }, []);
 
   const handleUpdateCyclist = (cyclist: Cyclist) => {
@@ -51,6 +69,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleUpdatePass = (pass: MountainPass) => {
     onUpdatePass(pass);
     setEditingPass(null);
+  };
+
+  const handleAddCollaborator = (collaborator: Collaborator) => {
+    addCollaborator(collaborator);
+    setCollaborators(loadCollaborators());
+    setShowAddCollaboratorModal(false);
+  };
+
+  const handleUpdateCollaborator = (collaborator: Collaborator) => {
+    updateCollaborator(collaborator);
+    setCollaborators(loadCollaborators());
+    setEditingCollaborator(null);
+  };
+
+  const handleDeleteCollaborator = (collaboratorId: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este colaborador?')) {
+      removeCollaborator(collaboratorId);
+      setCollaborators(loadCollaborators());
+    }
   };
 
   return (
@@ -84,6 +121,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             <Mountain className="h-4 w-4" />
             <span>{t.managePasses}</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveSection('collaborators')}
+            className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+              activeSection === 'collaborators'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            <Store className="h-4 w-4" />
+            <span>Gestionar Colaboradores</span>
           </button>
         </div>
       </div>
@@ -207,6 +256,89 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
+      {/* Collaborators Management */}
+      {activeSection === 'collaborators' && (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-slate-800">Gestionar Colaboradores</h3>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-slate-600">{collaborators.length} colaboradores totales</span>
+              <button
+                onClick={() => setShowAddCollaboratorModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Añadir Colaborador</span>
+              </button>
+            </div>
+          </div>
+
+          {collaborators.length === 0 ? (
+            <div className="text-center py-12">
+              <Store className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-xl text-slate-600">No hay colaboradores registrados</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {collaborators.map((collaborator) => (
+                <div key={collaborator.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="relative h-32 mb-3">
+                    <img 
+                      src={collaborator.images[0] || 'https://images.pexels.com/photos/100582/pexels-photo-100582.jpeg'} 
+                      alt={collaborator.name}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    {collaborator.featured && (
+                      <Star className="absolute top-2 right-2 h-5 w-5 text-yellow-400 bg-white rounded-full p-1" />
+                    )}
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${
+                      collaborator.isActive ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                    }`}>
+                      {collaborator.isActive ? 'Activo' : 'Inactivo'}
+                    </div>
+                  </div>
+                  
+                  <h4 className="font-semibold text-slate-800 mb-1">{collaborator.name}</h4>
+                  <p className="text-sm text-slate-600 mb-2">{collaborator.category}</p>
+                  <p className="text-xs text-slate-500 mb-3 line-clamp-2">{collaborator.description}</p>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setEditingCollaborator(collaborator)}
+                        className="text-orange-500 hover:text-orange-700 transition-colors"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCollaborator(collaborator.id)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        const updatedCollaborator = { ...collaborator, featured: !collaborator.featured };
+                        handleUpdateCollaborator(updatedCollaborator);
+                      }}
+                      className={`p-1 rounded transition-colors ${
+                        collaborator.featured 
+                          ? 'text-yellow-500 hover:text-yellow-700' 
+                          : 'text-slate-400 hover:text-yellow-500'
+                      }`}
+                    >
+                      <Star className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Edit Cyclist Modal */}
       {editingCyclist && (
         <EditCyclistModal
@@ -223,6 +355,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           pass={editingPass}
           onSave={handleUpdatePass}
           onClose={() => setEditingPass(null)}
+          t={t}
+        />
+      )}
+
+      {/* Add Collaborator Modal */}
+      {showAddCollaboratorModal && (
+        <AddCollaboratorModal
+          onSave={handleAddCollaborator}
+          onClose={() => setShowAddCollaboratorModal(false)}
+          t={t}
+        />
+      )}
+
+      {/* Edit Collaborator Modal */}
+      {editingCollaborator && (
+        <EditCollaboratorModal
+          collaborator={editingCollaborator}
+          onSave={handleUpdateCollaborator}
+          onClose={() => setEditingCollaborator(null)}
           t={t}
         />
       )}
