@@ -605,10 +605,7 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Retirer de Mes Cols',
     alreadyInMyPasses: 'Déjà dans Mes Cols',
     availablePasses: 'Cols Disponibles',
-    mySelectedPasses: 'Mes Cols Sélectionnés',
-    
-    // Collaborators
-    collaboratorsDescription: 'Découvrez nos collaborateurs et sponsors qui soutiennent la communauté cycliste'
+    mySelectedPasses: 'Mes Cols Sélectionnés'
   },
   
   it: {
@@ -908,7 +905,10 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Treure dels Meus Ports',
     alreadyInMyPasses: 'Ja als Meus Ports',
     availablePasses: 'Ports Disponibles',
-    mySelectedPasses: 'Els Meus Ports Seleccionats'
+    mySelectedPasses: 'Els Meus Ports Seleccionats',
+    
+    // Collaborators
+    collaboratorsDescription: 'Descobreix els nostres col·laboradors i patrocinadors que donen suport a la comunitat ciclista'
   }
 };
 
