@@ -34,7 +34,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
-  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes'>('cyclists');
+  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes' | 'brands' | 'collaborators' | 'news'>('cyclists');
 
   useEffect(() => {
     setCyclists(loadCyclists());
@@ -97,6 +97,39 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             >
               <Mountain className="h-4 w-4 inline mr-2" />
               {t.managePasses}
+            </button>
+            <button
+              onClick={() => setActiveTab('brands')}
+              className={`flex-1 py-2 px-4 rounded-md transition-colors font-medium ${
+                activeTab === 'brands'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              <Settings className="h-4 w-4 inline mr-2" />
+              Marcas
+            </button>
+            <button
+              onClick={() => setActiveTab('collaborators')}
+              className={`flex-1 py-2 px-4 rounded-md transition-colors font-medium ${
+                activeTab === 'collaborators'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              <Users className="h-4 w-4 inline mr-2" />
+              Colaboradores
+            </button>
+            <button
+              onClick={() => setActiveTab('news')}
+              className={`flex-1 py-2 px-4 rounded-md transition-colors font-medium ${
+                activeTab === 'news'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-800'
+              }`}
+            >
+              <Settings className="h-4 w-4 inline mr-2" />
+              Noticias
             </button>
           </div>
         </div>
