@@ -58,6 +58,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setCategories(loadCategories());
   }, []);
 
+  // Función para refrescar categorías desde localStorage
+  const refreshCategories = () => {
+    const updatedCategories = loadCategories();
+    setCategories(updatedCategories);
+  };
+
   const handleUpdateCyclist = (cyclist: Cyclist) => {
     updateCyclist(cyclist);
     setCyclists(loadCyclists());
@@ -79,14 +85,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleAddCollaborator = (collaborator: Collaborator) => {
     addCollaborator(collaborator);
     setCollaborators(loadCollaborators());
-    setCategories(loadCategories());
+    refreshCategories();
     setShowAddCollaboratorModal(false);
   };
 
   const handleUpdateCollaborator = (collaborator: Collaborator) => {
     updateCollaborator(collaborator);
     setCollaborators(loadCollaborators());
-    setCategories(loadCategories());
+    refreshCategories();
     setEditingCollaborator(null);
   };
 
@@ -99,8 +105,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleAddCategory = () => {
     if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
+      const { addCategory } = require('../utils/collaboratorStorage');
       addCategory(newCategoryName.trim());
-      setCategories(loadCategories());
+      refreshCategories();
       setNewCategoryName('');
       setShowAddCategoryModal(false);
     }
@@ -108,11 +115,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleRemoveCategory = (categoryToRemove: string) => {
     if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${getCategoryText(categoryToRemove)}"?`)) {
+      const { removeCategory } = require('../utils/collaboratorStorage');
       removeCategory(categoryToRemove);
-      setCategories(loadCategories());
+      refreshCategories();
     }
   };
 
+  const getCategoryText = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'Bike Shop': 'Tienda de Bicicletas',
+      'Hotel': 'Hotel',
+      'Restaurant': 'Restaurante',
+      'Tour Guide': 'Guía Turístico',
+      'Equipment': 'Equipamiento',
+      'Other': 'Otros'
+    };
+    return categoryMap[category] || category;
+  };
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -389,6 +408,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <AddCollaboratorModal
           onSave={handleAddCollaborator}
           onClose={() => setShowAddCollaboratorModal(false)}
+          categories={categories}
+          onCategoryAdded={refreshCategories}
           t={t}
         />
       )}
@@ -399,6 +420,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           collaborator={editingCollaborator}
           onSave={handleUpdateCollaborator}
           onClose={() => setEditingCollaborator(null)}
+          categories={categories}
+          onCategoryAdded={refreshCategories}
           t={t}
         />
       )}
@@ -718,15 +741,20 @@ const EditPassModal: React.FC<EditPassModalProps> = ({
 interface AddCollaboratorModalProps {
   onSave: (collaborator: Collaborator) => void;
   onClose: () => void;
+  categories: string[];
+  onCategoryAdded: () => void;
   t: Translation;
 }
 
 const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({ 
   onSave, 
   onClose, 
+  categories,
+  onCategoryAdded,
   t
 }) => {
-  const [categories] = useState<string[]>(loadCategories());
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [formData, setFormData] = useState<Partial<Collaborator>>({
     name: '',
     category: 'Bike Shop',
@@ -755,6 +783,16 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
     return categoryMap[category] || category;
   };
 
+  const handleAddCategory = () => {
+    if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
+      const { addCategory } = require('../utils/collaboratorStorage');
+      addCategory(newCategoryName.trim());
+      onCategoryAdded(); // Refresca las categorías en el componente padre
+      setFormData({ ...formData, category: newCategoryName.trim() }); // Selecciona la nueva categoría
+      setNewCategoryName('');
+      setShowAddCategoryModal(false);
+    }
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.description) {
