@@ -303,6 +303,90 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         )}
 
+        {/* Brands Management */}
+        {activeTab === 'brands' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Settings className="h-6 w-6 text-orange-500 mr-3" />
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Marcas</h3>
+                  <p className="text-slate-600">Administra las marcas de ciclismo</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {/* TODO: Implementar exportación de marcas */}}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar a Excel</span>
+              </button>
+            </div>
+            
+            <div className="text-center py-8">
+              <Settings className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-xl text-slate-600 mb-2">Gestión de Marcas</p>
+              <p className="text-slate-500">Funcionalidad en desarrollo</p>
+            </div>
+          </div>
+        )}
+
+        {/* Collaborators Management */}
+        {activeTab === 'collaborators' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Users className="h-6 w-6 text-orange-500 mr-3" />
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Colaboradores</h3>
+                  <p className="text-slate-600">Administra los colaboradores y servicios</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {/* TODO: Implementar exportación de colaboradores */}}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar a Excel</span>
+              </button>
+            </div>
+            
+            <div className="text-center py-8">
+              <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-xl text-slate-600 mb-2">Gestión de Colaboradores</p>
+              <p className="text-slate-500">Funcionalidad en desarrollo</p>
+            </div>
+          </div>
+        )}
+
+        {/* News Management */}
+        {activeTab === 'news' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Settings className="h-6 w-6 text-orange-500 mr-3" />
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Noticias</h3>
+                  <p className="text-slate-600">Administra las noticias de ciclismo</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {/* TODO: Implementar exportación de noticias */}}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar a Excel</span>
+              </button>
+            </div>
+            
+            <div className="text-center py-8">
+              <Settings className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-xl text-slate-600 mb-2">Gestión de Noticias</p>
+              <p className="text-slate-500">Funcionalidad en desarrollo</p>
+            </div>
+          </div>
+        )}
+
         {/* Edit Cyclist Modal */}
         {editingCyclist && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
