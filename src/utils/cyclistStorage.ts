@@ -60,3 +60,6 @@ export const updateCyclist = (cyclist: Cyclist): void => {
     saveCyclists(cyclists);
   }
 };
+
+// Alias for getCyclists (for compatibility)
+export const getCyclists = loadCyclists;

@@ -46,3 +46,6 @@ export const getNewsById = (articleId: string): NewsArticle | null => {
   const news = loadNews();
   return news.find(n => n.id === articleId) || null;
 };
+
+// Alias for getNews (for compatibility)
+export const getNews = loadNews;
