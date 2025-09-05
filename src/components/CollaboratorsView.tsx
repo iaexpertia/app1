@@ -72,8 +72,14 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
 
   const getCategoryText = (category: string) => {
     const categoryMap: Record<string, string> = {
+      'Bike Shop': 'Tienda de Bicicletas',
+      'Hotel': 'Hotel', 
+      'Restaurant': 'Restaurante',
+      'Tour Guide': 'Guía Turístico',
+      'Equipment': 'Equipamiento',
+      'Other': 'Otros',
+      // También mapear las versiones en español por si acaso
       'Tienda de Bicicletas': 'Tienda de Bicicletas',
-      'Hotel': 'Hotel',
       'Restaurante': 'Restaurante',
       'Guía Turístico': 'Guía Turístico',
       'Equipamiento': 'Equipamiento',
