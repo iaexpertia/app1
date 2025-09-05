@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
 import { getCyclists } from '../utils/cyclistStorage';
@@ -81,13 +81,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Ciclistas</h2>
-              <button
-                onClick={handleExportCyclists}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {/* TODO: Implementar modal de nuevo ciclista */}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Nuevo Ciclista
+                </button>
+                <button
+                  onClick={handleExportCyclists}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
             </div>
             <p className="text-gray-600">Funcionalidad de gestión de ciclistas en desarrollo.</p>
           </div>
@@ -97,13 +106,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
-              <button
-                onClick={handleExportPasses}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {/* TODO: Implementar modal de nuevo puerto */}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Mountain className="w-4 h-4" />
+                  Nuevo Puerto
+                </button>
+                <button
+                  onClick={handleExportPasses}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
             </div>
             <p className="text-gray-600">Funcionalidad de gestión de puertos en desarrollo.</p>
           </div>
@@ -113,13 +131,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Marcas</h2>
-              <button
-                onClick={handleExportBrands}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {/* TODO: Implementar modal de nueva marca */}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Tag className="w-4 h-4" />
+                  Nueva Marca
+                </button>
+                <button
+                  onClick={handleExportBrands}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
             </div>
             <p className="text-gray-600">Funcionalidad de gestión de marcas en desarrollo.</p>
           </div>
@@ -129,13 +156,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Colaboradores</h2>
-              <button
-                onClick={handleExportCollaborators}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {/* TODO: Implementar modal de nuevo colaborador */}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  Nuevo Colaborador
+                </button>
+                <button
+                  onClick={handleExportCollaborators}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
             </div>
             <p className="text-gray-600">Funcionalidad de gestión de colaboradores en desarrollo.</p>
           </div>
@@ -145,13 +181,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Noticias</h2>
-              <button
-                onClick={handleExportNews}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {/* TODO: Implementar modal de nueva noticia */}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Newspaper className="w-4 h-4" />
+                  Nueva Noticia
+                </button>
+                <button
+                  onClick={handleExportNews}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
             </div>
             <p className="text-gray-600">Funcionalidad de gestión de noticias en desarrollo.</p>
           </div>
