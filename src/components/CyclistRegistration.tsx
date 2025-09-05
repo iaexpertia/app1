@@ -177,101 +177,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             <p className="text-slate-600">{t.registrationDescription}</p>
           </div>
 
-        {/* Captcha Section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
-            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Verificación de Seguridad
-          </h4>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
-              <span className="font-bold text-blue-700">{captcha.num1}</span>
-              <span className="text-blue-600">+</span>
-              <span className="font-bold text-blue-700">{captcha.num2}</span>
-              <span className="text-blue-600">=</span>
-              <span className="text-blue-600">?</span>
-            </div>
-            
-            <input
-              type="number"
-              value={captchaInput}
-              onChange={(e) => {
-                setCaptchaInput(e.target.value);
-                setCaptchaError('');
-              }}
-              className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
-                captchaError ? 'border-red-500' : 'border-slate-300'
-              }`}
-              placeholder="?"
-              min="0"
-              max="100"
-            />
-            
-            <button
-              type="button"
-              onClick={generateCaptcha}
-              className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
-              title="Generar nueva suma"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-          </div>
-          
-          {captchaError && (
-            <p className="text-red-600 text-sm mt-2 flex items-center">
-              <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {captchaError}
-            </p>
-          )}
-          
-          <p className="text-blue-700 text-xs mt-2">
-            Por favor, resuelve esta suma para verificar que eres humano
-          </p>
-        </div>
-
-        {/* Email Status Messages */}
-        {emailStatus === 'sent' && (
-          <div className="mb-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-green-800 font-medium">Registro completado exitosamente</p>
-                  <p className="text-green-600 text-sm">Se ha enviado un email de confirmación a tu dirección</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {emailStatus === 'failed' && (
-          <div className="mb-6">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-yellow-800 font-medium">Registro completado</p>
-                  <p className="text-yellow-600 text-sm">No pudimos enviar el email de confirmación, pero tu registro fue exitoso</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -375,86 +280,96 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
           
           {/* Captcha Section */}
-          <div className="col-span-full">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
-                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Verificación de Seguridad
-              </h4>
-              
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
-                  <span className="font-bold text-blue-700">{captcha.num1}</span>
-                  <span className="text-blue-600">+</span>
-                  <span className="font-bold text-blue-700">{captcha.num2}</span>
-                  <span className="text-blue-600">=</span>
-                  <span className="text-blue-600">?</span>
-                </div>
-                
-                <input
-                  type="number"
-                  value={captchaInput}
-                  onChange={(e) => {
-                    setCaptchaInput(e.target.value);
-                    setCaptchaError('');
-                  }}
-                  className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
-                    captchaError ? 'border-red-500' : 'border-slate-300'
-                  }`}
-                  placeholder="?"
-                  min="0"
-                  max="100"
-                />
-                
-                <button
-                  type="button"
-                  onClick={generateCaptcha}
-                  className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
-                  title="Generar nueva suma"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </button>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+              <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Verificación de Seguridad
+            </h4>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
+                <span className="font-bold text-blue-700">{captcha.num1}</span>
+                <span className="text-blue-600">+</span>
+                <span className="font-bold text-blue-700">{captcha.num2}</span>
+                <span className="text-blue-600">=</span>
+                <span className="text-blue-600">?</span>
               </div>
               
-              {captchaError && (
-                <p className="text-red-600 text-sm mt-2 flex items-center">
-                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {captchaError}
-                </p>
-              )}
-              
-              <p className="text-blue-700 text-xs mt-2">
-                Por favor, resuelve esta suma para verificar que eres humano
-              </p>
-            </div>
-          </div>
-          
-          {/* Admin Role Checkbox */}
-          <div className="col-span-full">
-            <div className="flex items-start space-x-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
               <input
-                type="checkbox"
-                id="isAdmin"
-                checked={formData.isAdmin}
-                onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
-                className="mt-1 rounded border-orange-300 text-orange-500 focus:ring-orange-500"
+                type="number"
+                value={captchaInput}
+                onChange={(e) => {
+                  setCaptchaInput(e.target.value);
+                  setCaptchaError('');
+                }}
+                className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
+                  captchaError ? 'border-red-500' : 'border-slate-300'
+                }`}
+                placeholder="?"
+                min="0"
+                max="100"
               />
-              <div className="flex-1">
-                <label htmlFor="isAdmin" className="block text-sm font-medium text-orange-800 cursor-pointer">
-                  {t.adminRole}
-                </label>
-                <p className="text-xs text-orange-700 mt-1">
-                  {t.adminRoleDescription}
-                </p>
+              
+              <button
+                type="button"
+                onClick={generateCaptcha}
+                className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+                title="Generar nueva suma"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
+            
+            {captchaError && (
+              <p className="text-red-600 text-sm mt-2 flex items-center">
+                <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {captchaError}
+              </p>
+            )}
+            
+            <p className="text-blue-700 text-xs mt-2">
+              Por favor, resuelve esta suma para verificar que eres humano
+            </p>
+          </div>
+
+          {/* Email Status Messages */}
+          {emailStatus === 'sent' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-green-800 font-medium">Registro completado exitosamente</p>
+                  <p className="text-green-600 text-sm">Se ha enviado un email de confirmación a tu dirección</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {emailStatus === 'failed' && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-yellow-800 font-medium">Registro completado</p>
+                  <p className="text-yellow-600 text-sm">No pudimos enviar el email de confirmación, pero tu registro fue exitoso</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Bikes Section */}
           <div className="border-t pt-6">
