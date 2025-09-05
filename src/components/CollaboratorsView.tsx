@@ -31,6 +31,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
+  const [featuredSlideIndex, setFeaturedSlideIndex] = useState(0);
 
   useEffect(() => {
     const loadedCollaborators = loadCollaborators();
@@ -117,7 +118,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
     return isActive && matchesCategory && matchesCity && matchesSearch;
   });
 
-  const featuredCollaborators = filteredCollaborators.filter(c => c.featured);
+  const featuredCollaborators = collaborators.filter(c => c.isActive && c.featured);
   const regularCollaborators = filteredCollaborators.filter(c => !c.featured);
 
   const nextImage = (collaboratorId: string, totalImages: number) => {
@@ -132,6 +133,13 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
       ...prev,
       [collaboratorId]: ((prev[collaboratorId] || 0) - 1 + totalImages) % totalImages
     }));
+  };
+  const nextFeaturedSlide = () => {
+    setFeaturedSlideIndex((prev) => (prev + 1) % Math.ceil(featuredCollaborators.length / 3));
+  };
+
+  const prevFeaturedSlide = () => {
+    setFeaturedSlideIndex((prev) => (prev - 1 + Math.ceil(featuredCollaborators.length / 3)) % Math.ceil(featuredCollaborators.length / 3));
   };
 
   return (
@@ -227,109 +235,127 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
         </div>
       </div>
 
-      {/* Featured Collaborators */}
+      {/* Featured Collaborators Slide */}
       {featuredCollaborators.length > 0 && (
-        <div className="mb-12">
-          <h3 className="text-xl font-semibold text-slate-800 mb-6 flex items-center">
-            <Star className="h-5 w-5 text-yellow-500 mr-2" />
-            Colaboradores Destacados
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {featuredCollaborators.map(collaborator => {
-              const Icon = getCategoryIcon(collaborator.category);
-              const currentIndex = currentImageIndex[collaborator.id] || 0;
-              
-              return (
-                <div key={collaborator.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative h-64">
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Users className="h-6 w-6 text-orange-500 mr-3" />
+                <h3 className="text-xl font-semibold text-slate-800">Colaboradores Destacados</h3>
+              </div>
+              {featuredCollaborators.length > 3 && (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={prevFeaturedSlide}
+                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <ChevronLeft className="h-4 w-4 text-slate-600" />
+                  </button>
+                  <button
+                    onClick={nextFeaturedSlide}
+                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <ChevronRight className="h-4 w-4 text-slate-600" />
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-4">
+              {featuredCollaborators.slice(featuredSlideIndex * 3, (featuredSlideIndex * 3) + 3).map(collaborator => {
+                const Icon = getCategoryIcon(collaborator.category);
+                const currentIndex = currentImageIndex[collaborator.id] || 0;
+                
+                return (
+                  <div key={collaborator.id} className="flex items-center space-x-4 p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow">
                     {collaborator.images.length > 0 && (
-                      <>
+                      <div className="relative">
                         <img 
                           src={collaborator.images[currentIndex]} 
                           alt={collaborator.name}
-                          className="w-full h-full object-cover"
+                          className="w-16 h-16 object-cover rounded-lg"
                         />
                         {collaborator.images.length > 1 && (
                           <>
                             <button
                               onClick={() => prevImage(collaborator.id, collaborator.images.length)}
-                              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
+                              className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70 transition-opacity"
                             >
-                              <ChevronLeft className="h-4 w-4" />
+                              <ChevronLeft className="h-3 w-3" />
                             </button>
                             <button
                               onClick={() => nextImage(collaborator.id, collaborator.images.length)}
-                              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
+                              className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1 bg-black bg-opacity-50 text-white p-1 rounded-full hover:bg-opacity-70 transition-opacity"
                             >
-                              <ChevronRight className="h-4 w-4" />
+                              <ChevronRight className="h-3 w-3" />
                             </button>
-                            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                              {collaborator.images.map((_, index) => (
-                                <div
-                                  key={index}
-                                  className={`w-2 h-2 rounded-full ${
-                                    index === currentIndex ? 'bg-white' : 'bg-white bg-opacity-50'
-                                  }`}
-                                />
-                              ))}
-                            </div>
                           </>
                         )}
-                      </>
+                      </div>
                     )}
-                    <div className="absolute top-4 right-4 flex space-x-2">
-                      <span className="px-3 py-1 bg-orange-500 text-white rounded-full text-sm font-medium">
-                        {getCategoryText(collaborator.category)}
-                      </span>
-                      <Star className="h-6 w-6 text-yellow-400 bg-white rounded-full p-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="flex items-center mb-3">
-                      <Icon className="h-6 w-6 text-orange-500 mr-3" />
-                      <h3 className="text-xl font-bold text-slate-800">{collaborator.name}</h3>
-                    </div>
-                    
-                    <p className="text-slate-600 mb-4 leading-relaxed">{collaborator.description}</p>
-                    
-                    <div className="space-y-2 mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Icon className="h-5 w-5 text-orange-500" />
+                        <h4 className="font-semibold text-slate-800">{collaborator.name}</h4>
+                        <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                          Destacado
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-1">{getCategoryText(collaborator.category)}</p>
+                      <p className="text-xs text-slate-500 line-clamp-2">{collaborator.description}</p>
                       {collaborator.contactInfo.address && (
-                        <div className="flex items-center text-slate-600 text-sm">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          <span>{collaborator.contactInfo.address}</span>
-                        </div>
+                        <p className="text-xs text-slate-500 mt-1 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {collaborator.contactInfo.address}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      {collaborator.contactInfo.website && (
+                        <a
+                          href={collaborator.contactInfo.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 text-orange-500 hover:text-orange-600 transition-colors"
+                        >
+                          <Globe className="h-4 w-4" />
+                        </a>
                       )}
                       {collaborator.contactInfo.phone && (
-                        <div className="flex items-center text-slate-600 text-sm">
-                          <Phone className="h-4 w-4 mr-2" />
-                          <span>{collaborator.contactInfo.phone}</span>
-                        </div>
+                        <a
+                          href={`tel:${collaborator.contactInfo.phone}`}
+                          className="p-2 text-orange-500 hover:text-orange-600 transition-colors"
+                        >
+                          <Phone className="h-4 w-4" />
+                        </a>
                       )}
                       {collaborator.contactInfo.email && (
-                        <div className="flex items-center text-slate-600 text-sm">
-                          <Mail className="h-4 w-4 mr-2" />
-                          <span>{collaborator.contactInfo.email}</span>
-                        </div>
+                        <a
+                          href={`mailto:${collaborator.contactInfo.email}`}
+                          className="p-2 text-orange-500 hover:text-orange-600 transition-colors"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </a>
                       )}
                     </div>
-                    
-                    {collaborator.contactInfo.website && (
-                      <a
-                        href={collaborator.contactInfo.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                      >
-                        <Globe className="h-4 w-4" />
-                        <span>Visitar Web</span>
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            
+            {featuredCollaborators.length > 3 && (
+              <div className="flex justify-center mt-4 space-x-1">
+                {Array.from({ length: Math.ceil(featuredCollaborators.length / 3) }).map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === featuredSlideIndex ? 'bg-orange-500' : 'bg-slate-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
