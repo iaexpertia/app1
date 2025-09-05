@@ -229,9 +229,16 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="text-sm font-semibold text-slate-800 flex items-center">
                         <FileText className="h-4 w-4 mr-1" />
-                        Mis Notas
+                        Notas y Fotos
                       </h4>
                       <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleEditNotes(pass.id)}
+                          className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-xs"
+                        >
+                          <FileText className="h-3 w-3" />
+                          <span>Mis Notas</span>
+                        </button>
                         <button
                           onClick={() => {
                             const photosPass = pass;
@@ -239,21 +246,11 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
                               onAddPhotos(photosPass.id);
                             }
                           }}
-                          className="flex items-center space-x-1 px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-xs"
-                          title="Añadir fotos de la ruta"
+                          className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-xs"
                         >
                           <Camera className="h-3 w-3" />
                           <span>Fotos</span>
                         </button>
-                        {!editingNotes && (
-                          <button
-                            onClick={() => handleEditNotes(pass.id)}
-                            className="text-blue-500 hover:text-blue-700 transition-colors"
-                            title="Editar notas"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                        )}
                       </div>
                     </div>
                     
