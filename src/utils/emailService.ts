@@ -209,7 +209,7 @@ export const generateRegistrationEmailHTML = (cyclist: CyclistEmailData): string
               <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
             </svg>
           </div>
-          <h1>¡Bienvenido a Puertos Conquistados!</h1>
+          <h1>¡Bienvenido a CyclePeaks!</h1>
           <p class="welcome-text">Tu registro ha sido confirmado exitosamente</p>
         </div>
 
@@ -315,7 +315,7 @@ export const generateRegistrationEmailHTML = (cyclist: CyclistEmailData): string
           </div>
           
           <p style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
-            © ${currentYear} Puertos Conquistados. Todos los derechos reservados.<br>
+            © ${currentYear} CyclePeaks. Todos los derechos reservados.<br>
             Este email fue enviado porque te registraste en nuestra plataforma.
           </p>
         </div>
@@ -334,7 +334,7 @@ export const generateRegistrationEmailText = (cyclist: CyclistEmailData): string
   });
 
   let text = `
-¡BIENVENIDO A PUERTOS CONQUISTADOS!
+¡BIENVENIDO A CYCLEPEAKS!
 
 Hola ${cyclist.name},
 
@@ -367,7 +367,7 @@ ${cyclist.alias ? `- Alias: ${cyclist.alias}\n` : ''}- Email: ${cyclist.email}
 Gracias por unirte a nuestra comunidad de ciclistas.
 Si tienes alguna pregunta, no dudes en contactarnos.
 
-© ${new Date().getFullYear()} Puertos Conquistados. Todos los derechos reservados.
+© ${new Date().getFullYear()} CyclePeaks. Todos los derechos reservados.
 `;
 
   return text;
@@ -381,7 +381,7 @@ export const sendRegistrationEmail = async (cyclist: CyclistEmailData): Promise<
     
     const emailData: EmailData = {
       to: cyclist.email,
-      subject: '🏔️ ¡Bienvenido a Puertos Conquistados! - Registro Confirmado',
+      subject: '🏔️ ¡Bienvenido a CyclePeaks! - Registro Confirmado',
       html: generateRegistrationEmailHTML(cyclist),
       text: generateRegistrationEmailText(cyclist)
     };
@@ -419,7 +419,7 @@ export const sendRegistrationEmail = async (cyclist: CyclistEmailData): Promise<
     const emailLog = {
       id: Date.now().toString(),
       to: cyclist.email,
-      subject: '🏔️ ¡Bienvenido a Puertos Conquistados! - Registro Confirmado',
+      subject: '🏔️ ¡Bienvenido a CyclePeaks! - Registro Confirmado',
       sentAt: new Date().toISOString(),
       type: 'registration_confirmation',
       status: 'failed',

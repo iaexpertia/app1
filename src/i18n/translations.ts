@@ -157,7 +157,7 @@ export interface Translation {
 export const translations: Record<string, Translation> = {
   es: {
     // Header
-    appTitle: 'Puertos conquistados',
+    appTitle: 'CyclePeaks',
     passesConquered: 'puertos conquistados',
     passes: 'Puertos',
     map: 'Mapa',
@@ -310,7 +310,7 @@ export const translations: Record<string, Translation> = {
   
   en: {
     // Header
-    appTitle: 'Mountain Pass Conquest',
+    appTitle: 'CyclePeaks',
     passesConquered: 'passes conquered',
     passes: 'Passes',
     map: 'Map',
@@ -460,7 +460,7 @@ export const translations: Record<string, Translation> = {
   
   fr: {
     // Header
-    appTitle: 'Conquête des Cols de Montagne',
+    appTitle: 'CyclePeaks',
     passesConquered: 'cols conquis',
     passes: 'Cols',
     map: 'Carte',
@@ -610,7 +610,7 @@ export const translations: Record<string, Translation> = {
   
   it: {
     // Header
-    appTitle: 'Conquista dei Passi di Montagna',
+    appTitle: 'CyclePeaks',
     passesConquered: 'passi conquistati',
     passes: 'Passi',
     map: 'Mappa',
@@ -760,7 +760,7 @@ export const translations: Record<string, Translation> = {
   
   ca: {
     // Header
-    appTitle: 'Conquesta de Ports de Muntanya',
+    appTitle: 'CyclePeaks',
     passesConquered: 'ports conquistats',
     passes: 'Ports',
     map: 'Mapa',
