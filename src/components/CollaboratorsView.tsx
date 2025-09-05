@@ -38,7 +38,26 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
     } else {
       setCollaborators(loadedCollaborators);
     }
-    setCategories(loadCategories());
+    
+    // Función para cargar y refrescar categorías
+    const refreshCategories = () => {
+      setCategories(loadCategories());
+    };
+    
+    refreshCategories();
+    
+    // Listener para cambios en localStorage (sincronización entre pestañas)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'collaborator-categories') {
+        refreshCategories();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const getCategoryIcon = (category: string) => {

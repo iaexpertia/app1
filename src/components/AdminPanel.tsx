@@ -1039,6 +1039,56 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
           </div>
         </form>
       </div>
+      
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Categoría</h3>
+              <button
+                onClick={() => setShowAddCategoryModal(false)}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre de la Categoría
+                </label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  placeholder="Ej: Nutrición Deportiva"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowAddCategoryModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddCategory}
+                  disabled={!newCategoryName.trim()}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Añadir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1048,6 +1098,8 @@ interface EditCollaboratorModalProps {
   collaborator: Collaborator;
   onSave: (collaborator: Collaborator) => void;
   onClose: () => void;
+  categories: string[];
+  onCategoryAdded: () => void;
   t: Translation;
 }
 
@@ -1055,9 +1107,12 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
   collaborator, 
   onSave, 
   onClose, 
+  categories,
+  onCategoryAdded,
   t
 }) => {
-  const [categories] = useState<string[]>(loadCategories());
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [formData, setFormData] = useState(collaborator);
   const [imageUrl, setImageUrl] = useState('');
 
@@ -1071,6 +1126,17 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
       'Other': 'Otros'
     };
     return categoryMap[category] || category;
+  };
+
+  const handleAddCategory = () => {
+    if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
+      const { addCategory } = require('../utils/collaboratorStorage');
+      addCategory(newCategoryName.trim());
+      onCategoryAdded(); // Refresca las categorías en el componente padre
+      setFormData({ ...formData, category: newCategoryName.trim() }); // Selecciona la nueva categoría
+      setNewCategoryName('');
+      setShowAddCategoryModal(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1297,6 +1363,56 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
           </div>
         </form>
       </div>
+      
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Categoría</h3>
+              <button
+                onClick={() => setShowAddCategoryModal(false)}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre de la Categoría
+                </label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  placeholder="Ej: Nutrición Deportiva"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowAddCategoryModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddCategory}
+                  disabled={!newCategoryName.trim()}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Añadir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
