@@ -75,3 +75,6 @@ export const removeBrandCategory = (category: string): void => {
   const filteredCategories = categories.filter(c => c !== category);
   saveBrandCategories(filteredCategories);
 };
+
+// Alias for getBrands (for compatibility)
+export const getBrands = loadBrands;
