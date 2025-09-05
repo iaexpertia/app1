@@ -582,9 +582,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                           </div>
                         </div>
 
-                       </div>
-                       
-                       <div>
+                        {/* Bikes Information */}
                         <div className="space-y-4">
                           <div className="flex items-center space-x-3 mb-4">
                             <Bike className="h-5 w-5 text-orange-500" />
