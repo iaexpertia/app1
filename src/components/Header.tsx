@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'collaborators', icon: Users, label: t.collaborators },
     { key: 'register', icon: UserPlus, label: t.register },
     { key: 'database', icon: Database, label: t.database },
-    ...(showAdminTab ? [{ key: 'admin', icon: Settings, label: t.admin }] : [])
+    { key: 'admin', icon: Settings, label: t.admin } // Siempre mostrar admin
   ];
 
   return (
