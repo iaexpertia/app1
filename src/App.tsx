@@ -44,6 +44,19 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
 
+  const handleLogout = () => {
+    // Clear current user session
+    localStorage.removeItem('currentUserId');
+    setIsAdmin(false);
+    
+    // Optionally redirect to passes tab
+    setActiveTab('passes');
+    
+    // Show a brief message
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 2000);
+  };
+
   useEffect(() => {
     const loadedConquests = loadConquests();
     setConquests(loadedConquests);
@@ -154,11 +167,17 @@ function App() {
         language={language}
         onLanguageChange={changeLanguage}
         showAdminTab={isAdmin}
+        onLogout={handleLogout}
       />
       
       {showSuccessMessage && (
         <div className="bg-green-500 text-white px-4 py-3 text-center">
-          <p>{t.registrationSuccess}</p>
+          <p>
+            {activeTab === 'passes' && !isAdmin 
+              ? 'Sesión cerrada correctamente' 
+              : t.registrationSuccess
+            }
+          </p>
         </div>
       )}
       
