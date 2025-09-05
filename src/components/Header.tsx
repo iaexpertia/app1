@@ -25,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   showAdminTab
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -36,16 +37,16 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const navigationItems = [
-    { key: 'passes', icon: Mountain, label: t.passes },
-    { key: 'conquered', icon: Trophy, label: 'Conquistados' },
-    { key: 'map', icon: Map, label: t.map },
-    { key: 'stats', icon: Award, label: t.stats },
-    { key: 'brands', icon: Tag, label: 'Marcas' },
-    { key: 'news', icon: Newspaper, label: 'Noticias' },
-    { key: 'collaborators', icon: Users, label: t.collaborators },
-    { key: 'register', icon: UserPlus, label: t.register },
-    { key: 'database', icon: Database, label: t.database },
-    { key: 'admin', icon: Settings, label: t.admin } // Siempre mostrar admin
+    { key: 'passes', icon: Mountain, label: t.passes, tooltip: 'Explora todos los puertos de montaña disponibles' },
+    { key: 'conquered', icon: Trophy, label: 'Conquistados', tooltip: 'Ve tus puertos conquistados con fotos y notas' },
+    { key: 'map', icon: Map, label: t.map, tooltip: 'Mapa interactivo con ubicaciones de puertos' },
+    { key: 'stats', icon: Award, label: t.stats, tooltip: 'Estadísticas de tu progreso y conquistas' },
+    { key: 'brands', icon: Tag, label: 'Marcas', tooltip: 'Marcas de ciclismo y equipamiento' },
+    { key: 'news', icon: Newspaper, label: 'Noticias', tooltip: 'Últimas noticias del mundo del ciclismo' },
+    { key: 'collaborators', icon: Users, label: t.collaborators, tooltip: 'Colaboradores y servicios para ciclistas' },
+    { key: 'register', icon: UserPlus, label: t.register, tooltip: 'Registrarse como nuevo ciclista' },
+    { key: 'database', icon: Database, label: t.database, tooltip: 'Base de datos completa de puertos' },
+    { key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }
   ];
 
   return (
@@ -67,22 +68,33 @@ export const Header: React.FC<HeaderProps> = ({
           
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-4">
-            <nav className="flex space-x-1">
+            <nav className="flex space-x-1 relative">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button
-                    key={item.key}
-                    onClick={() => handleTabChange(item.key as any)}
-                    className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
-                      activeTab === item.key
-                        ? 'bg-orange-500 text-white shadow-lg'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden xl:inline">{item.label}</span>
-                  </button>
+                  <div key={item.key} className="relative">
+                    <button
+                      onClick={() => handleTabChange(item.key as any)}
+                      onMouseEnter={() => setHoveredItem(item.key)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                        activeTab === item.key
+                          ? 'bg-orange-500 text-white shadow-lg'
+                          : 'text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="hidden xl:inline">{item.label}</span>
+                    </button>
+                    
+                    {/* Tooltip */}
+                    {hoveredItem === item.key && (
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+                        {item.tooltip}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </nav>
