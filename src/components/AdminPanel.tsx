@@ -407,13 +407,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   };
 
   const handleAddNews = () => {
+    const today = new Date().toISOString().split('T')[0];
+    
     const newArticle: NewsArticle = {
       id: Date.now().toString(),
       title: '',
       summary: '',
       content: '',
       author: '',
-      publishDate: new Date().toISOString().split('T')[0],
+      publishDate: today,
       category: 'Noticias',
       imageUrl: '',
       readTime: 5,
@@ -434,8 +436,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     const publishDate = selectedDate === today ? today : selectedDate;
     
     const updatedNews = showAddNews 
-      ? [...news, editingNews]
-      : news.map(article => article.id === editingNews.id ? editingNews : article);
+      ? [...news, { ...editingNews, publishDate: publishDate }]
+      : news.map(article => article.id === editingNews.id ? { ...editingNews, publishDate: publishDate } : article);
     
     saveNews(updatedNews);
     setEditingNews(null);
