@@ -9,6 +9,7 @@ import { StatsView } from './components/StatsView';
 import { CyclistRegistration } from './components/CyclistRegistration';
 import { AdminPanel } from './components/AdminPanel';
 import { DatabaseView } from './components/DatabaseView';
+import { CollaboratorsView } from './components/CollaboratorsView';
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
@@ -19,7 +20,7 @@ import {
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin } from './utils/cyclistStorage';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators';
 
 function App() {
   const { language, t, changeLanguage } = useLanguage();
@@ -159,6 +160,12 @@ function App() {
             userPasses={passes}
             onAddPass={handleAddPass}
             onRemovePass={handleRemovePass}
+            t={t}
+          />
+        )}
+        
+        {activeTab === 'collaborators' && (
+          <CollaboratorsView
             t={t}
           />
         )}

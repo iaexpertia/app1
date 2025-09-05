@@ -8,6 +8,7 @@ export interface Translation {
   register: string;
   admin: string;
   database: string;
+  collaborators: string;
   
   // Pass Card
   altitude: string;
@@ -148,6 +149,9 @@ export interface Translation {
   alreadyInMyPasses: string;
   availablePasses: string;
   mySelectedPasses: string;
+  
+  // Collaborators
+  collaboratorsDescription: string;
 }
 
 export const translations: Record<string, Translation> = {
@@ -161,6 +165,7 @@ export const translations: Record<string, Translation> = {
     register: 'Registro',
     admin: 'Admin',
     database: 'Base de Datos',
+    collaborators: 'Colaboradores',
     
     // Pass Card
     altitude: 'Altitud',
@@ -297,7 +302,10 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Quitar de Mis Puertos',
     alreadyInMyPasses: 'Ya en Mis Puertos',
     availablePasses: 'Puertos Disponibles',
-    mySelectedPasses: 'Mis Puertos Seleccionados'
+    mySelectedPasses: 'Mis Puertos Seleccionados',
+    
+    // Collaborators
+    collaboratorsDescription: 'Descubre nuestros colaboradores y patrocinadores que apoyan la comunidad ciclista'
   },
   
   en: {
