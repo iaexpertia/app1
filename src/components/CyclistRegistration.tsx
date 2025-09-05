@@ -40,6 +40,26 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  
+  // Captcha state
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
+
+  // Generate new captcha
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 20) + 1; // 1-20
+    const num2 = Math.floor(Math.random() * 20) + 1; // 1-20
+    const answer = num1 + num2;
+    setCaptcha({ num1, num2, answer });
+    setCaptchaInput('');
+    setCaptchaError('');
+  };
+
+  // Initialize captcha on component mount
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -56,6 +76,15 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     
     if (!formData.phone.trim()) {
       newErrors.phone = t.phoneRequired;
+    }
+    
+    // Validate captcha
+    const userAnswer = parseInt(captchaInput);
+    if (isNaN(userAnswer) || userAnswer !== captcha.answer) {
+      setCaptchaError('La respuesta del captcha es incorrecta');
+      newErrors.captcha = 'Captcha incorrecto';
+    } else {
+      setCaptchaError('');
     }
     
     setErrors(newErrors);
@@ -127,6 +156,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       });
       setBikes([]);
       setErrors({});
+      generateCaptcha(); // Generate new captcha after successful registration
       
       // Show success message with email status
       setTimeout(() => {
@@ -303,6 +333,67 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 max="150"
                 step="0.1"
               />
+            </div>
+          </div>
+          
+          {/* Captcha Section */}
+          <div className="col-span-full">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Verificación de Seguridad
+              </h4>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
+                  <span className="font-bold text-blue-700">{captcha.num1}</span>
+                  <span className="text-blue-600">+</span>
+                  <span className="font-bold text-blue-700">{captcha.num2}</span>
+                  <span className="text-blue-600">=</span>
+                  <span className="text-blue-600">?</span>
+                </div>
+                
+                <input
+                  type="number"
+                  value={captchaInput}
+                  onChange={(e) => {
+                    setCaptchaInput(e.target.value);
+                    setCaptchaError('');
+                  }}
+                  className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
+                    captchaError ? 'border-red-500' : 'border-slate-300'
+                  }`}
+                  placeholder="?"
+                  min="0"
+                  max="100"
+                />
+                
+                <button
+                  type="button"
+                  onClick={generateCaptcha}
+                  className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+                  title="Generar nueva suma"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
+              </div>
+              
+              {captchaError && (
+                <p className="text-red-600 text-sm mt-2 flex items-center">
+                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {captchaError}
+                </p>
+              )}
+              
+              <p className="text-blue-700 text-xs mt-2">
+                Por favor, resuelve esta suma para verificar que eres humano
+              </p>
             </div>
           </div>
           
