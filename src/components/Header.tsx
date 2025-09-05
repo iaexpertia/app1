@@ -94,14 +94,11 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Mobile Menu Button and Language Selector */}
-          <div className="flex items-center space-x-2 lg:hidden">
-            <div className="hidden sm:block">
-              <LanguageSelector
-                currentLanguage={language}
-                onLanguageChange={onLanguageChange}
-              />
-            </div>
-            
+          <div className="flex items-center space-x-3 lg:hidden">
+            <LanguageSelector
+              currentLanguage={language}
+              onLanguageChange={onLanguageChange}
+            />
             <button
               onClick={toggleMobileMenu}
               className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
@@ -143,13 +140,6 @@ export const Header: React.FC<HeaderProps> = ({
             })}
             </nav>
           
-            {/* Mobile Language Selector */}
-            <div className="px-4 pb-4 pt-2 border-t border-slate-200 sm:hidden">
-              <LanguageSelector
-                currentLanguage={language}
-                onLanguageChange={onLanguageChange}
-              />
-            </div>
           </div>
         </div>
       </div>
