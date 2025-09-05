@@ -90,8 +90,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       
       addCyclist(newCyclist);
       
-      // Set as current user for normal registration
-      setCurrentUser(newCyclist.id);
+      // Set as current user only if not admin registration
+      if (!formData.isAdmin) {
+        setCurrentUser(newCyclist.id);
+      }
       
       // Send confirmation email
       setEmailStatus('sending');
@@ -168,6 +170,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
         </div>
 
+        {/* Email Status Messages */}
         {(emailStatus === 'sent' || emailStatus === 'failed') && (
           <div className="mb-6">
             {emailStatus === 'sent' && (
