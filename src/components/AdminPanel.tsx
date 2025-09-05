@@ -729,151 +729,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </div>
                   </div>
                 ))}
-                  {/* Images Section */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-3">
-                      Imágenes del Colaborador
-                    </label>
-                    
-                    {/* Current Images */}
-                    {newCollaborator.images.length > 0 && (
-                      <div className="mb-4">
-                        <p className="text-sm text-slate-600 mb-2">Imágenes actuales ({newCollaborator.images.length}):</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {newCollaborator.images.map((image, index) => (
-                            <div key={index} className="relative group">
-                              <img 
-                                src={image} 
-                                alt={`Imagen ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-lg border border-slate-300"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updatedImages = newCollaborator.images.filter((_, i) => i !== index);
-                                  setNewCollaborator({ ...newCollaborator, images: updatedImages });
-                                }}
-                                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Add Image by URL */}
-                    <div className="space-y-3">
-                      <div className="flex space-x-3">
-                        <input
-                          type="url"
-                          value={newImageUrl}
-                          onChange={(e) => setNewImageUrl(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                          placeholder="https://ejemplo.com/imagen.jpg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (newImageUrl.trim()) {
-                              setNewCollaborator({
-                                ...newCollaborator,
-                                images: [...newCollaborator.images, newImageUrl.trim()]
-                              });
-                              setNewImageUrl('');
-                            }
-                          }}
-                          disabled={!newImageUrl.trim()}
-                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span>Añadir</span>
-                        </button>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 h-px bg-slate-300"></div>
-                        <span className="text-sm text-slate-500">o</span>
-                        <div className="flex-1 h-px bg-slate-300"></div>
-                      </div>
-                      
-                      {/* Upload Image File */}
-                      <div>
-                        <input
-                          type="file"
-                          accept=".jpg,.jpeg,.png,.webp"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-
-                            // Validar tipo de archivo
-                            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-                            if (!validTypes.includes(file.type)) {
-                              alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
-                              return;
-                            }
-
-                            // Validar tamaño (5MB máximo)
-                            const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-                            if (file.size > maxSize) {
-                              alert('El archivo es demasiado grande. El tamaño máximo es 5MB');
-                              return;
-                            }
-
-                            // Convertir a Base64
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              const base64String = event.target?.result as string;
-                              setNewCollaborator({
-                                ...newCollaborator,
-                                images: [...newCollaborator.images, base64String]
-                              });
-                              // Reset file input
-                              e.target.value = '';
-                            };
-                            reader.onerror = () => {
-                              alert('Error al leer el archivo. Por favor intenta de nuevo.');
-                            };
-                            reader.readAsDataURL(file);
-                          }}
-                          className="hidden"
-                          id="collaborator-image-upload"
-                        />
-                        <label
-                          htmlFor="collaborator-image-upload"
-                          className="w-full flex items-center justify-center px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
-                        >
-                          <div className="text-center">
-                            <Camera className="mx-auto h-8 w-8 text-slate-400 mb-2" />
-                            <p className="text-sm text-slate-600">
-                              <span className="font-medium text-blue-600">Subir imagen</span> o arrastra aquí
-                            </p>
-                            <p className="text-xs text-slate-500">JPG, PNG, WEBP hasta 5MB</p>
-                          </div>
-                        </label>
-                      </div>
-                      
-                      {/* Tips */}
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-start">
-                          <Camera className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
-                          <div className="text-sm text-blue-700">
-                            <p className="font-medium mb-1">Consejos para las imágenes:</p>
-                            <ul className="list-disc list-inside space-y-1 text-xs">
-                              <li>Añade mínimo 2 imágenes para crear un carrusel</li>
-                              <li>Usa imágenes de buena calidad (mínimo 800x600px)</li>
-                              <li>Las imágenes se mostrarán en el orden que las añadas</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
               </div>
             </div>
           </div>
@@ -1709,7 +1564,7 @@ const AddCollaboratorModal: React.FC<{
   onClose: () => void;
   onSave: (collaborator: Omit<Collaborator, 'id'>) => void;
 }> = ({ onClose, onSave }) => {
-  const [formData, setFormData] = useState<Omit<Collaborator, 'id'>>({
+  const [newCollaborator, setNewCollaborator] = useState<Omit<Collaborator, 'id'>>({
     name: '',
     category: 'Tienda de Bicicletas',
     description: '',
@@ -1723,13 +1578,29 @@ const AddCollaboratorModal: React.FC<{
     isActive: true,
     featured: false
   });
+  const [newImageUrl, setNewImageUrl] = useState('');
 
   const categories = ['Tienda de Bicicletas', 'Hotel', 'Restaurante', 'Guía Turístico', 'Equipamiento', 'Otros'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.description) {
-      onSave(formData);
+    if (newCollaborator.name && newCollaborator.description) {
+      onSave(newCollaborator);
+      setNewCollaborator({
+        name: '',
+        category: 'Tienda de Bicicletas',
+        description: '',
+        contactInfo: {
+          email: '',
+          phone: '',
+          website: '',
+          address: ''
+        },
+        images: [],
+        isActive: true,
+        featured: false
+      });
+      setNewImageUrl('');
     }
   };
 
@@ -1751,8 +1622,8 @@ const AddCollaboratorModal: React.FC<{
               </label>
               <input
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={newCollaborator.name}
+                onChange={(e) => setNewCollaborator({ ...newCollaborator, name: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                 required
               />
@@ -1761,8 +1632,8 @@ const AddCollaboratorModal: React.FC<{
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
               <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                value={newCollaborator.category}
+                onChange={(e) => setNewCollaborator({ ...newCollaborator, category: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               >
                 {categories.map(cat => (
@@ -1777,8 +1648,8 @@ const AddCollaboratorModal: React.FC<{
               Descripción <span className="text-red-500">*</span>
             </label>
             <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              value={newCollaborator.description}
+              onChange={(e) => setNewCollaborator({ ...newCollaborator, description: e.target.value })}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               rows={3}
               required
@@ -1790,10 +1661,10 @@ const AddCollaboratorModal: React.FC<{
               <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <input
                 type="email"
-                value={formData.contactInfo.email || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  contactInfo: { ...formData.contactInfo, email: e.target.value }
+                value={newCollaborator.contactInfo.email || ''}
+                onChange={(e) => setNewCollaborator({ 
+                  ...newCollaborator, 
+                  contactInfo: { ...newCollaborator.contactInfo, email: e.target.value }
                 })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               />
@@ -1803,10 +1674,10 @@ const AddCollaboratorModal: React.FC<{
               <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
               <input
                 type="tel"
-                value={formData.contactInfo.phone || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  contactInfo: { ...formData.contactInfo, phone: e.target.value }
+                value={newCollaborator.contactInfo.phone || ''}
+                onChange={(e) => setNewCollaborator({ 
+                  ...newCollaborator, 
+                  contactInfo: { ...newCollaborator.contactInfo, phone: e.target.value }
                 })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               />
@@ -1816,10 +1687,10 @@ const AddCollaboratorModal: React.FC<{
               <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
               <input
                 type="url"
-                value={formData.contactInfo.website || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  contactInfo: { ...formData.contactInfo, website: e.target.value }
+                value={newCollaborator.contactInfo.website || ''}
+                onChange={(e) => setNewCollaborator({ 
+                  ...newCollaborator, 
+                  contactInfo: { ...newCollaborator.contactInfo, website: e.target.value }
                 })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               />
@@ -1829,13 +1700,158 @@ const AddCollaboratorModal: React.FC<{
               <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
               <input
                 type="text"
-                value={formData.contactInfo.address || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  contactInfo: { ...formData.contactInfo, address: e.target.value }
+                value={newCollaborator.contactInfo.address || ''}
+                onChange={(e) => setNewCollaborator({ 
+                  ...newCollaborator, 
+                  contactInfo: { ...newCollaborator.contactInfo, address: e.target.value }
                 })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               />
+            </div>
+          </div>
+          
+          {/* Images Section */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3">
+              Imágenes del Colaborador
+            </label>
+            
+            {/* Current Images */}
+            {newCollaborator.images.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-slate-600 mb-2">Imágenes actuales ({newCollaborator.images.length}):</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {newCollaborator.images.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={image} 
+                        alt={`Imagen ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border border-slate-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedImages = newCollaborator.images.filter((_, i) => i !== index);
+                          setNewCollaborator({ ...newCollaborator, images: updatedImages });
+                        }}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Add Image by URL */}
+            <div className="space-y-3">
+              <div className="flex space-x-3">
+                <input
+                  type="url"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newImageUrl.trim()) {
+                      setNewCollaborator({
+                        ...newCollaborator,
+                        images: [...newCollaborator.images, newImageUrl.trim()]
+                      });
+                      setNewImageUrl('');
+                    }
+                  }}
+                  disabled={!newImageUrl.trim()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Añadir</span>
+                </button>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 h-px bg-slate-300"></div>
+                <span className="text-sm text-slate-500">o</span>
+                <div className="flex-1 h-px bg-slate-300"></div>
+              </div>
+              
+              {/* Upload Image File */}
+              <div>
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    // Validar tipo de archivo
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                    if (!validTypes.includes(file.type)) {
+                      alert('Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP)');
+                      return;
+                    }
+
+                    // Validar tamaño (5MB máximo)
+                    const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+                    if (file.size > maxSize) {
+                      alert('El archivo es demasiado grande. El tamaño máximo es 5MB');
+                      return;
+                    }
+
+                    // Convertir a Base64
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const base64String = event.target?.result as string;
+                      setNewCollaborator({
+                        ...newCollaborator,
+                        images: [...newCollaborator.images, base64String]
+                      });
+                      // Reset file input
+                      e.target.value = '';
+                    };
+                    reader.onerror = () => {
+                      alert('Error al leer el archivo. Por favor intenta de nuevo.');
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="hidden"
+                  id="collaborator-image-upload"
+                />
+                <label
+                  htmlFor="collaborator-image-upload"
+                  className="w-full flex items-center justify-center px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
+                >
+                  <div className="text-center">
+                    <Camera className="mx-auto h-8 w-8 text-slate-400 mb-2" />
+                    <p className="text-sm text-slate-600">
+                      <span className="font-medium text-blue-600">Subir imagen</span> o arrastra aquí
+                    </p>
+                    <p className="text-xs text-slate-500">JPG, PNG, WEBP hasta 5MB</p>
+                  </div>
+                </label>
+              </div>
+              
+              {/* Tips */}
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start">
+                  <Camera className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                  <div className="text-sm text-blue-700">
+                    <p className="font-medium mb-1">Consejos para las imágenes:</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      <li>Añade mínimo 2 imágenes para crear un carrusel</li>
+                      <li>Usa imágenes de buena calidad (mínimo 800x600px)</li>
+                      <li>Las imágenes se mostrarán en el orden que las añadas</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -1843,8 +1859,8 @@ const AddCollaboratorModal: React.FC<{
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                checked={newCollaborator.isActive}
+                onChange={(e) => setNewCollaborator({ ...newCollaborator, isActive: e.target.checked })}
                 className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
               />
               <span className="text-sm text-slate-700">Colaborador Activo</span>
@@ -1853,8 +1869,8 @@ const AddCollaboratorModal: React.FC<{
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.featured}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                checked={newCollaborator.featured}
+                onChange={(e) => setNewCollaborator({ ...newCollaborator, featured: e.target.checked })}
                 className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
               />
               <span className="text-sm text-slate-700">Colaborador Destacado</span>
