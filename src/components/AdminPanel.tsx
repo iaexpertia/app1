@@ -539,22 +539,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowPassModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Mountain className="w-4 h-4" />
-                  Nuevo Puerto
-                </button>
-                <button
-                  onClick={handleExportPasses}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  Exportar Excel
-                </button>
-              </div>
+              <button
+                onClick={() => exportMountainPasses(passes)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar Excel</span>
+              </button>
             </div>
             
             {/* Passes Table */}
