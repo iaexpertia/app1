@@ -401,6 +401,5 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
         </div>
       )}
     </div>
-    </div>
   );
 };
