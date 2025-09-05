@@ -51,6 +51,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [categoryError, setCategoryError] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
 
   useEffect(() => {
@@ -105,12 +106,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   const handleAddCategory = () => {
-    if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
-      addCategory(newCategoryName.trim());
-      refreshCategories();
-      setNewCategoryName('');
-      setShowAddCategoryModal(false);
+    setCategoryError('');
+    
+    if (!newCategoryName.trim()) {
+      setCategoryError('El nombre de la categoría es obligatorio');
+      return;
     }
+    
+    // Verificar si la categoría ya existe
+    if (categories.includes(newCategoryName.trim())) {
+      setCategoryError('Ya existe una categoría con ese nombre');
+      return;
+    }
+    
+    addCategory(newCategoryName.trim());
+    refreshCategories();
+    setNewCategoryName('');
+    setCategoryError('');
+    setShowAddCategoryModal(false);
   };
 
   const handleRemoveCategory = (categoryToRemove: string) => {
@@ -449,10 +462,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   type="text"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
+                    categoryError ? 'border-red-500' : 'border-slate-300'
+                  }`}
                   placeholder="Ej: Nutrición Deportiva"
                   onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
                 />
+                {categoryError && (
+                  <p className="text-red-500 text-sm mt-1">{categoryError}</p>
+                )}
               </div>
               
               <div className="flex justify-end space-x-3">
@@ -464,8 +482,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </button>
                 <button
                   onClick={handleAddCategory}
-                  disabled={!newCategoryName.trim()}
-                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    categoryError 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-green-500 hover:bg-green-600 text-white'
+                  }`}
+                  disabled={!!categoryError}
                 >
                   <Save className="h-4 w-4" />
                   <span>Añadir</span>
