@@ -90,17 +90,3 @@ export interface Brand {
   isActive: boolean;
   featured: boolean;
 }
-
-export interface NewsArticle {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  author: string;
-  publishDate: string;
-  category: 'Competición' | 'Equipamiento' | 'Rutas' | 'Noticias' | 'Entrevistas';
-  imageUrl: string;
-  readTime: number;
-  featured: boolean;
-  externalUrl?: string;
-}

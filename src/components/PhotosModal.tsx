@@ -211,54 +211,24 @@ export const PhotosModal: React.FC<PhotosModalProps> = ({
                 Añadir Nueva Foto
               </h4>
               
-              <div className="space-y-4">
-                <div className="flex space-x-3">
-                  <div className="flex-1">
-                    <input
-                      type="url"
-                      value={newPhotoUrl}
-                      onChange={(e) => setNewPhotoUrl(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="https://ejemplo.com/mi-foto.jpg"
-                    />
-                  </div>
-                  <button
-                    onClick={handleAddPhoto}
-                    disabled={!newPhotoUrl.trim()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    <span>Añadir</span>
-                  </button>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1 h-px bg-slate-300"></div>
-                  <span className="text-sm text-slate-500">o</span>
-                  <div className="flex-1 h-px bg-slate-300"></div>
-                </div>
-                
+              <div className="flex space-x-3">
                 <div className="flex-1">
                   <input
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.webp"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    id="photo-upload"
+                    type="url"
+                    value={newPhotoUrl}
+                    onChange={(e) => setNewPhotoUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://ejemplo.com/mi-foto.jpg"
                   />
-                  <label
-                    htmlFor="photo-upload"
-                    className="w-full flex items-center justify-center px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
-                  >
-                    <div className="text-center">
-                      <Camera className="mx-auto h-8 w-8 text-slate-400 mb-2" />
-                      <p className="text-sm text-slate-600">
-                        <span className="font-medium text-blue-600">Subir foto</span> o arrastra aquí
-                      </p>
-                      <p className="text-xs text-slate-500">JPG, PNG, WEBP hasta 10MB</p>
-                    </div>
-                  </label>
                 </div>
+                <button
+                  onClick={handleAddPhoto}
+                  disabled={!newPhotoUrl.trim()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Añadir</span>
+                </button>
               </div>
               
               <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
