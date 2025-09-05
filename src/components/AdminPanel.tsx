@@ -48,6 +48,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
   const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
 
   useEffect(() => {
@@ -92,6 +94,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (window.confirm('¿Estás seguro de que quieres eliminar este colaborador?')) {
       removeCollaborator(collaboratorId);
       setCollaborators(loadCollaborators());
+    }
+  };
+
+  const handleAddCategory = () => {
+    if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
+      addCategory(newCategoryName.trim());
+      setCategories(loadCategories());
+      setNewCategoryName('');
+      setShowAddCategoryModal(false);
+    }
+  };
+
+  const handleRemoveCategory = (categoryToRemove: string) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${getCategoryText(categoryToRemove)}"?`)) {
+      removeCategory(categoryToRemove);
+      setCategories(loadCategories());
     }
   };
 
@@ -265,7 +283,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {activeSection === 'collaborators' && (
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-slate-800">Gestionar Colaboradores</h3>
+            <div className="flex items-center space-x-4">
+              <h3 className="text-xl font-semibold text-slate-800">Gestionar Colaboradores</h3>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-slate-700">Categorías</span>
+                <button
+                  onClick={() => setShowAddCategoryModal(true)}
+                  className="p-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+                  title="Añadir nueva categoría"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-slate-600">{collaborators.length} colaboradores totales</span>
               <button
@@ -381,6 +411,56 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onClose={() => setEditingCollaborator(null)}
           t={t}
         />
+      )}
+
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Categoría</h3>
+              <button
+                onClick={() => setShowAddCategoryModal(false)}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre de la Categoría
+                </label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  placeholder="Ej: Nutrición Deportiva"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowAddCategoryModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddCategory}
+                  disabled={!newCategoryName.trim()}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Añadir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -654,7 +734,7 @@ interface AddCollaboratorModalProps {
 const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({ 
   onSave, 
   onClose, 
-  t 
+  t
 }) => {
   const [categories] = useState<string[]>(loadCategories());
   const [formData, setFormData] = useState<Partial<Collaborator>>({
@@ -937,7 +1017,7 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
   collaborator, 
   onSave, 
   onClose, 
-  t 
+  t
 }) => {
   const [categories] = useState<string[]>(loadCategories());
   const [formData, setFormData] = useState(collaborator);
