@@ -82,6 +82,7 @@ export interface Translation {
   lakeDistrict: string;
   friuli: string;
   sierraNevada: string;
+  pirineos: string;
   
   // Registration
   cyclistRegistration: string;
@@ -236,6 +237,7 @@ export const translations: Record<string, Translation> = {
     lakeDistrict: 'Distrito de los Lagos',
     friuli: 'Friuli',
     sierraNevada: 'Sierra Nevada',
+    pirineos: 'Pirineos',
     
     // Registration
     cyclistRegistration: 'Registro de Ciclista',
@@ -389,6 +391,7 @@ export const translations: Record<string, Translation> = {
     lakeDistrict: 'Lake District',
     friuli: 'Friuli',
     sierraNevada: 'Sierra Nevada',
+    pirineos: 'Pyrenees',
     
     // Registration
     cyclistRegistration: 'Cyclist Registration',
@@ -539,6 +542,7 @@ export const translations: Record<string, Translation> = {
     lakeDistrict: 'Lake District',
     friuli: 'Frioul',
     sierraNevada: 'Sierra Nevada',
+    pirineos: 'Pyrénées',
     
     // Registration
     cyclistRegistration: 'Inscription Cycliste',
@@ -689,6 +693,7 @@ export const translations: Record<string, Translation> = {
     lakeDistrict: 'Lake District',
     friuli: 'Friuli',
     sierraNevada: 'Sierra Nevada',
+    pirineos: 'Pirenei',
     
     // Registration
     cyclistRegistration: 'Registrazione Ciclista',

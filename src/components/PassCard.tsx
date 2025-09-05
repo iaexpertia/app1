@@ -86,6 +86,7 @@ export const PassCard: React.FC<PassCardProps> = ({
       'Lake District': 'lakeDistrict',
       'Friuli': 'friuli',
       'Sierra Nevada': 'sierraNevada'
+      'Pirineos': 'pirineos'
     };
     return t[regionMap[region]] || region;
   };

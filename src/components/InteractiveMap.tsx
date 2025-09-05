@@ -125,7 +125,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const getRegionText = (region: string) => {
     const regionMap: Record<string, string> = {
       'Alpes': 'Alpes',
-      'Pirineos': 'Pirineos', 
+      'Pirineos': 'Pirineos',
       'Dolomitas': 'Dolomitas',
       'Asturias': 'Asturias',
       'Lake District': 'Distrito de los Lagos',

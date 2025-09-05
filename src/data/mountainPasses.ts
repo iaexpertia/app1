@@ -47,7 +47,7 @@ export const mountainPasses: MountainPass[] = [
     id: 'col-du-tourmalet',
     name: 'Col du Tourmalet',
     country: 'France',
-    region: 'Pyrenees',
+    region: 'Pirineos',
     maxAltitude: 2115,
     elevationGain: 1268,
     averageGradient: 7.4,
