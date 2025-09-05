@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users, Mountain, Tag, UserCheck, Newspaper, Download } from 'lucide-react';
-import { Pass, Cyclist, Brand, Collaborator, News } from '../types';
-import { exportCyclists, exportPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
+import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
+import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
 import { getCyclists } from '../utils/cyclistStorage';
 import { getBrands } from '../utils/brandsStorage';
 import { getCollaborators } from '../utils/collaboratorStorage';
@@ -22,7 +22,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   };
 
   const handleExportPasses = () => {
-    exportPasses(passes);
+    exportMountainPasses(passes);
   };
 
   const handleExportBrands = () => {
