@@ -54,6 +54,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
+  const [showDatabasePassModal, setShowDatabasePassModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   
   // Edit states
@@ -76,6 +77,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
     description: '', imageUrl: '', category: 'Otros'
+  });
+  
+  const [databasePassData, setDatabasePassData] = useState<Partial<MountainPass>>({
+    name: '',
+    country: '',
+    region: '',
+    maxAltitude: 0,
+    elevationGain: 0,
+    averageGradient: 0,
+    maxGradient: 0,
+    distance: 0,
+    difficulty: 'Cuarta',
+    coordinates: { lat: 0, lng: 0 },
+    description: '',
+    famousWinners: [],
+    imageUrl: '',
+    category: 'Otros'
   });
   
   const [brandForm, setBrandForm] = useState({
