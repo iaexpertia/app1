@@ -16,10 +16,8 @@ import {
   Bike,
   Shirt,
   Smartphone,
-  Wrench,
-  Download
+  Wrench
 } from 'lucide-react';
-import { exportBrandsToExcel } from '../utils/excelExport';
 
 interface BrandsViewProps {
   t: Translation;
@@ -82,17 +80,6 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
         
         {/* Search and Filters */}
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div></div>
-            <button
-              onClick={() => exportBrandsToExcel(brands)}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-            >
-              <Download className="h-4 w-4" />
-              <span>Exportar a Excel</span>
-            </button>
-          </div>
-          
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
