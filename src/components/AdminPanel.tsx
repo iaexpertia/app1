@@ -404,6 +404,99 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setEditingNews(null);
     resetNewsForm();
   };
+  const handleImportCSV = () => {
+    if (!importFile) {
+      alert('Por favor selecciona un archivo CSV');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      
+      const importedPasses: MountainPass[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+        
+        if (values.length >= headers.length) {
+          const pass: MountainPass = {
+            id: values[0] || `imported-${Date.now()}-${i}`,
+            name: values[1] || '',
+            country: values[2] || '',
+            region: values[3] || '',
+            maxAltitude: parseInt(values[4]) || 0,
+            elevationGain: parseInt(values[5]) || 0,
+            averageGradient: parseFloat(values[6]) || 0,
+            maxGradient: parseFloat(values[7]) || 0,
+            distance: parseFloat(values[8]) || 0,
+            difficulty: (values[9] as any) || 'Cuarta',
+            coordinates: {
+              lat: parseFloat(values[10]) || 0,
+              lng: parseFloat(values[11]) || 0
+            },
+            description: values[12] || '',
+            imageUrl: values[13] || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+            category: values[14] || 'Otros',
+            famousWinners: []
+          };
+          
+          if (pass.name && pass.country) {
+            importedPasses.push(pass);
+          }
+        }
+      }
+      
+      if (importedPasses.length > 0) {
+        const updatedPasses = [...passes];
+        let addedCount = 0;
+        
+        importedPasses.forEach(newPass => {
+          const existingIndex = updatedPasses.findIndex(p => p.id === newPass.id || p.name === newPass.name);
+          if (existingIndex >= 0) {
+            updatedPasses[existingIndex] = newPass;
+          } else {
+            updatedPasses.push(newPass);
+            addedCount++;
+          }
+        });
+        
+        setPasses(updatedPasses);
+        alert(`Importación completada: ${addedCount} puertos nuevos añadidos, ${importedPasses.length - addedCount} actualizados`);
+        setShowImportModal(false);
+        setImportFile(null);
+        setImportPreview([]);
+      } else {
+        alert('No se pudieron importar puertos. Verifica el formato del archivo.');
+      }
+    };
+    
+    reader.readAsText(importFile);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setImportFile(file);
+      
+      // Preview first few lines
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').slice(0, 6); // First 5 lines + header
+        setImportPreview(lines);
+      };
+      reader.readAsText(file);
+    } else {
+      alert('Por favor selecciona un archivo CSV válido');
+    }
+  };
+
 
   const handleDeleteNews = (articleId: string) => {
     if (confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
