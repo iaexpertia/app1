@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { MountainPass, Cyclist } from '../types';
+import { Brand, NewsArticle, Collaborator } from '../types';
 import { Translation } from '../i18n/translations';
 import { Brand, NewsArticle, Collaborator } from '../types';
+import { loadBrands, saveBrands, addBrand, removeBrand } from '../utils/brandsStorage';
+import { loadNews, saveNews, addNews, removeNews } from '../utils/newsStorage';
+import { loadCollaborators, saveCollaborators, addCollaborator, removeCollaborator } from '../utils/collaboratorStorage';
 import { 
   loadCyclists, 
   saveCyclists, 
@@ -52,7 +56,20 @@ import {
   Globe,
   MapPin,
   Camera,
-  FileText
+  Upload,
+  Plus,
+  Trash2,
+  Edit,
+  Eye,
+  Globe,
+  Calendar,
+  User,
+  Store,
+  Hotel,
+  UtensilsCrossed,
+  MapPin,
+  Phone,
+  Mail
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -66,8 +83,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
@@ -83,6 +106,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   useEffect(() => {
     setCyclists(loadCyclists());
+    setBrands(loadBrands());
+    setNews(loadNews());
+    setCollaborators(loadCollaborators());
     setBrands(loadBrands());
     setNews(loadNews());
     setCollaborators(loadCollaborators());
