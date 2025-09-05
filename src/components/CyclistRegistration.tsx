@@ -33,7 +33,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     phone: '',
     age: '',
     weight: '',
-    isAdmin: false,
   });
   
   const [bikes, setBikes] = useState<Omit<Bike, 'id'>[]>([]);
@@ -109,93 +108,70 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: formData.phone.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        isAdmin: formData.isAdmin,
+        isAdmin: false,
         bikes: bikes.map(bike => ({
           ...bike,
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
         })),
         registrationDate: new Date().toISOString().split('T')[0]
       };
-      
-      addCyclist(newCyclist);
-      
-      // Set as current user for normal registration
-      setCurrentUser(newCyclist.id);
-      
-      // Send confirmation email
-      setEmailStatus('sending');
-      try {
-        const emailSuccess = await sendRegistrationEmail({
-          name: newCyclist.name,
-          email: newCyclist.email,
-          alias: newCyclist.alias,
-          registrationDate: newCyclist.registrationDate,
-          bikes: newCyclist.bikes.map(bike => ({
-            brand: bike.brand,
-            model: bike.model,
-            type: bike.type,
-            year: bike.year
-          }))
-        });
-        
-        setEmailStatus(emailSuccess ? 'sent' : 'failed');
-      } catch (error) {
-        console.error('Error sending confirmation email:', error);
-        setEmailStatus('failed');
-      }
-      
-      // Reset form
-      setFormData({
-        name: '',
-        alias: '',
-        email: '',
-        phone: '',
-        age: '',
-        weight: '',
-        isAdmin: false,
-      });
-      setBikes([]);
-      setErrors({});
-      generateCaptcha(); // Generate new captcha after successful registration
-      
-      // Show success message with email status
-      setTimeout(() => {
-        onRegistrationSuccess();
-        setEmailStatus('idle');
-      }, 2000);
-    } catch (error) {
-      console.error('Error registering cyclist:', error);
-      setEmailStatus('failed');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const addBike = () => {
-    setBikes([...bikes, { brand: '', model: '', year: undefined, type: 'Road' }]);
-  };
-
-  const removeBike = (index: number) => {
-    setBikes(bikes.filter((_, i) => i !== index));
-  };
-
-  const updateBike = (index: number, field: keyof Omit<Bike, 'id'>, value: any) => {
-    const updatedBikes = bikes.map((bike, i) => 
-      i === index ? { ...bike, [field]: value } : bike
-    );
-    setBikes(updatedBikes);
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <div className="flex items-center mb-8">
-          <UserPlus className="h-8 w-8 text-orange-500 mr-3" />
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">{t.cyclistRegistration}</h2>
-            <p className="text-slate-600">{t.registrationDescription}</p>
+        {/* Captcha Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Verificación de Seguridad
+          </h4>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
+              <span className="font-bold text-blue-700">{captcha.num1}</span>
+              <span className="text-blue-600">+</span>
+              <span className="font-bold text-blue-700">{captcha.num2}</span>
+              <span className="text-blue-600">=</span>
+              <span className="text-blue-600">?</span>
+            </div>
+            
+            <input
+              type="number"
+              value={captchaInput}
+              onChange={(e) => {
+                setCaptchaInput(e.target.value);
+                setCaptchaError('');
+              }}
+              className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
+                captchaError ? 'border-red-500' : 'border-slate-300'
+              }`}
+              placeholder="?"
+              min="0"
+              max="100"
+            />
+            
+            <button
+              type="button"
+              onClick={generateCaptcha}
+              className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+              title="Generar nueva suma"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
           </div>
+          
+          {captchaError && (
+            <p className="text-red-600 text-sm mt-2 flex items-center">
+              <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {captchaError}
+            </p>
+          )}
+          
+          <p className="text-blue-700 text-xs mt-2">
+            Por favor, resuelve esta suma para verificar que eres humano
+          </p>
         </div>
 
         {/* Email Status Messages */}
