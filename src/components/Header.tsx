@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users } from 'lucide-react';
+import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
 
@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navigationItems = [
     { key: 'passes', icon: Mountain, label: t.passes },
-    { key: 'conquered', icon: Award, label: 'Conquistados' },
+    { key: 'conquered', icon: Trophy, label: 'Conquistados' },
     { key: 'map', icon: Map, label: t.map },
     { key: 'stats', icon: Award, label: t.stats },
     { key: 'collaborators', icon: Users, label: t.collaborators },
