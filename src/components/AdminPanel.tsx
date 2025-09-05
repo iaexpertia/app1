@@ -113,18 +113,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
     
+    const trimmedCategory = newCategoryName.trim();
+    
     // Verificar si la categoría ya existe (comparación case-insensitive)
     const categoryExists = categories.some(cat => 
       cat.toLowerCase() === trimmedCategory.toLowerCase()
     );
     
     if (categoryExists) {
-    if (categories.includes(newCategoryName.trim())) {
       setCategoryError('Ya existe una categoría con ese nombre');
       return;
     }
     
-    addCategory(newCategoryName.trim());
+    addCategory(trimmedCategory);
     refreshCategories();
     setNewCategoryName('');
     setCategoryError('');
@@ -150,6 +151,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     };
     return categoryMap[category] || category;
   };
+  
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -819,6 +821,7 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
       setShowAddCategoryModal(false);
     }
   };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.description) {
