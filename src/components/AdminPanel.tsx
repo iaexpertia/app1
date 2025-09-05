@@ -34,7 +34,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
-  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes' | 'brands' | 'collaborators' | 'news'>('cyclists');
+  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes'>('cyclists');
 
   useEffect(() => {
     setCyclists(loadCyclists());
@@ -97,39 +97,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             >
               <Mountain className="h-4 w-4 inline mr-2" />
               {t.managePasses}
-            </button>
-            <button
-              onClick={() => setActiveTab('brands')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors font-medium ${
-                activeTab === 'brands'
-                  ? 'bg-white text-orange-600 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-800'
-              }`}
-            >
-              <Settings className="h-4 w-4 inline mr-2" />
-              Marcas
-            </button>
-            <button
-              onClick={() => setActiveTab('collaborators')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors font-medium ${
-                activeTab === 'collaborators'
-                  ? 'bg-white text-orange-600 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-800'
-              }`}
-            >
-              <Users className="h-4 w-4 inline mr-2" />
-              Colaboradores
-            </button>
-            <button
-              onClick={() => setActiveTab('news')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors font-medium ${
-                activeTab === 'news'
-                  ? 'bg-white text-orange-600 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-800'
-              }`}
-            >
-              <Settings className="h-4 w-4 inline mr-2" />
-              Noticias
             </button>
           </div>
         </div>
@@ -299,90 +266,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Brands Management */}
-        {activeTab === 'brands' && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Settings className="h-6 w-6 text-orange-500 mr-3" />
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Marcas</h3>
-                  <p className="text-slate-600">Administra las marcas de ciclismo</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {/* TODO: Implementar exportación de marcas */}}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar a Excel</span>
-              </button>
-            </div>
-            
-            <div className="text-center py-8">
-              <Settings className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-xl text-slate-600 mb-2">Gestión de Marcas</p>
-              <p className="text-slate-500">Funcionalidad en desarrollo</p>
-            </div>
-          </div>
-        )}
-
-        {/* Collaborators Management */}
-        {activeTab === 'collaborators' && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Users className="h-6 w-6 text-orange-500 mr-3" />
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Colaboradores</h3>
-                  <p className="text-slate-600">Administra los colaboradores y servicios</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {/* TODO: Implementar exportación de colaboradores */}}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar a Excel</span>
-              </button>
-            </div>
-            
-            <div className="text-center py-8">
-              <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-xl text-slate-600 mb-2">Gestión de Colaboradores</p>
-              <p className="text-slate-500">Funcionalidad en desarrollo</p>
-            </div>
-          </div>
-        )}
-
-        {/* News Management */}
-        {activeTab === 'news' && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Settings className="h-6 w-6 text-orange-500 mr-3" />
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-800">Gestión de Noticias</h3>
-                  <p className="text-slate-600">Administra las noticias de ciclismo</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {/* TODO: Implementar exportación de noticias */}}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar a Excel</span>
-              </button>
-            </div>
-            
-            <div className="text-center py-8">
-              <Settings className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-xl text-slate-600 mb-2">Gestión de Noticias</p>
-              <p className="text-slate-500">Funcionalidad en desarrollo</p>
             </div>
           </div>
         )}
