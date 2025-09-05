@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
+import { isUserLoggedIn, logout, getCurrentAuthUser } from '../utils/authStorage';
 
 interface HeaderProps {
   activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
@@ -12,6 +13,7 @@ interface HeaderProps {
   language: string;
   onLanguageChange: (language: string) => void;
   showAdminTab: boolean;
+  onLoginRequired: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -22,18 +24,57 @@ export const Header: React.FC<HeaderProps> = ({
   t,
   language,
   onLanguageChange,
-  showAdminTab
+  showAdminTab,
+  onLoginRequired
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(getCurrentAuthUser());
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news') => {
+    // Verificar si necesita login para ciertas pestañas
+    const protectedTabs = ['register', 'database', 'admin'];
+    
+    if (protectedTabs.includes(tab) && !isUserLoggedIn()) {
+      onLoginRequired();
+      return;
+    }
+    
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
+
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+    // Redirigir a la pestaña de puertos si estaba en una pestaña protegida
+    const protectedTabs = ['register', 'database', 'admin'];
+    if (protectedTabs.includes(activeTab)) {
+      onTabChange('passes');
+    }
+  };
+
+  // Escuchar cambios de autenticación
+  React.useEffect(() => {
+    const handleAuthChange = () => {
+      setCurrentUser(getCurrentAuthUser());
+    };
+
+    const handleLogoutEvent = () => {
+      setCurrentUser(null);
+    };
+
+    window.addEventListener('userLoggedIn', handleAuthChange);
+    window.addEventListener('userLoggedOut', handleLogoutEvent);
+
+    return () => {
+      window.removeEventListener('userLoggedIn', handleAuthChange);
+      window.removeEventListener('userLoggedOut', handleLogoutEvent);
+    };
+  }, []);
 
   const navigationItems = [
     { key: 'passes', icon: Mountain, label: t.passes },
@@ -87,10 +128,44 @@ export const Header: React.FC<HeaderProps> = ({
               })}
             </nav>
             
+            {/* Mobile User Info */}
+            {currentUser && (
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-slate-800">{currentUser.name}</p>
+                    <p className="text-sm text-slate-600">{currentUser.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    Salir
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <LanguageSelector
               currentLanguage={language}
               onLanguageChange={onLanguageChange}
             />
+            
+            {/* User Info and Logout */}
+            {currentUser && (
+              <div className="flex items-center space-x-3 pl-4 border-l border-slate-300">
+                <div className="text-sm">
+                  <p className="font-medium text-slate-800">{currentUser.name}</p>
+                  <p className="text-xs text-slate-600">{currentUser.email}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Salir
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button and Language Selector */}
