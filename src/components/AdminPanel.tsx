@@ -7,20 +7,13 @@ import {
   addCollaborator, 
   updateCollaborator, 
   removeCollaborator,
-  loadCategories
+  loadCategories,
+  addCategory
 } from '../utils/collaboratorStorage';
 import { 
   Settings, 
   Users, 
   Mountain, 
-import { 
-  loadCollaborators, 
-  addCollaborator, 
-  removeCollaborator, 
-  updateCollaborator,
-  loadCategories,
-  addCategory
-} from '../utils/collaboratorStorage';
   Edit3, 
   Trash2, 
   Save,
@@ -113,7 +106,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleAddCategory = () => {
     if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
-      const { addCategory } = require('../utils/collaboratorStorage');
       addCategory(newCategoryName.trim());
       refreshCategories();
       setNewCategoryName('');
@@ -793,7 +785,6 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
 
   const handleAddCategory = () => {
     if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
-      const { addCategory } = require('../utils/collaboratorStorage');
       addCategory(newCategoryName.trim());
       onCategoryAdded(); // Refresca las categorías en el componente padre
       setFormData({ ...formData, category: newCategoryName.trim() }); // Selecciona la nueva categoría
@@ -1138,7 +1129,6 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
 
   const handleAddCategory = () => {
     if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
-      const { addCategory } = require('../utils/collaboratorStorage');
       addCategory(newCategoryName.trim());
       onCategoryAdded(); // Refresca las categorías en el componente padre
       setFormData({ ...formData, category: newCategoryName.trim() }); // Selecciona la nueva categoría
