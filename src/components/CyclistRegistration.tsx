@@ -115,64 +115,78 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         })),
         registrationDate: new Date().toISOString().split('T')[0]
       };
-        {/* Captcha Section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
-            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Verificación de Seguridad
-          </h4>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
-              <span className="font-bold text-blue-700">{captcha.num1}</span>
-              <span className="text-blue-600">+</span>
-              <span className="font-bold text-blue-700">{captcha.num2}</span>
-              <span className="text-blue-600">=</span>
-              <span className="text-blue-600">?</span>
+
+      // Add cyclist to storage
+      addCyclist(newCyclist);
+      setCurrentUser(newCyclist);
+      
+      // Send registration email
+      setEmailStatus('sending');
+      try {
+        await sendRegistrationEmail(newCyclist);
+        setEmailStatus('sent');
+      } catch (emailError) {
+        console.error('Failed to send registration email:', emailError);
+        setEmailStatus('failed');
+      }
+      
+      // Reset form
+      setFormData({
+        name: '',
+        alias: '',
+        email: '',
+        phone: '',
+        age: '',
+        weight: '',
+      });
+      setBikes([]);
+      generateCaptcha();
+      
+      // Call success callback after a short delay to show the success message
+      setTimeout(() => {
+        onRegistrationSuccess();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setErrors({ submit: 'Registration failed. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const addBike = () => {
+    setBikes([...bikes, {
+      brand: '',
+      model: '',
+      type: 'Road',
+      year: undefined
+    }]);
+  };
+
+  const removeBike = (index: number) => {
+    setBikes(bikes.filter((_, i) => i !== index));
+  };
+
+  const updateBike = (index: number, field: keyof Omit<Bike, 'id'>, value: any) => {
+    const updatedBikes = [...bikes];
+    updatedBikes[index] = { ...updatedBikes[index], [field]: value };
+    setBikes(updatedBikes);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-slate-100 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="bg-orange-100 p-3 rounded-full">
+                <UserPlus className="h-8 w-8 text-orange-600" />
+              </div>
             </div>
-            
-            <input
-              type="number"
-              value={captchaInput}
-              onChange={(e) => {
-                setCaptchaInput(e.target.value);
-                setCaptchaError('');
-              }}
-              className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
-                captchaError ? 'border-red-500' : 'border-slate-300'
-              }`}
-              placeholder="?"
-              min="0"
-              max="100"
-            />
-            
-            <button
-              type="button"
-              onClick={generateCaptcha}
-              className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
-              title="Generar nueva suma"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">{t.cyclistRegistration}</h1>
+            <p className="text-slate-600">{t.registrationDescription}</p>
           </div>
-          
-          {captchaError && (
-            <p className="text-red-600 text-sm mt-2 flex items-center">
-              <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {captchaError}
-            </p>
-          )}
-          
-          <p className="text-blue-700 text-xs mt-2">
-            Por favor, resuelve esta suma para verificar que eres humano
-          </p>
-        </div>
 
         {/* Email Status Messages */}
         {emailStatus === 'sent' && (
@@ -210,6 +224,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             </div>
           </div>
         )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -372,27 +387,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               </p>
             </div>
           </div>
-          
-          {/* Admin Role Checkbox */}
-          <div className="col-span-full">
-            <div className="flex items-start space-x-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <input
-                type="checkbox"
-                id="isAdmin"
-                checked={formData.isAdmin}
-                onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
-                className="mt-1 rounded border-orange-300 text-orange-500 focus:ring-orange-500"
-              />
-              <div className="flex-1">
-                <label htmlFor="isAdmin" className="block text-sm font-medium text-orange-800 cursor-pointer">
-                  {t.adminRole}
-                </label>
-                <p className="text-xs text-orange-700 mt-1">
-                  {t.adminRoleDescription}
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Bikes Section */}
           <div className="border-t pt-6">
@@ -517,7 +511,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
         </form>
       </div>
-    </div>
     </div>
   );
 };
