@@ -557,7 +557,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                           </div>
                         )}
                       </div>
-                      </div>
                     </div>
                     <div className="flex space-x-2">
                       <button
