@@ -29,6 +29,7 @@ export interface ConquestData {
   dateCompleted: string;
   timeCompleted?: string;
   personalNotes?: string;
+  photos?: string[];
 }
 
 export interface UserStats {
@@ -63,7 +64,7 @@ export interface Bike {
 export interface Collaborator {
   id: string;
   name: string;
-  category: 'Bike Shop' | 'Hotel' | 'Restaurant' | 'Tour Guide' | 'Equipment' | 'Other';
+  category: 'Tienda de Bicicletas' | 'Hotel' | 'Restaurante' | 'Guía Turístico' | 'Equipamiento' | 'Otros';
   description: string;
   contactInfo: {
     email?: string;
@@ -74,4 +75,32 @@ export interface Collaborator {
   images: string[];
   isActive: boolean;
   featured: boolean;
+}
+
+export interface Brand {
+  id: string;
+  name: string;
+  category: 'Bicicletas' | 'Componentes' | 'Ropa' | 'Accesorios' | 'Nutrición' | 'Otros';
+  description: string;
+  logo?: string;
+  website?: string;
+  country?: string;
+  foundedYear?: number;
+  specialties: string[];
+  isActive: boolean;
+  featured: boolean;
+}
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  author: string;
+  publishDate: string;
+  category: 'Competición' | 'Equipamiento' | 'Rutas' | 'Noticias' | 'Entrevistas';
+  imageUrl: string;
+  readTime: number;
+  featured: boolean;
+  externalUrl?: string;
 }

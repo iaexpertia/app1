@@ -8,7 +8,8 @@ import {
   TrendingUp, 
   MapPin,
   Info,
-  Flag
+  Flag,
+  Camera
 } from 'lucide-react';
 
 interface PassCardProps {
@@ -16,6 +17,7 @@ interface PassCardProps {
   isConquered: boolean;
   onToggleConquest: (passId: string) => void;
   onViewDetails: (pass: MountainPass) => void;
+  onAddPhotos?: (passId: string) => void;
   t: Translation;
 }
 
@@ -41,6 +43,7 @@ export const PassCard: React.FC<PassCardProps> = ({
   isConquered, 
   onToggleConquest, 
   onViewDetails,
+  onAddPhotos,
   t
 }) => {
   const getDifficultyText = (difficulty: string) => {
@@ -156,10 +159,10 @@ export const PassCard: React.FC<PassCardProps> = ({
           </div>
         </div>
         
-        <div className="flex space-x-3">
+        <div className="flex space-x-2">
           <button
             onClick={() => onToggleConquest(pass.id)}
-            className={`flex-1 py-2 px-4 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 ${
+            className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 ${
               isConquered 
                 ? 'bg-green-500 hover:bg-green-600 text-white' 
                 : 'bg-orange-500 hover:bg-orange-600 text-white'
@@ -171,7 +174,7 @@ export const PassCard: React.FC<PassCardProps> = ({
           
           <button
             onClick={() => onViewDetails(pass)}
-            className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200"
+            className="px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200"
           >
             <Info className="h-4 w-4 text-slate-600" />
           </button>

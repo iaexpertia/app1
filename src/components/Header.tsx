@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users } from 'lucide-react';
+import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
 
 interface HeaderProps {
-  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators';
-  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators') => void;
+  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
+  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news') => void;
   conqueredCount: number;
   totalCount: number;
   t: Translation;
@@ -30,15 +30,18 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators') => {
+  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
 
   const navigationItems = [
     { key: 'passes', icon: Mountain, label: t.passes },
+    { key: 'conquered', icon: Trophy, label: 'Conquistados' },
     { key: 'map', icon: Map, label: t.map },
     { key: 'stats', icon: Award, label: t.stats },
+    { key: 'brands', icon: Tag, label: 'Marcas' },
+    { key: 'news', icon: Newspaper, label: 'Noticias' },
     { key: 'collaborators', icon: Users, label: t.collaborators },
     { key: 'register', icon: UserPlus, label: t.register },
     { key: 'database', icon: Database, label: t.database },

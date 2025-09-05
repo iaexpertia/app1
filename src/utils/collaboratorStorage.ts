@@ -45,12 +45,12 @@ const CATEGORIES_STORAGE_KEY = 'collaborator-categories';
 
 export const getDefaultCategories = (): string[] => {
   return [
-    'Bike Shop',
+    'Tienda de Bicicletas',
     'Hotel', 
-    'Restaurant',
-    'Tour Guide',
-    'Equipment',
-    'Other'
+    'Restaurante',
+    'Guía Turístico',
+    'Equipamiento',
+    'Otros'
   ];
 };
 
