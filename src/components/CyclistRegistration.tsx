@@ -33,7 +33,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     phone: '',
     age: '',
     weight: '',
-    isAdmin: false,
   });
   
   const [bikes, setBikes] = useState<Omit<Bike, 'id'>[]>([]);
@@ -80,7 +79,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: formData.phone.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        isAdmin: formData.isAdmin,
+        isAdmin: false,
         bikes: bikes.map(bike => ({
           ...bike,
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
@@ -90,10 +89,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       
       addCyclist(newCyclist);
       
-      // Set as current user only if not admin registration
-      if (!formData.isAdmin) {
-        setCurrentUser(newCyclist.id);
-      }
+      // Set as current user for normal registration
+      setCurrentUser(newCyclist.id);
       
       // Send confirmation email
       setEmailStatus('sending');
@@ -125,7 +122,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         phone: '',
         age: '',
         weight: '',
-        isAdmin: false,
       });
       setBikes([]);
       setErrors({});
@@ -170,27 +166,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
         </div>
 
-        {/* Email Status Messages */}
-        {emailStatus !== 'idle' && (
-          <div className="mb-6">
-            {emailStatus === 'sending' && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500 mr-3"></div>
-                <div>
-                  <p className="text-blue-800 font-medium">Enviando email de confirmación...</p>
-                  <p className="text-blue-600 text-sm">Te enviaremos un email con los detalles de tu registro</p>
-                </div>
-              </div>
-            )}
-            
-            {emailStatus === 'sent' && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
                   <p className="text-green-800 font-medium">¡Email de confirmación enviado!</p>
                   <p className="text-green-600 text-sm">Revisa tu bandeja de entrada en {formData.email}</p>
                 </div>
