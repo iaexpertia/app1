@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Collaborator } from '../types';
 import { Translation } from '../i18n/translations';
-import { loadCollaborators } from '../utils/collaboratorStorage';
+import { loadCollaborators, loadCategories, addCategory, removeCategory } from '../utils/collaboratorStorage';
 import { defaultCollaborators } from '../data/defaultCollaborators';
 import { 
   Store, 
@@ -15,7 +15,10 @@ import {
   Users,
   ExternalLink,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  X,
+  Save
 } from 'lucide-react';
 
 interface CollaboratorsViewProps {
@@ -24,8 +27,11 @@ interface CollaboratorsViewProps {
 
 export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   useEffect(() => {
     const loadedCollaborators = loadCollaborators();
@@ -34,6 +40,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
     } else {
       setCollaborators(loadedCollaborators);
     }
+    setCategories(loadCategories());
   }, []);
 
   const getCategoryIcon = (category: string) => {
@@ -81,7 +88,24 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
     }));
   };
 
-  const categories = [...new Set(collaborators.map(c => c.category))];
+  const handleAddCategory = () => {
+    if (newCategoryName.trim() && !categories.includes(newCategoryName.trim())) {
+      addCategory(newCategoryName.trim());
+      setCategories(loadCategories());
+      setNewCategoryName('');
+      setShowAddCategoryModal(false);
+    }
+  };
+
+  const handleRemoveCategory = (categoryToRemove: string) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar la categoría "${getCategoryText(categoryToRemove)}"?`)) {
+      removeCategory(categoryToRemove);
+      setCategories(loadCategories());
+      if (selectedCategory === categoryToRemove) {
+        setSelectedCategory('all');
+      }
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -95,30 +119,53 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
         </div>
         
         {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              selectedCategory === 'all'
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            Todos
-          </button>
-          {categories.map(category => (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 flex items-center">
+              CATEGORÍAS
+              <button
+                onClick={() => setShowAddCategoryModal(true)}
+                className="ml-2 p-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+                title="Añadir nueva categoría"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </h3>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => setSelectedCategory('all')}
               className={`px-4 py-2 rounded-lg transition-colors ${
-                selectedCategory === category
+                selectedCategory === 'all'
                   ? 'bg-orange-500 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              {getCategoryText(category)}
+              Todos
             </button>
-          ))}
+            {categories.map(category => (
+              <div key={category} className="relative group">
+                <button
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    selectedCategory === category
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {getCategoryText(category)}
+                </button>
+                <button
+                  onClick={() => handleRemoveCategory(category)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  title="Eliminar categoría"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -330,6 +377,56 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
           <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <p className="text-xl text-slate-600 mb-2">No hay colaboradores disponibles</p>
           <p className="text-slate-500">Próximamente añadiremos más colaboradores</p>
+        </div>
+      )}
+      
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Categoría</h3>
+              <button
+                onClick={() => setShowAddCategoryModal(false)}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre de la Categoría
+                </label>
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  placeholder="Ej: Nutrición Deportiva"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowAddCategoryModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddCategory}
+                  disabled={!newCategoryName.trim()}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Añadir</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -6,7 +6,8 @@ import {
   loadCollaborators, 
   addCollaborator, 
   updateCollaborator, 
-  removeCollaborator 
+  removeCollaborator,
+  loadCategories
 } from '../utils/collaboratorStorage';
 import { 
   Settings, 
@@ -42,6 +43,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [activeSection, setActiveSection] = useState<'cyclists' | 'passes' | 'collaborators'>('cyclists');
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
@@ -51,6 +53,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
     setCyclists(loadCyclists());
     setCollaborators(loadCollaborators());
+    setCategories(loadCategories());
   }, []);
 
   const handleUpdateCyclist = (cyclist: Cyclist) => {
@@ -74,12 +77,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleAddCollaborator = (collaborator: Collaborator) => {
     addCollaborator(collaborator);
     setCollaborators(loadCollaborators());
+    setCategories(loadCategories());
     setShowAddCollaboratorModal(false);
   };
 
   const handleUpdateCollaborator = (collaborator: Collaborator) => {
     updateCollaborator(collaborator);
     setCollaborators(loadCollaborators());
+    setCategories(loadCategories());
     setEditingCollaborator(null);
   };
 
@@ -651,6 +656,7 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
   onClose, 
   t 
 }) => {
+  const [categories] = useState<string[]>(loadCategories());
   const [formData, setFormData] = useState<Partial<Collaborator>>({
     name: '',
     category: 'Bike Shop',
@@ -666,6 +672,18 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
     featured: false
   });
   const [imageUrl, setImageUrl] = useState('');
+
+  const getCategoryText = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'Bike Shop': 'Tienda de Bicicletas',
+      'Hotel': 'Hotel',
+      'Restaurant': 'Restaurante',
+      'Tour Guide': 'Guía Turístico',
+      'Equipment': 'Equipamiento',
+      'Other': 'Otros'
+    };
+    return categoryMap[category] || category;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -741,12 +759,11 @@ const AddCollaboratorModal: React.FC<AddCollaboratorModalProps> = ({
                 onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               >
-                <option value="Bike Shop">Tienda de Bicicletas</option>
-                <option value="Hotel">Hotel</option>
-                <option value="Restaurant">Restaurante</option>
-                <option value="Tour Guide">Guía Turístico</option>
-                <option value="Equipment">Equipamiento</option>
-                <option value="Other">Otros</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {getCategoryText(category)}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -922,8 +939,21 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
   onClose, 
   t 
 }) => {
+  const [categories] = useState<string[]>(loadCategories());
   const [formData, setFormData] = useState(collaborator);
   const [imageUrl, setImageUrl] = useState('');
+
+  const getCategoryText = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'Bike Shop': 'Tienda de Bicicletas',
+      'Hotel': 'Hotel',
+      'Restaurant': 'Restaurante',
+      'Tour Guide': 'Guía Turístico',
+      'Equipment': 'Equipamiento',
+      'Other': 'Otros'
+    };
+    return categoryMap[category] || category;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -982,13 +1012,11 @@ const EditCollaboratorModal: React.FC<EditCollaboratorModalProps> = ({
                 onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
               >
-                <option value="Bike Shop">Tienda de Bicicletas</option>
-                <option value="Hotel">Hotel</option>
-                <option value="Restaurant">Restaurante</option>
-                <option value="Tour Guide">Guía Turístico</option>
-                <option value="Equipment">Equipamiento</option>
-                <option value="Other">Otros</option>
-              </select>
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {getCategoryText(category)}
+                  </option>
+                ))}
             </div>
           </div>
           

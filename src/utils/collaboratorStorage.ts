@@ -39,3 +39,40 @@ export const updateCollaborator = (collaborator: Collaborator): void => {
     saveCollaborators(collaborators);
   }
 };
+
+// Categories management
+const CATEGORIES_STORAGE_KEY = 'collaborator-categories';
+
+export const getDefaultCategories = (): string[] => {
+  return [
+    'Bike Shop',
+    'Hotel', 
+    'Restaurant',
+    'Tour Guide',
+    'Equipment',
+    'Other'
+  ];
+};
+
+export const loadCategories = (): string[] => {
+  const stored = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : getDefaultCategories();
+};
+
+export const saveCategories = (categories: string[]): void => {
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+};
+
+export const addCategory = (category: string): void => {
+  const categories = loadCategories();
+  if (!categories.includes(category)) {
+    categories.push(category);
+    saveCategories(categories);
+  }
+};
+
+export const removeCategory = (category: string): void => {
+  const categories = loadCategories();
+  const filteredCategories = categories.filter(c => c !== category);
+  saveCategories(filteredCategories);
+};
