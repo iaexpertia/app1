@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
+import { getCurrentUser } from '../utils/cyclistStorage';
 
 interface HeaderProps {
   activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
@@ -28,6 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const currentUser = getCurrentUser();
+  const isLoggedIn = currentUser !== null;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -52,7 +55,13 @@ export const Header: React.FC<HeaderProps> = ({
 
   const userActions = [
     { key: 'cyclist-register', icon: UserCheck, label: 'Registro Ciclista', tooltip: 'Registrar nuevo ciclista', action: () => handleTabChange('register') },
-    { key: 'logout', icon: LogOut, label: 'Cerrar Sesión', tooltip: 'Cerrar sesión actual', action: onLogout }
+    { 
+      key: isLoggedIn ? 'logout' : 'login', 
+      icon: isLoggedIn ? LogOut : UserCheck, 
+      label: isLoggedIn ? 'Cerrar Sesión' : 'Iniciar Sesión', 
+      tooltip: isLoggedIn ? 'Cerrar sesión actual' : 'Iniciar sesión', 
+      action: isLoggedIn ? onLogout : () => handleTabChange('register')
+    }
   ];
 
   return (
@@ -206,6 +215,10 @@ export const Header: React.FC<HeaderProps> = ({
                     className={`w-full px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-3 text-left ${
                       action.key === 'logout'
                         ? 'text-red-600 hover:bg-red-50'
+                      : action.key === 'login'
+                        ? 'text-blue-600 hover:bg-blue-50'
+                      : action.key === 'login'
+                        ? 'text-blue-600 hover:bg-blue-50'
                         : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
