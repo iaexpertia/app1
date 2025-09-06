@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
-import { addCyclist } from '../utils/cyclistStorage';
+import { Eye, EyeOff, Plus, Trash2, UserPlus, LogIn, Bike as BikeIcon, FileText, X } from 'lucide-react';
 import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
