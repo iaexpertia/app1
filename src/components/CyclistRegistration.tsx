@@ -56,6 +56,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
   const [captchaInput, setCaptchaInput] = useState('');
   const [captchaError, setCaptchaError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   // Generate new captcha
   const generateCaptcha = () => {
@@ -97,6 +99,11 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
+    
+    // Validate terms acceptance for first user
+    if (!hasRegisteredCyclists && !acceptedTerms) {
+      newErrors.terms = 'Debes aceptar los términos y condiciones';
     }
     
     // Validate captcha
