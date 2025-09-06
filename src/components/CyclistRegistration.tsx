@@ -307,21 +307,12 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-xl max-w-md w-full p-6">
           <div className="text-center mb-6">
-            <div className="flex justify-center mb-4">
-              <div className="bg-blue-100 p-3 rounded-full">
-                <UserPlus className="h-8 w-8 text-blue-600" />
-              </div>
-            </div>
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Iniciar Sesión</h2>
-            <p className="text-slate-600">Accede a tu cuenta de ciclista</p>
           </div>
 
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                <Mail className="h-4 w-4 inline mr-1" />
-                Email
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
               <input
                 type="email"
                 value={loginData.email}
@@ -350,24 +341,17 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               />
             </div>
 
-            {/* Login Captcha */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
-                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Verificación de Seguridad
-              </h4>
-              
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-lg font-mono bg-white px-4 py-2 rounded border">
-                  <span className="font-bold text-blue-700">{loginCaptcha.num1}</span>
-                  <span className="text-blue-600">+</span>
-                  <span className="font-bold text-blue-700">{loginCaptcha.num2}</span>
-                  <span className="text-blue-600">=</span>
-                  <span className="text-blue-600">?</span>
+            {/* Captcha */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Captcha</label>
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 text-lg font-mono bg-slate-50 px-3 py-2 rounded border">
+                  <span className="font-bold">{loginCaptcha.num1}</span>
+                  <span>+</span>
+                  <span className="font-bold">{loginCaptcha.num2}</span>
+                  <span>=</span>
+                  <span>?</span>
                 </div>
-                
                 <input
                   type="number"
                   value={loginCaptchaInput}
@@ -375,55 +359,22 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                     setLoginCaptchaInput(e.target.value);
                     setLoginCaptchaError('');
                   }}
-                  className={`w-20 px-3 py-2 border rounded-lg text-center font-mono focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-20 px-3 py-2 border rounded-lg text-center focus:ring-2 focus:ring-blue-500 ${
                     loginCaptchaError ? 'border-red-500' : 'border-slate-300'
                   }`}
                   placeholder="?"
                   min="0"
                   max="100"
                 />
-                
-                <button
-                  type="button"
-                  onClick={generateLoginCaptcha}
-                  className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors text-sm"
-                  title="Generar nueva suma"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </button>
               </div>
-              
               {loginCaptchaError && (
-                <p className="text-red-600 text-sm mt-2 flex items-center">
-                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {loginCaptchaError}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{loginCaptchaError}</p>
               )}
-              
-              <p className="text-blue-700 text-xs mt-2">
-                Por favor, resuelve esta suma para verificar que eres humano
-              </p>
             </div>
-            {loginErrors.general && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-red-800 text-sm font-medium">Error de autenticación</p>
-                    <p className="text-red-600 text-sm">{loginErrors.general}</p>
-                  </div>
-                </div>
-              </div>
-            )}
 
+            {loginErrors.general && (
+              <p className="text-red-500 text-sm">{loginErrors.general}</p>
+            )}
 
             <div className="flex space-x-3">
               <button
