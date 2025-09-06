@@ -3,7 +3,7 @@ import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
 import { addCyclist } from '../utils/cyclistStorage';
 import { setCurrentUser } from '../utils/cyclistStorage';
-import { sendRegistrationEmail } from '../utils/emailService';
+import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
 import { 
   User, 
   Mail, 

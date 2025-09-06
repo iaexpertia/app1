@@ -374,6 +374,365 @@ Si tienes alguna pregunta, no dudes en contactarnos.
   return text;
 };
 
+// Generate HTML email template for password recovery
+export const generatePasswordRecoveryEmailHTML = (email: string, recoveryToken: string): string => {
+  const currentYear = new Date().getFullYear();
+  const recoveryLink = `${window.location.origin}/reset-password?token=${recoveryToken}&email=${encodeURIComponent(email)}`;
+
+  return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Recuperación de Contraseña - CyclePeaks</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          line-height: 1.6;
+          color: #334155;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f8fafc;
+        }
+        .container {
+          background-color: white;
+          border-radius: 12px;
+          padding: 40px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        .logo {
+          width: 60px;
+          height: 60px;
+          background: linear-gradient(135deg, #f97316, #ea580c);
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+        }
+        .logo svg {
+          width: 30px;
+          height: 30px;
+          color: white;
+        }
+        h1 {
+          color: #1e293b;
+          margin: 0;
+          font-size: 28px;
+          font-weight: 700;
+        }
+        .alert-section {
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          border-radius: 8px;
+          padding: 25px;
+          margin: 25px 0;
+          color: white;
+          text-align: center;
+        }
+        .info-card {
+          background-color: #f1f5f9;
+          border-radius: 8px;
+          padding: 20px;
+          margin: 20px 0;
+          border-left: 4px solid #f97316;
+        }
+        .cta-button {
+          display: inline-block;
+          background: linear-gradient(135deg, #f97316, #ea580c);
+          color: white;
+          padding: 15px 30px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 600;
+          margin: 20px 0;
+          transition: all 0.3s ease;
+          text-align: center;
+        }
+        .cta-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
+        }
+        .security-info {
+          background-color: #fef3c7;
+          border: 1px solid #f59e0b;
+          border-radius: 8px;
+          padding: 20px;
+          margin: 25px 0;
+        }
+        .security-info h3 {
+          color: #92400e;
+          margin-top: 0;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e2e8f0;
+          color: #64748b;
+          font-size: 14px;
+        }
+        .contact-info {
+          background-color: #f8fafc;
+          border-radius: 8px;
+          padding: 20px;
+          margin: 20px 0;
+          text-align: center;
+        }
+        @media (max-width: 600px) {
+          body {
+            padding: 10px;
+          }
+          .container {
+            padding: 20px;
+          }
+          h1 {
+            font-size: 24px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="logo">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+            </svg>
+          </div>
+          <h1>Recuperación de Contraseña</h1>
+        </div>
+
+        <div class="alert-section">
+          <h2 style="margin-top: 0; font-size: 20px;">🔐 Solicitud de Recuperación</h2>
+          <p style="margin-bottom: 0;">
+            Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en CyclePeaks.
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3 style="margin-top: 0; color: #1e293b;">📧 Detalles de la Solicitud</h3>
+          <p><strong>Email de la cuenta:</strong> ${email}</p>
+          <p><strong>Fecha y hora:</strong> ${new Date().toLocaleString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Europe/Madrid'
+          })}</p>
+          <p><strong>IP de origen:</strong> [Protegida por seguridad]</p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <p style="font-size: 18px; color: #1e293b; margin-bottom: 20px;">
+            <strong>Para restablecer tu contraseña, haz clic en el siguiente enlace:</strong>
+          </p>
+          
+          <a href="${recoveryLink}" class="cta-button">
+            🔑 Restablecer Mi Contraseña
+          </a>
+          
+          <p style="font-size: 14px; color: #64748b; margin-top: 15px;">
+            O copia y pega este enlace en tu navegador:<br>
+            <code style="background-color: #f1f5f9; padding: 5px 10px; border-radius: 4px; word-break: break-all;">
+              ${recoveryLink}
+            </code>
+          </p>
+        </div>
+
+        <div class="security-info">
+          <h3>🛡️ Información de Seguridad</h3>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li><strong>Validez:</strong> Este enlace expirará en 24 horas por seguridad</li>
+            <li><strong>Uso único:</strong> Solo puede utilizarse una vez</li>
+            <li><strong>Seguridad:</strong> Si no solicitaste este cambio, ignora este email</li>
+            <li><strong>Protección:</strong> Tu cuenta permanece segura hasta que uses el enlace</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3 style="margin-top: 0; color: #1e293b;">❓ ¿No Solicitaste Este Cambio?</h3>
+          <p>
+            Si no solicitaste restablecer tu contraseña, puedes ignorar este email de forma segura. 
+            Tu cuenta permanece protegida y no se realizarán cambios.
+          </p>
+          <p>
+            <strong>Recomendación:</strong> Si recibes estos emails frecuentemente sin solicitarlos, 
+            contacta con nuestro equipo de soporte inmediatamente.
+          </p>
+        </div>
+
+        <div class="contact-info">
+          <h3 style="color: #1e293b; margin-top: 0;">📞 Soporte Técnico</h3>
+          <p><strong>Email de soporte:</strong> support@cyclepeaks.com</p>
+          <p><strong>Email de seguridad:</strong> security@cyclepeaks.com</p>
+          <p><strong>Horario:</strong> Lunes a Viernes, 9:00 - 18:00 (CET)</p>
+        </div>
+
+        <div class="footer">
+          <p><strong>CyclePeaks - Conquista los Puertos Más Famosos del Mundo</strong></p>
+          <p>
+            Este email fue enviado desde una dirección no monitoreada. Para soporte, 
+            utiliza los canales oficiales mencionados arriba.
+          </p>
+          <p style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
+            © ${currentYear} CyclePeaks. Todos los derechos reservados.<br>
+            Email enviado por el sistema de recuperación de contraseñas.<br>
+            <strong>Remitente:</strong> recovery@cyclepeaks.com
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+// Generate plain text version for password recovery
+export const generatePasswordRecoveryEmailText = (email: string, recoveryToken: string): string => {
+  const recoveryLink = `${window.location.origin}/reset-password?token=${recoveryToken}&email=${encodeURIComponent(email)}`;
+  
+  return `
+CYCLEPEAKS - RECUPERACIÓN DE CONTRASEÑA
+
+Hola,
+
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en CyclePeaks.
+
+DETALLES DE LA SOLICITUD:
+- Email de la cuenta: ${email}
+- Fecha y hora: ${new Date().toLocaleString('es-ES')}
+- Estado: Pendiente de confirmación
+
+PARA RESTABLECER TU CONTRASEÑA:
+Haz clic en el siguiente enlace o cópialo en tu navegador:
+
+${recoveryLink}
+
+INFORMACIÓN DE SEGURIDAD:
+✓ Este enlace expirará en 24 horas
+✓ Solo puede utilizarse una vez
+✓ Si no solicitaste este cambio, ignora este email
+✓ Tu cuenta permanece segura hasta que uses el enlace
+
+¿NO SOLICITASTE ESTE CAMBIO?
+Si no solicitaste restablecer tu contraseña, puedes ignorar este email de forma segura. 
+Tu cuenta permanece protegida y no se realizarán cambios.
+
+SOPORTE TÉCNICO:
+- Email de soporte: support@cyclepeaks.com
+- Email de seguridad: security@cyclepeaks.com
+- Horario: Lunes a Viernes, 9:00 - 18:00 (CET)
+
+---
+CyclePeaks - Conquista los Puertos Más Famosos del Mundo
+© ${new Date().getFullYear()} CyclePeaks. Todos los derechos reservados.
+
+Este email fue enviado desde: recovery@cyclepeaks.com
+Email enviado por el sistema de recuperación de contraseñas.
+`;
+};
+
+// Generate recovery token
+export const generateRecoveryToken = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 64; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+};
+
+// Send password recovery email
+export const sendPasswordRecoveryEmail = async (email: string): Promise<boolean> => {
+  try {
+    // Generate recovery token
+    const recoveryToken = generateRecoveryToken();
+    
+    // Store recovery token with expiration (24 hours)
+    const recoveryData = {
+      email,
+      token: recoveryToken,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+      used: false,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Store in localStorage (in production, this would be in database)
+    const existingTokens = JSON.parse(localStorage.getItem('recovery-tokens') || '[]');
+    // Remove old tokens for this email
+    const filteredTokens = existingTokens.filter((t: any) => t.email !== email);
+    filteredTokens.push(recoveryData);
+    localStorage.setItem('recovery-tokens', JSON.stringify(filteredTokens));
+    
+    // Simulate email sending delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const emailData: EmailData = {
+      to: email,
+      subject: '🔐 CyclePeaks - Recuperación de Contraseña',
+      html: generatePasswordRecoveryEmailHTML(email, recoveryToken),
+      text: generatePasswordRecoveryEmailText(email, recoveryToken)
+    };
+
+    // In a real application, you would integrate with:
+    // - EmailJS with recovery@cyclepeaks.com as sender
+    // - SendGrid, Mailgun, or similar service
+    // - Your own backend email service with SMTP
+    
+    console.log('🔐 Email de recuperación enviado exitosamente:', {
+      from: 'recovery@cyclepeaks.com',
+      to: emailData.to,
+      subject: emailData.subject,
+      timestamp: new Date().toISOString(),
+      token: recoveryToken.substring(0, 8) + '...' // Solo mostrar parte del token por seguridad
+    });
+
+    // Store email log for admin purposes
+    const emailLog = {
+      id: Date.now().toString(),
+      from: 'recovery@cyclepeaks.com',
+      to: email,
+      subject: emailData.subject,
+      sentAt: new Date().toISOString(),
+      type: 'password_recovery',
+      status: 'sent',
+      token: recoveryToken
+    };
+
+    const existingLogs = JSON.parse(localStorage.getItem('email-logs') || '[]');
+    existingLogs.push(emailLog);
+    localStorage.setItem('email-logs', JSON.stringify(existingLogs));
+
+    return true;
+  } catch (error) {
+    console.error('❌ Error enviando email de recuperación:', error);
+    
+    // Store failed email log
+    const emailLog = {
+      id: Date.now().toString(),
+      from: 'recovery@cyclepeaks.com',
+      to: email,
+      subject: '🔐 CyclePeaks - Recuperación de Contraseña',
+      sentAt: new Date().toISOString(),
+      type: 'password_recovery',
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+
+    const existingLogs = JSON.parse(localStorage.getItem('email-logs') || '[]');
+    existingLogs.push(emailLog);
+    localStorage.setItem('email-logs', JSON.stringify(existingLogs));
+
+    return false;
+  }
+};
+
 // Mock email sending function (in a real app, this would integrate with an email service)
 export const sendRegistrationEmail = async (cyclist: CyclistEmailData): Promise<boolean> => {
   try {
