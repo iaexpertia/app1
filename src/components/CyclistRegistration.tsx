@@ -143,6 +143,11 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     const success = loginUser(email.trim(), password);
     
     if (success) {
+     // Redirect to main passes page after successful login
+     if (onRegistrationSuccess) {
+       // This will trigger the parent component to change to passes tab
+       onRegistrationSuccess();
+     }
       onRegistrationSuccess();
       return true;
     }
