@@ -141,9 +141,14 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
   const handlePasswordRecovery = async () => {
     if (!recoveryEmail.trim()) {
-      setErrors({ recoveryEmail: 'El email es obligatorio' });
+      setErrors({ ...errors, recoveryEmail: 'El email es obligatorio' });
       return;
     }
+    
+    // Clear recovery email error when starting recovery
+    const newErrors = { ...errors };
+    delete newErrors.recoveryEmail;
+    setErrors(newErrors);
     
     setRecoveryStatus('sending');
     
@@ -155,6 +160,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         setShowPasswordRecovery(false);
         setRecoveryStatus('idle');
         setRecoveryEmail('');
+        // Clear errors when closing modal
+        const clearedErrors = { ...errors };
+        delete clearedErrors.recoveryEmail;
+        setErrors(clearedErrors);
       }, 3000);
     } catch (error) {
       setRecoveryStatus('failed');
@@ -360,9 +369,18 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               <input
                 type="email"
                 value={recoveryEmail}
-                onChange={(e) => setRecoveryEmail(e.target.value)}
+                onChange={(e) => {
+                  setRecoveryEmail(e.target.value);
+                  // Clear error when user starts typing
+                  if (errors.recoveryEmail) {
+                    const newErrors = { ...errors };
+                    delete newErrors.recoveryEmail;
+                    setErrors(newErrors);
+                  }
+                }}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                 placeholder="tu@email.com"
+                autoFocus
               />
               {errors.recoveryEmail && (
                 <p className="text-red-500 text-sm mt-1">{errors.recoveryEmail}</p>
@@ -382,6 +400,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                   setShowPasswordRecovery(false);
                   setRecoveryEmail('');
                   setRecoveryStatus('idle');
+                  // Clear recovery email error when closing
+                  const newErrors = { ...errors };
+                  delete newErrors.recoveryEmail;
+                  setErrors(newErrors);
                 }}
                 className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
               >
