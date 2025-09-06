@@ -31,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const currentUser = getCurrentUser();
   const isLoggedIn = currentUser !== null;
+  const isCurrentUserAdmin = currentUser?.isAdmin || false;
   const cyclists = loadCyclists();
   const hasRegisteredCyclists = cyclists.length > 0;
 
@@ -52,7 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'news', icon: Newspaper, label: 'Noticias', tooltip: 'Últimas noticias del mundo del ciclismo' },
     { key: 'collaborators', icon: Users, label: t.collaborators, tooltip: 'Colaboradores y servicios para ciclistas' },
     { key: 'database', icon: Database, label: t.database, tooltip: 'Base de datos completa de puertos' },
-    { key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }
+    // Solo mostrar admin si el usuario actual es administrador
+    ...(isCurrentUserAdmin ? [{ key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }] : [])
   ];
 
   const userActions = [
@@ -93,9 +95,6 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden lg:flex items-center space-x-4">
             <nav className="flex space-x-1 relative">
               {navigationItems.map((item) => {
-                // Skip admin tab if user is not admin
-                if (item.key === 'admin' && !showAdminTab) return null;
-                
                 const Icon = item.icon;
                 return (
                   <div key={item.key} className="relative">
@@ -192,9 +191,6 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="bg-white border-t border-slate-200 mx-4 rounded-lg shadow-lg mt-2">
             <nav className="flex flex-col space-y-2 p-4">
             {navigationItems.map((item) => {
-              // Skip admin tab if user is not admin
-              if (item.key === 'admin' && !showAdminTab) return null;
-              
               const Icon = item.icon;
               return (
                 <button

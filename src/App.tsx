@@ -47,6 +47,7 @@ function App() {
   const handleLogout = () => {
     // Clear current user session
     localStorage.removeItem('currentUserId');
+    // Reset admin status immediately
     setIsAdmin(false);
     
     // Optionally redirect to passes tab
@@ -62,8 +63,9 @@ function App() {
     setConquests(loadedConquests);
     setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
     
-    // Verificar si el usuario actual es admin
-    setIsAdmin(isCurrentUserAdmin());
+    // Verificar si el usuario actual es admin al cargar
+    const currentUserIsAdmin = isCurrentUserAdmin();
+    setIsAdmin(currentUserIsAdmin);
     
     // Si no hay ciclistas registrados, crear un admin por defecto
     const cyclists = loadCyclists();
@@ -122,7 +124,9 @@ function App() {
   const handleRegistrationSuccess = () => {
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 3000);
-    setIsAdmin(isCurrentUserAdmin());
+    // Actualizar estado de admin después del registro/login
+    const currentUserIsAdmin = isCurrentUserAdmin();
+    setIsAdmin(currentUserIsAdmin);
   };
 
   const handleUpdatePass = (updatedPass: MountainPass) => {
@@ -225,15 +229,6 @@ function App() {
           />
         )}
         
-        {activeTab === 'admin' && !isAdmin && (
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center py-12">
-              <Settings className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-xl text-slate-600 mb-2">Acceso Denegado</p>
-              <p className="text-slate-500">No tienes permisos de administrador</p>
-            </div>
-          </div>
-        )}
         
         {activeTab === 'database' && (
           <DatabaseView
