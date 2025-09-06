@@ -10,6 +10,7 @@ export interface CyclistEmailData {
   name: string;
   email: string;
   alias?: string;
+  password?: string;
   registrationDate: string;
   bikes: Array<{
     brand: string;

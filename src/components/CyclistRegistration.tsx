@@ -30,6 +30,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     name: '',
     alias: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     phone: '',
     age: '',
     weight: '',
@@ -40,6 +42,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [showLogin, setShowLogin] = useState(false);
+  const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryStatus, setRecoveryStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   
   // Captcha state
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
@@ -78,6 +84,16 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       newErrors.phone = t.phoneRequired;
     }
     
+    if (!formData.password.trim()) {
+      newErrors.password = 'La contraseña es obligatoria';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
+    
     // Validate captcha
     const userAnswer = parseInt(captchaInput);
     if (isNaN(userAnswer) || userAnswer !== captcha.answer) {
@@ -110,6 +126,41 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     setBikes(updatedBikes);
   };
 
+  const handleLogin = async (email: string, password: string) => {
+    // Simulate login process
+    const cyclists = loadCyclists();
+    const cyclist = cyclists.find(c => c.email === email && c.password === password);
+    
+    if (cyclist) {
+      setCurrentUser(cyclist.id);
+      onRegistrationSuccess();
+      return true;
+    }
+    return false;
+  };
+
+  const handlePasswordRecovery = async () => {
+    if (!recoveryEmail.trim()) {
+      setErrors({ recoveryEmail: 'El email es obligatorio' });
+      return;
+    }
+    
+    setRecoveryStatus('sending');
+    
+    // Simulate sending recovery email
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setRecoveryStatus('sent');
+      setTimeout(() => {
+        setShowPasswordRecovery(false);
+        setRecoveryStatus('idle');
+        setRecoveryEmail('');
+      }, 3000);
+    } catch (error) {
+      setRecoveryStatus('failed');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -126,6 +177,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         alias: formData.alias.trim() || undefined,
         email: formData.email.trim(),
         phone: formData.phone.trim(),
+        password: formData.password.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
         isAdmin: formData.isAdmin,
@@ -163,6 +215,192 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     }
   };
 
+  // Login Modal Component
+  const LoginModal = () => {
+    const [loginData, setLoginData] = useState({ email: '', password: '' });
+    const [loginErrors, setLoginErrors] = useState<Record<string, string>>({});
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+    const handleLoginSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (!loginData.email || !loginData.password) {
+        setLoginErrors({ 
+          general: 'Por favor completa todos los campos' 
+        });
+        return;
+      }
+
+      setIsLoggingIn(true);
+      
+      try {
+        const success = await handleLogin(loginData.email, loginData.password);
+        if (!success) {
+          setLoginErrors({ 
+            general: 'Email o contraseña incorrectos' 
+          });
+        }
+      } catch (error) {
+        setLoginErrors({ 
+          general: 'Error al iniciar sesión' 
+        });
+      } finally {
+        setIsLoggingIn(false);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-xl max-w-md w-full p-6">
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <UserPlus className="h-8 w-8 text-blue-600" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Iniciar Sesión</h2>
+            <p className="text-slate-600">Accede a tu cuenta de ciclista</p>
+          </div>
+
+          <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                <Mail className="h-4 w-4 inline mr-1" />
+                Email
+              </label>
+              <input
+                type="email"
+                value={loginData.email}
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="tu@email.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={loginData.password}
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Tu contraseña"
+              />
+            </div>
+
+            {loginErrors.general && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-sm">{loginErrors.general}</p>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => setShowPasswordRecovery(true)}
+                className="text-blue-600 hover:text-blue-700 text-sm"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowLogin(false)}
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isLoggingIn}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+              >
+                {isLoggingIn ? 'Iniciando...' : 'Iniciar Sesión'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  // Password Recovery Modal Component
+  const PasswordRecoveryModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-4">
+            <div className="bg-orange-100 p-3 rounded-full">
+              <Mail className="h-8 w-8 text-orange-600" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Recuperar Contraseña</h2>
+          <p className="text-slate-600">Te enviaremos un enlace para restablecer tu contraseña</p>
+        </div>
+
+        {recoveryStatus === 'sent' ? (
+          <div className="text-center">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-green-800 font-medium">¡Email enviado!</p>
+              <p className="text-green-600 text-sm mt-1">
+                Revisa tu bandeja de entrada y sigue las instrucciones
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email registrado
+              </label>
+              <input
+                type="email"
+                value={recoveryEmail}
+                onChange={(e) => setRecoveryEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="tu@email.com"
+              />
+              {errors.recoveryEmail && (
+                <p className="text-red-500 text-sm mt-1">{errors.recoveryEmail}</p>
+              )}
+            </div>
+
+            {recoveryStatus === 'failed' && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-sm">Error al enviar el email. Inténtalo de nuevo.</p>
+              </div>
+            )}
+
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordRecovery(false);
+                  setRecoveryEmail('');
+                  setRecoveryStatus('idle');
+                }}
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handlePasswordRecovery}
+                disabled={recoveryStatus === 'sending'}
+                className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+              >
+                {recoveryStatus === 'sending' ? 'Enviando...' : 'Enviar Email'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-slate-100 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -175,6 +413,16 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             </div>
             <h1 className="text-3xl font-bold text-slate-800 mb-2">{t.cyclistRegistration}</h1>
             <p className="text-slate-600">{t.registrationDescription}</p>
+          </div>
+          
+          <div className="text-center mb-6">
+            <p className="text-slate-600 mb-4">¿Ya tienes una cuenta?</p>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Iniciar Sesión
+            </button>
           </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -226,6 +474,38 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 placeholder={t.emailPlaceholder}
               />
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Contraseña <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
+                  errors.password ? 'border-red-500' : 'border-slate-300'
+                }`}
+                placeholder="Mínimo 6 caracteres"
+              />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Confirmar Contraseña <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
+                  errors.confirmPassword ? 'border-red-500' : 'border-slate-300'
+                }`}
+                placeholder="Repite tu contraseña"
+              />
+              {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
 
             <div>
@@ -494,6 +774,9 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
         </form>
       </div>
+      
+      {showLogin && <LoginModal />}
+      {showPasswordRecovery && <PasswordRecoveryModal />}
     </div>
     </div>
   );

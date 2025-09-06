@@ -45,6 +45,7 @@ export interface Cyclist {
   name: string;
   alias?: string;
   email: string;
+  password?: string;
   phone: string;
   age?: number;
   weight?: number;
