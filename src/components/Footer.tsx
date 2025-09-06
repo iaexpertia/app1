@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mountain, Mail, Globe, Shield, FileText, Cookie } from 'lucide-react';
+import { Mountain, Mail, Globe, Shield, FileText, Cookie, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
 
 interface FooterProps {
   onShowPrivacy: () => void;
@@ -7,8 +7,47 @@ interface FooterProps {
   onShowCookies: () => void;
 }
 
+// Social media storage functions
+const SOCIAL_MEDIA_KEY = 'social-media-urls';
+
+interface SocialMediaUrls {
+  instagram: string;
+  facebook: string;
+  youtube: string;
+  linkedin: string;
+}
+
+const getDefaultSocialUrls = (): SocialMediaUrls => ({
+  instagram: 'https://instagram.com/cyclepeaks',
+  facebook: 'https://facebook.com/cyclepeaks',
+  youtube: 'https://youtube.com/@cyclepeaks',
+  linkedin: 'https://linkedin.com/company/cyclepeaks'
+});
+
+export const loadSocialMediaUrls = (): SocialMediaUrls => {
+  const stored = localStorage.getItem(SOCIAL_MEDIA_KEY);
+  return stored ? JSON.parse(stored) : getDefaultSocialUrls();
+};
+
+export const saveSocialMediaUrls = (urls: SocialMediaUrls): void => {
+  localStorage.setItem(SOCIAL_MEDIA_KEY, JSON.stringify(urls));
+// Update Footer to listen for social media changes
 export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onShowCookies }) => {
   const currentYear = new Date().getFullYear();
+  const [socialUrls, setSocialUrls] = React.useState<SocialMediaUrls>(loadSocialMediaUrls());
+
+  React.useEffect(() => {
+    const handleSocialMediaUpdate = () => {
+      setSocialUrls(loadSocialMediaUrls());
+    };
+
+    window.addEventListener('socialMediaUpdated', handleSocialMediaUpdate);
+    
+    return () => {
+      window.removeEventListener('socialMediaUpdated', handleSocialMediaUpdate);
+    };
+  }, []);
+};
 
   return (
     <footer className="bg-slate-800 text-white mt-16">
@@ -31,6 +70,46 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
               >
                 <Mail className="h-4 w-4" />
                 <span className="text-sm">info@cyclepeaks.com</span>
+              </a>
+            </div>
+            
+            {/* Social Media Icons */}
+            <div className="flex space-x-4 pt-4">
+              <a 
+                href={socialUrls.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-300 hover:text-pink-400 transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-6 w-6" />
+              </a>
+              <a 
+                href={socialUrls.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-300 hover:text-blue-400 transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-6 w-6" />
+              </a>
+              <a 
+                href={socialUrls.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-300 hover:text-red-400 transition-colors"
+                aria-label="YouTube"
+              >
+                <Youtube className="h-6 w-6" />
+              </a>
+              <a 
+                href={socialUrls.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-300 hover:text-blue-500 transition-colors"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-6 w-6" />
               </a>
             </div>
           </div>
