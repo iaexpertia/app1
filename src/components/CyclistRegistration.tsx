@@ -3,6 +3,7 @@ import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
 import { addCyclist } from '../utils/cyclistStorage';
 import { setCurrentUser } from '../utils/cyclistStorage';
+import { loginUser } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
 import { 
   User, 
@@ -127,12 +128,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   };
 
   const handleLogin = async (email: string, password: string) => {
-    // Simulate login process
-    const cyclists = loadCyclists();
-    const cyclist = cyclists.find(c => c.email === email && c.password === password);
+    // Authenticate user with stored credentials
+    const success = loginUser(email.trim(), password);
     
-    if (cyclist) {
-      setCurrentUser(cyclist.id);
+    if (success) {
       onRegistrationSuccess();
       return true;
     }
@@ -240,18 +239,20 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         return;
       }
 
+      // Clear previous errors
+      setLoginErrors({});
       setIsLoggingIn(true);
       
       try {
         const success = await handleLogin(loginData.email, loginData.password);
         if (!success) {
           setLoginErrors({ 
-            general: 'Email o contraseña incorrectos' 
+            general: 'Email o contraseña incorrectos. Verifica tus credenciales.' 
           });
         }
       } catch (error) {
         setLoginErrors({ 
-          general: 'Error al iniciar sesión' 
+          general: 'Error al iniciar sesión. Inténtalo de nuevo.' 
         });
       } finally {
         setIsLoggingIn(false);
@@ -281,8 +282,11 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 type="email"
                 value={loginData.email}
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  loginErrors.general ? 'border-red-500' : 'border-slate-300'
+                }`}
                 placeholder="tu@email.com"
+                required
               />
             </div>
 
@@ -294,14 +298,27 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 type="password"
                 value={loginData.password}
                 onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  loginErrors.general ? 'border-red-500' : 'border-slate-300'
+                }`}
                 placeholder="Tu contraseña"
+                required
               />
             </div>
 
             {loginErrors.general && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-red-600 text-sm">{loginErrors.general}</p>
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-red-800 text-sm font-medium">Error de autenticación</p>
+                    <p className="text-red-600 text-sm">{loginErrors.general}</p>
+                  </div>
+                </div>
               </div>
             )}
 
