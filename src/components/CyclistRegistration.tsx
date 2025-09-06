@@ -843,6 +843,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       
       {showLogin && <LoginModal />}
       {showPasswordRecovery && <PasswordRecoveryModal />}
+      {showTermsModal && <TermsModal />}
     </div>
     </div>
   );
