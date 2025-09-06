@@ -49,7 +49,6 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
       window.removeEventListener('socialMediaUpdated', handleSocialMediaUpdate);
     };
   }, []);
-};
 
   return (
     <footer className="bg-slate-800 text-white mt-16">
