@@ -1211,7 +1211,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 </p>
               </section>
             </div>
-              </section>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-6 rounded-b-xl">
               <div className="flex justify-end">
                 <button
