@@ -593,6 +593,16 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               <p className="text-red-500 text-sm">{loginErrors.general}</p>
             )}
 
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowPasswordRecovery(true)}
+                className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+
             <div className="flex space-x-3">
               <button
                 type="button"
