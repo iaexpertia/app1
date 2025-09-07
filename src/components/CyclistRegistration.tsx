@@ -6,17 +6,18 @@ import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
-import { 
+import { addCyclist } from '../utils/cyclistStorage';
+import {
   User, 
   Mail, 
   Phone, 
   Calendar, 
   Weight, 
-  Bike as BikeIcon,
-  Plus,
-  Trash2,
+  Bike as BikeIcon2,
+  Plus as Plus2,
+  Trash2 as Trash22,
   Save,
-  UserPlus
+  UserPlus as UserPlus2
 } from 'lucide-react';
 
 interface CyclistRegistrationProps {
@@ -591,6 +592,16 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             {loginErrors.general && (
               <p className="text-red-500 text-sm">{loginErrors.general}</p>
             )}
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowPasswordRecovery(true)}
+                className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
 
             <div className="flex space-x-3">
               <button
@@ -1345,6 +1356,38 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 >
                   Cerrar
                 </button>
+              </div>
+              
+              {/* Terms and Conditions Checkbox */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="acceptedTerms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="acceptedTerms" className="text-sm text-slate-700 cursor-pointer">
+                      Acepto los{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowTermsModal(true)}
+                        className="text-orange-600 hover:text-orange-700 underline font-medium"
+                      >
+                        términos y condiciones
+                      </button>{' '}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Es obligatorio aceptar los términos y condiciones para completar el registro.
+                    </p>
+                  </div>
+                </div>
+                {errors.terms && (
+                  <p className="text-red-500 text-sm mt-2 ml-6">{errors.terms}</p>
+                )}
               </div>
             </div>
           </div>
