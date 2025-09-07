@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
-import { getCurrentUser } from '../utils/cyclistStorage';
+import { getCurrentUser, loadCyclists } from '../utils/cyclistStorage';
 
 interface HeaderProps {
   activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
@@ -31,6 +31,9 @@ export const Header: React.FC<HeaderProps> = ({
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const currentUser = getCurrentUser();
   const isLoggedIn = currentUser !== null;
+  const isCurrentUserAdmin = currentUser?.isAdmin || false;
+  const cyclists = loadCyclists();
+  const hasRegisteredCyclists = cyclists.length > 0;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -50,17 +53,24 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'news', icon: Newspaper, label: 'Noticias', tooltip: 'Últimas noticias del mundo del ciclismo' },
     { key: 'collaborators', icon: Users, label: t.collaborators, tooltip: 'Colaboradores y servicios para ciclistas' },
     { key: 'database', icon: Database, label: t.database, tooltip: 'Base de datos completa de puertos' },
-    { key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }
+    // Solo mostrar admin si el usuario actual es administrador
+    ...(isCurrentUserAdmin ? [{ key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }] : [])
   ];
 
   const userActions = [
-    { key: 'cyclist-register', icon: UserCheck, label: 'Registro Ciclista', tooltip: 'Registrar nuevo ciclista', action: () => handleTabChange('register') },
+    { 
+      key: 'cyclist-register', 
+      icon: UserCheck, 
+      label: hasRegisteredCyclists ? 'Registro Ciclista' : 'Primer Registro', 
+      tooltip: hasRegisteredCyclists ? 'Registrar nuevo ciclista' : 'Crear tu primera cuenta', 
+      action: () => handleTabChange('register') 
+    },
     { 
       key: isLoggedIn ? 'logout' : 'login', 
       icon: isLoggedIn ? LogOut : UserCheck, 
       label: isLoggedIn ? 'Cerrar Sesión' : 'Iniciar Sesión', 
       tooltip: isLoggedIn ? 'Cerrar sesión actual' : 'Iniciar sesión', 
-      action: isLoggedIn ? onLogout : () => handleTabChange('register')
+      action: isLoggedIn ? onLogout : (hasRegisteredCyclists ? () => handleTabChange('register') : () => handleTabChange('register'))
     }
   ];
 
@@ -85,9 +95,6 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden lg:flex items-center space-x-4">
             <nav className="flex space-x-1 relative">
               {navigationItems.map((item) => {
-                // Skip admin tab if user is not admin
-                if (item.key === 'admin' && !showAdminTab) return null;
-                
                 const Icon = item.icon;
                 return (
                   <div key={item.key} className="relative">
@@ -102,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden xl:inline">{item.label}</span>
+                      <span className="hidden xl:inline whitespace-nowrap">{item.label}</span>
                     </button>
                     
                     {/* Tooltip */}
@@ -118,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
             </nav>
             
             {/* User Actions */}
-            <div className="flex items-center space-x-1 border-l border-slate-200 pl-4">
+            <div className="flex items-center space-x-2 border-l border-slate-200 pl-4">
               {userActions.map((action) => {
                 const Icon = action.icon;
                 return (
@@ -134,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden xl:inline">{action.label}</span>
+                      <span className="hidden xl:inline whitespace-nowrap">{action.label}</span>
                     </button>
                     
                     {/* Tooltip */}
@@ -147,12 +154,13 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 );
               })}
+              
+              {/* Language Selector integrated directly */}
+              <LanguageSelector
+                currentLanguage={language}
+                onLanguageChange={onLanguageChange}
+              />
             </div>
-            
-            <LanguageSelector
-              currentLanguage={language}
-              onLanguageChange={onLanguageChange}
-            />
           </div>
 
           {/* Mobile Menu Button and Language Selector */}
@@ -184,9 +192,6 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="bg-white border-t border-slate-200 mx-4 rounded-lg shadow-lg mt-2">
             <nav className="flex flex-col space-y-2 p-4">
             {navigationItems.map((item) => {
-              // Skip admin tab if user is not admin
-              if (item.key === 'admin' && !showAdminTab) return null;
-              
               const Icon = item.icon;
               return (
                 <button

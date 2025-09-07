@@ -19,15 +19,32 @@ export const getCurrentUser = (): Cyclist | null => {
   return cyclists.find(c => c.id === currentUserId) || null;
 };
 
+export const authenticateUser = (email: string, password: string): Cyclist | null => {
+  const cyclists = loadCyclists();
+  const cyclist = cyclists.find(c => 
+    c.email.toLowerCase() === email.toLowerCase() && 
+    c.password === password
+  );
+  return cyclist || null;
+};
+
+export const loginUser = (email: string, password: string): boolean => {
+  const cyclist = authenticateUser(email, password);
+  if (cyclist) {
+    setCurrentUser(cyclist.id);
+    return true;
+  }
+  return false;
+};
 export const setCurrentUser = (cyclistId: string): void => {
   localStorage.setItem('currentUserId', cyclistId);
 };
 
 export const isCurrentUserAdmin = (): boolean => {
   const currentUser = getCurrentUser();
-  // Permitir acceso admin si no hay usuario actual (para setup inicial)
+  // Solo permitir acceso admin si hay usuario actual Y es admin
   if (!currentUser) {
-    return true;
+    return false;
   }
   return currentUser?.isAdmin || false;
 };
