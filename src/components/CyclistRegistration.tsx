@@ -1165,12 +1165,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">1. Aceptación de los Términos</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Al registrarte en CyclePeaks, aceptas cumplir con estos términos y condiciones. 
-                  Si no estás de acuerdo con alguna parte de estos términos, no debes usar nuestra plataforma.
-                </p>
-              </section>
-
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">2. Uso de la Plataforma</h3>
                 <ul className="list-disc list-inside text-slate-600 space-y-1">
@@ -1180,7 +1174,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                   <li>Respetas los derechos de otros usuarios y de la plataforma</li>
                 </ul>
               </section>
-
+                <p className="text-slate-600 leading-relaxed">
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">3. Contenido del Usuario</h3>
                 <p className="text-slate-600 leading-relaxed">
@@ -1189,7 +1183,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                   Mantienes todos los derechos sobre tu contenido.
                 </p>
               </section>
-
+                  Al registrarte en CyclePeaks, aceptas cumplir con estos términos y condiciones. 
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">4. Privacidad y Datos</h3>
                 <p className="text-slate-600 leading-relaxed">
@@ -1198,7 +1192,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                   con terceros sin tu consentimiento.
                 </p>
               </section>
-
+                  Si no estás de acuerdo con alguna parte de estos términos, no debes usar nuestra plataforma.
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">5. Limitación de Responsabilidad</h3>
                 <p className="text-slate-600 leading-relaxed">
@@ -1207,7 +1201,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                   de forma segura y responsable.
                 </p>
               </section>
-
+                </p>
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">6. Modificaciones</h3>
                 <p className="text-slate-600 leading-relaxed">
@@ -1217,6 +1211,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 </p>
               </section>
             </div>
+              </section>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-6 rounded-b-xl">
               <div className="flex justify-end">
                 <button
