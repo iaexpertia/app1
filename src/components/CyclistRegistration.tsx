@@ -4,7 +4,6 @@ import { Translation } from '../i18n/translations';
 import { addCyclist } from '../utils/cyclistStorage';
 import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
-import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
 import { 
   User, 
@@ -28,9 +27,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   t, 
   onRegistrationSuccess 
 }) => {
-  const [cyclists] = useState(() => loadCyclists());
-  const hasRegisteredCyclists = cyclists.length > 0;
-  
   const [formData, setFormData] = useState({
     name: '',
     alias: '',
@@ -458,31 +454,15 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             <p className="text-slate-600">{t.registrationDescription}</p>
           </div>
           
-          {hasRegisteredCyclists && (
-            <div className="text-center mb-6">
-              <p className="text-slate-600 mb-4">¿Ya tienes una cuenta?</p>
-              <button
-                onClick={() => setShowLogin(true)}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Iniciar Sesión
-              </button>
-            </div>
-          )}
-          
-          {!hasRegisteredCyclists && (
-            <div className="text-center mb-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-center mb-2">
-                  <UserPlus className="h-6 w-6 text-blue-600 mr-2" />
-                  <h3 className="text-lg font-semibold text-blue-800">¡Bienvenido a CyclePeaks!</h3>
-                </div>
-                <p className="text-blue-700 text-sm">
-                  Parece que eres el primer usuario. Completa tu registro para comenzar a conquistar puertos de montaña.
-                </p>
-              </div>
-            </div>
-          )}
+          <div className="text-center mb-6">
+            <p className="text-slate-600 mb-4">¿Ya tienes una cuenta?</p>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Iniciar Sesión
+            </button>
+          </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
