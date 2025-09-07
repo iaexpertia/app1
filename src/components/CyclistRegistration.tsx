@@ -8,6 +8,7 @@ import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
 import { 
   User, 
+  Mail, 
   Phone, 
   Calendar, 
   Weight, 
