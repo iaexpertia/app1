@@ -31,6 +31,8 @@ export const loadSocialMediaUrls = (): SocialMediaUrls => {
 
 export const saveSocialMediaUrls = (urls: SocialMediaUrls): void => {
   localStorage.setItem(SOCIAL_MEDIA_KEY, JSON.stringify(urls));
+};
+
 // Update Footer to listen for social media changes
 export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onShowCookies }) => {
   const currentYear = new Date().getFullYear();
@@ -47,7 +49,6 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
       window.removeEventListener('socialMediaUpdated', handleSocialMediaUpdate);
     };
   }, []);
-};
 
   return (
     <footer className="bg-slate-800 text-white mt-16">
