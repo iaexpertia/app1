@@ -1,567 +1,1591 @@
 import React, { useState, useEffect } from 'react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save, Upload, Database } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
-import { Translation } from '../i18n/translations';
+import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
 import { 
   loadCyclists, 
-  saveCyclists, 
+  addCyclist, 
   removeCyclist, 
-  updateCyclist 
+  updateCyclist,
+  saveCyclists 
 } from '../utils/cyclistStorage';
-import { loadBrands, saveBrands } from '../utils/brandsStorage';
-import { loadCollaborators, saveCollaborators } from '../utils/collaboratorStorage';
-import { loadNews, saveNews } from '../utils/newsStorage';
-import { loadSocialMediaUrls, saveSocialMediaUrls } from './Footer';
-import { exportCyclists, exportBrands, exportCollaborators, exportNews, exportMountainPasses } from '../utils/excelExport';
 import { 
-  Settings, 
-  Users, 
-  Mountain, 
-  Edit, 
-  Trash2, 
-  Save, 
-  X, 
-  Download,
-  Tag,
-  UserCheck,
-  Newspaper,
-  Instagram,
-  Facebook,
-  Youtube,
-  Linkedin,
-  Globe
-} from 'lucide-react';
+  loadBrands, 
+  addBrand, 
+  removeBrand, 
+  updateBrand,
+  saveBrands,
+  loadBrandCategories 
+} from '../utils/brandsStorage';
+import { 
+  loadCollaborators, 
+  addCollaborator, 
+  removeCollaborator, 
+  updateCollaborator,
+  saveCollaborators,
+  loadCategories as loadCollaboratorCategories 
+} from '../utils/collaboratorStorage';
+import { 
+  loadNews, 
+  addNews, 
+  removeNews, 
+  updateNews,
+  saveNews 
+} from '../utils/newsStorage';
 
 interface AdminPanelProps {
   passes: MountainPass[];
   onUpdatePass: (pass: MountainPass) => void;
-  t: Translation;
-}
-
-interface SocialMediaUrls {
-  instagram: string;
-  facebook: string;
-  youtube: string;
-  linkedin: string;
+  t: (key: string) => string;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t }) => {
-  const [activeTab, setActiveTab] = useState<'cyclists' | 'passes' | 'brands' | 'collaborators' | 'news' | 'social'>('cyclists');
+  const [activeTab, setActiveTab] = useState('cyclists');
+  
+  // Data states
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [news, setNews] = useState<NewsArticle[]>([]);
-  const [socialUrls, setSocialUrls] = useState<SocialMediaUrls>({
-    instagram: '',
-    facebook: '',
-    youtube: '',
-    linkedin: ''
-  });
+  
+  // Modal states
+  const [showCyclistModal, setShowCyclistModal] = useState(false);
+  const [showPassModal, setShowPassModal] = useState(false);
+  const [showBrandModal, setShowBrandModal] = useState(false);
+  const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
+  const [showNewsModal, setShowNewsModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  
+  // Edit states
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
 
+  // Import states
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPreview, setImportPreview] = useState<string[]>([]);
+
+  // Form states
+  const [cyclistForm, setCyclistForm] = useState({
+    name: '', alias: '', email: '', phone: '', age: '', weight: '', isAdmin: false
+  });
+  
+  const [passForm, setPassForm] = useState({
+    name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
+    averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
+    description: '', imageUrl: '', category: 'Otros'
+  });
+  
+  const [brandForm, setBrandForm] = useState({
+    name: '', category: 'Bicicletas', description: '', logo: '', website: '',
+    country: '', foundedYear: '', specialties: '', featured: false
+  });
+  
+  const [collaboratorForm, setCollaboratorForm] = useState({
+    name: '', category: 'Tienda de Bicicletas', description: '', email: '',
+    phone: '', website: '', address: '', images: '', featured: false
+  });
+  
+  const [newsForm, setNewsForm] = useState({
+    title: '', summary: '', content: '', author: '', category: 'Noticias',
+    imageUrl: '', readTime: 5, featured: false, externalUrl: ''
+  });
+
+  // Load data on component mount
   useEffect(() => {
+    loadAllData();
+  }, []);
+
+  const loadAllData = () => {
     setCyclists(loadCyclists());
     setBrands(loadBrands());
     setCollaborators(loadCollaborators());
     setNews(loadNews());
-    setSocialUrls(loadSocialMediaUrls());
-  }, []);
+  };
+
+  // Import handlers
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setImportFile(file);
+      
+      // Read file preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').slice(0, 6); // First 6 lines (header + 5 data rows)
+        setImportPreview(lines);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleImportCSV = async () => {
+    if (!importFile) return;
+
+    try {
+      const text = await importFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',');
+      
+      const newPasses: MountainPass[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',');
+        if (values.length >= headers.length) {
+          const pass: MountainPass = {
+            id: values[0] || `imported-${Date.now()}-${i}`,
+            name: values[1] || '',
+            country: values[2] || '',
+            region: values[3] || '',
+            maxAltitude: parseInt(values[4]) || 0,
+            elevationGain: parseInt(values[5]) || 0,
+            averageGradient: parseFloat(values[6]) || 0,
+            maxGradient: parseFloat(values[7]) || 0,
+            distance: parseFloat(values[8]) || 0,
+            difficulty: values[9] as any || 'Cuarta',
+            coordinates: {
+              lat: parseFloat(values[10]) || 0,
+              lng: parseFloat(values[11]) || 0
+            },
+            description: values[12] || '',
+            imageUrl: values[13] || '',
+            category: values[14] || 'Otros'
+          };
+          newPasses.push(pass);
+        }
+      }
+
+      // Update passes through parent component
+      newPasses.forEach(pass => {
+        onUpdatePass(pass);
+      });
+
+      alert(`Se han importado ${newPasses.length} puertos correctamente.`);
+      setShowImportModal(false);
+      setImportFile(null);
+      setImportPreview([]);
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      alert('Error al importar el archivo CSV. Verifica el formato.');
+    }
+  };
+
+  // Export handlers
+  const handleExportCyclists = () => {
+    exportCyclists(cyclists);
+  };
+
+  const handleExportPasses = () => {
+    exportMountainPasses(passes);
+  };
+
+  const handleExportBrands = () => {
+    exportBrands(brands);
+  };
+
+  const handleExportCollaborators = () => {
+    exportCollaborators(collaborators);
+  };
+
+  const handleExportNews = () => {
+    exportNews(news);
+  };
+
+  // Cyclist handlers
+  const handleCreateCyclist = () => {
+    const newCyclist: Cyclist = {
+      id: Date.now().toString(),
+      name: cyclistForm.name,
+      alias: cyclistForm.alias || undefined,
+      email: cyclistForm.email,
+      phone: cyclistForm.phone,
+      age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
+      weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
+      bikes: [],
+      registrationDate: new Date().toISOString().split('T')[0],
+      isAdmin: cyclistForm.isAdmin
+    };
+    
+    addCyclist(newCyclist);
+    setCyclists(loadCyclists());
+    setShowCyclistModal(false);
+    resetCyclistForm();
+  };
+
+  const handleEditCyclist = (cyclist: Cyclist) => {
+    setEditingCyclist(cyclist);
+    setCyclistForm({
+      name: cyclist.name,
+      alias: cyclist.alias || '',
+      email: cyclist.email,
+      phone: cyclist.phone,
+      age: cyclist.age?.toString() || '',
+      weight: cyclist.weight?.toString() || '',
+      isAdmin: cyclist.isAdmin || false
+    });
+    setShowCyclistModal(true);
+  };
+
+  const handleUpdateCyclist = () => {
+    if (!editingCyclist) return;
+    
+    const updatedCyclist: Cyclist = {
+      ...editingCyclist,
+      name: cyclistForm.name,
+      alias: cyclistForm.alias || undefined,
+      email: cyclistForm.email,
+      phone: cyclistForm.phone,
+      age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
+      weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
+      isAdmin: cyclistForm.isAdmin
+    };
+    
+    updateCyclist(updatedCyclist);
+    setCyclists(loadCyclists());
+    setShowCyclistModal(false);
+    setEditingCyclist(null);
+    resetCyclistForm();
+  };
 
   const handleDeleteCyclist = (cyclistId: string) => {
-    removeCyclist(cyclistId);
-    setCyclists(loadCyclists());
-    setShowDeleteConfirm(null);
+    if (confirm('¿Estás seguro de que quieres eliminar este ciclista?')) {
+      removeCyclist(cyclistId);
+      setCyclists(loadCyclists());
+    }
   };
 
-  const handleUpdateCyclist = (cyclist: Cyclist) => {
-    updateCyclist(cyclist);
-    setCyclists(loadCyclists());
-    setEditingCyclist(null);
+  const resetCyclistForm = () => {
+    setCyclistForm({
+      name: '', alias: '', email: '', phone: '', age: '', weight: '', isAdmin: false
+    });
   };
 
-  const handleUpdatePass = (pass: MountainPass) => {
-    onUpdatePass(pass);
-    setEditingPass(null);
+  // Brand handlers
+  const handleCreateBrand = () => {
+    const newBrand: Brand = {
+      id: Date.now().toString(),
+      name: brandForm.name,
+      category: brandForm.category as any,
+      description: brandForm.description,
+      logo: brandForm.logo || undefined,
+      website: brandForm.website || undefined,
+      country: brandForm.country || undefined,
+      foundedYear: brandForm.foundedYear ? parseInt(brandForm.foundedYear) : undefined,
+      specialties: brandForm.specialties ? brandForm.specialties.split(',').map(s => s.trim()) : [],
+      isActive: true,
+      featured: brandForm.featured
+    };
+    
+    addBrand(newBrand);
+    setBrands(loadBrands());
+    setShowBrandModal(false);
+    resetBrandForm();
   };
 
-  const handleSaveSocialUrls = () => {
-    saveSocialMediaUrls(socialUrls);
-    // Trigger a custom event to notify Footer component
-    window.dispatchEvent(new CustomEvent('socialMediaUpdated'));
-    alert('URLs de redes sociales actualizadas correctamente');
+  const handleEditBrand = (brand: Brand) => {
+    setEditingBrand(brand);
+    setBrandForm({
+      name: brand.name,
+      category: brand.category,
+      description: brand.description,
+      logo: brand.logo || '',
+      website: brand.website || '',
+      country: brand.country || '',
+      foundedYear: brand.foundedYear?.toString() || '',
+      specialties: brand.specialties.join(', '),
+      featured: brand.featured
+    });
+    setShowBrandModal(true);
   };
 
-  const adminTabs = [
-    { key: 'cyclists', icon: Users, label: 'Ciclistas', count: cyclists.length },
-    { key: 'passes', icon: Mountain, label: 'Puertos', count: passes.length },
-    { key: 'brands', icon: Tag, label: 'Marcas', count: brands.length },
-    { key: 'collaborators', icon: UserCheck, label: 'Colaboradores', count: collaborators.length },
-    { key: 'news', icon: Newspaper, label: 'Noticias', count: news.length },
-    { key: 'social', icon: Globe, label: 'Redes Sociales', count: 0 }
+  const handleUpdateBrand = () => {
+    if (!editingBrand) return;
+    
+    const updatedBrand: Brand = {
+      ...editingBrand,
+      name: brandForm.name,
+      category: brandForm.category as any,
+      description: brandForm.description,
+      logo: brandForm.logo || undefined,
+      website: brandForm.website || undefined,
+      country: brandForm.country || undefined,
+      foundedYear: brandForm.foundedYear ? parseInt(brandForm.foundedYear) : undefined,
+      specialties: brandForm.specialties ? brandForm.specialties.split(',').map(s => s.trim()) : [],
+      featured: brandForm.featured
+    };
+    
+    updateBrand(updatedBrand);
+    setBrands(loadBrands());
+    setShowBrandModal(false);
+    setEditingBrand(null);
+    resetBrandForm();
+  };
+
+  const handleDeleteBrand = (brandId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar esta marca?')) {
+      removeBrand(brandId);
+      setBrands(loadBrands());
+    }
+  };
+
+  const resetBrandForm = () => {
+    setBrandForm({
+      name: '', category: 'Bicicletas', description: '', logo: '', website: '',
+      country: '', foundedYear: '', specialties: '', featured: false
+    });
+  };
+
+  // Collaborator handlers
+  const handleCreateCollaborator = () => {
+    const newCollaborator: Collaborator = {
+      id: Date.now().toString(),
+      name: collaboratorForm.name,
+      category: collaboratorForm.category as any,
+      description: collaboratorForm.description,
+      contactInfo: {
+        email: collaboratorForm.email || undefined,
+        phone: collaboratorForm.phone || undefined,
+        website: collaboratorForm.website || undefined,
+        address: collaboratorForm.address || undefined
+      },
+      images: collaboratorForm.images ? collaboratorForm.images.split(',').map(s => s.trim()) : [],
+      isActive: true,
+      featured: collaboratorForm.featured
+    };
+    
+    addCollaborator(newCollaborator);
+    setCollaborators(loadCollaborators());
+    setShowCollaboratorModal(false);
+    resetCollaboratorForm();
+  };
+
+  const handleEditCollaborator = (collaborator: Collaborator) => {
+    setEditingCollaborator(collaborator);
+    setCollaboratorForm({
+      name: collaborator.name,
+      category: collaborator.category,
+      description: collaborator.description,
+      email: collaborator.contactInfo.email || '',
+      phone: collaborator.contactInfo.phone || '',
+      website: collaborator.contactInfo.website || '',
+      address: collaborator.contactInfo.address || '',
+      images: collaborator.images.join(', '),
+      featured: collaborator.featured
+    });
+    setShowCollaboratorModal(true);
+  };
+
+  const handleUpdateCollaborator = () => {
+    if (!editingCollaborator) return;
+    
+    const updatedCollaborator: Collaborator = {
+      ...editingCollaborator,
+      name: collaboratorForm.name,
+      category: collaboratorForm.category as any,
+      description: collaboratorForm.description,
+      contactInfo: {
+        email: collaboratorForm.email || undefined,
+        phone: collaboratorForm.phone || undefined,
+        website: collaboratorForm.website || undefined,
+        address: collaboratorForm.address || undefined
+      },
+      images: collaboratorForm.images ? collaboratorForm.images.split(',').map(s => s.trim()) : [],
+      featured: collaboratorForm.featured
+    };
+    
+    updateCollaborator(updatedCollaborator);
+    setCollaborators(loadCollaborators());
+    setShowCollaboratorModal(false);
+    setEditingCollaborator(null);
+    resetCollaboratorForm();
+  };
+
+  const handleDeleteCollaborator = (collaboratorId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este colaborador?')) {
+      removeCollaborator(collaboratorId);
+      setCollaborators(loadCollaborators());
+    }
+  };
+
+  const resetCollaboratorForm = () => {
+    setCollaboratorForm({
+      name: '', category: 'Tienda de Bicicletas', description: '', email: '',
+      phone: '', website: '', address: '', images: '', featured: false
+    });
+  };
+
+  // News handlers
+  const handleCreateNews = () => {
+    const newArticle: NewsArticle = {
+      id: Date.now().toString(),
+      title: newsForm.title,
+      summary: newsForm.summary,
+      content: newsForm.content,
+      author: newsForm.author,
+      publishDate: new Date().toISOString().split('T')[0],
+      category: newsForm.category as any,
+      imageUrl: newsForm.imageUrl,
+      readTime: newsForm.readTime,
+      featured: newsForm.featured,
+      externalUrl: newsForm.externalUrl || undefined
+    };
+    
+    addNews(newArticle);
+    setNews(loadNews());
+    setShowNewsModal(false);
+    resetNewsForm();
+  };
+
+  const handleEditNews = (article: NewsArticle) => {
+    setEditingNews(article);
+    setNewsForm({
+      title: article.title,
+      summary: article.summary,
+      content: article.content,
+      author: article.author,
+      category: article.category,
+      imageUrl: article.imageUrl,
+      readTime: article.readTime,
+      featured: article.featured,
+      externalUrl: article.externalUrl || ''
+    });
+    setShowNewsModal(true);
+  };
+
+  const handleUpdateNews = () => {
+    if (!editingNews) return;
+    
+    const updatedArticle: NewsArticle = {
+      ...editingNews,
+      title: newsForm.title,
+      summary: newsForm.summary,
+      content: newsForm.content,
+      author: newsForm.author,
+      category: newsForm.category as any,
+      imageUrl: newsForm.imageUrl,
+      readTime: newsForm.readTime,
+      featured: newsForm.featured,
+      externalUrl: newsForm.externalUrl || undefined
+    };
+    
+    updateNews(updatedArticle);
+    setNews(loadNews());
+    setShowNewsModal(false);
+    setEditingNews(null);
+    resetNewsForm();
+  };
+
+  const handleDeleteNews = (articleId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar esta noticia?')) {
+      removeNews(articleId);
+      setNews(loadNews());
+    }
+  };
+
+  const resetNewsForm = () => {
+    setNewsForm({
+      title: '', summary: '', content: '', author: '', category: 'Noticias',
+      imageUrl: '', readTime: 5, featured: false, externalUrl: ''
+    });
+  };
+
+  const tabs = [
+    { id: 'cyclists', label: 'Gestionar Ciclistas', icon: Users },
+    { id: 'passes', label: 'Gestionar Puertos', icon: Mountain },
+    { id: 'brands', label: 'Gestionar Marcas', icon: Tag },
+    { id: 'collaborators', label: 'Gestionar Colaboradores', icon: UserCheck },
+    { id: 'news', label: 'Gestionar Noticias', icon: Newspaper },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Settings className="h-8 w-8 text-orange-500 mr-3" />
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800">{t.adminPanel}</h2>
-              <p className="text-slate-600">Gestiona todos los aspectos de la plataforma</p>
-            </div>
-          </div>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Panel de Administración</h1>
+      
+      {/* Tabs */}
+      <div className="border-b border-gray-200 mb-8">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center gap-2 ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-        {/* Admin Tabs */}
-        <div className="bg-white rounded-xl shadow-lg mb-8">
-          <div className="border-b border-slate-200">
-            <nav className="flex space-x-8 px-6">
-              {adminTabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key as any)}
-                    className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === tab.key
-                        ? 'border-orange-500 text-orange-600'
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span>{tab.label}</span>
-                    {tab.count > 0 && (
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        activeTab === tab.key
-                          ? 'bg-orange-100 text-orange-800'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {tab.count}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="p-6">
-            {/* Cyclists Tab */}
-            {activeTab === 'cyclists' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">{t.registeredCyclists}</h3>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-slate-600">
-                      {cyclists.length} {t.totalCyclists}
-                    </span>
-                    <button
-                      onClick={() => exportCyclists(cyclists)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Exportar CSV</span>
-                    </button>
-                  </div>
-                </div>
-
-                {cyclists.length === 0 ? (
-                  <p className="text-slate-500 text-center py-8">{t.noCyclists}</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-slate-200">
-                          <th className="text-left py-3 px-4 font-medium text-slate-700">Nombre</th>
-                          <th className="text-left py-3 px-4 font-medium text-slate-700">Email</th>
-                          <th className="text-left py-3 px-4 font-medium text-slate-700">Teléfono</th>
-                          <th className="text-left py-3 px-4 font-medium text-slate-700">Bicicletas</th>
-                          <th className="text-left py-3 px-4 font-medium text-slate-700">Admin</th>
-                          <th className="text-left py-3 px-4 font-medium text-slate-700">{t.actions}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cyclists.map((cyclist) => (
-                          <tr key={cyclist.id} className="border-b border-slate-100 hover:bg-slate-50">
-                            <td className="py-3 px-4">
-                              <div>
-                                <p className="font-medium text-slate-800">{cyclist.name}</p>
-                                {cyclist.alias && (
-                                  <p className="text-sm text-slate-500">"{cyclist.alias}"</p>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 text-slate-600">{cyclist.email}</td>
-                            <td className="py-3 px-4 text-slate-600">{cyclist.phone}</td>
-                            <td className="py-3 px-4 text-slate-600">{cyclist.bikes.length}</td>
-                            <td className="py-3 px-4">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                cyclist.isAdmin 
-                                  ? 'bg-red-100 text-red-800' 
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {cyclist.isAdmin ? 'Admin' : 'Usuario'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="flex space-x-2">
-                                <button
-                                  onClick={() => setEditingCyclist(cyclist)}
-                                  className="text-blue-600 hover:text-blue-800 transition-colors"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => setShowDeleteConfirm(cyclist.id)}
-                                  className="text-red-600 hover:text-red-800 transition-colors"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Social Media Tab */}
-            {activeTab === 'social' && (
-              <div>
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">Gestión de Redes Sociales</h3>
-                  <p className="text-slate-600">Configura las URLs de las redes sociales que aparecerán en el footer</p>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Instagram */}
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-3 w-32">
-                      <Instagram className="h-6 w-6 text-pink-500" />
-                      <span className="font-medium text-slate-700">Instagram</span>
-                    </div>
-                    <input
-                      type="url"
-                      value={socialUrls.instagram}
-                      onChange={(e) => setSocialUrls({ ...socialUrls, instagram: e.target.value })}
-                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="https://instagram.com/cyclepeaks"
-                    />
-                  </div>
-
-                  {/* Facebook */}
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-3 w-32">
-                      <Facebook className="h-6 w-6 text-blue-600" />
-                      <span className="font-medium text-slate-700">Facebook</span>
-                    </div>
-                    <input
-                      type="url"
-                      value={socialUrls.facebook}
-                      onChange={(e) => setSocialUrls({ ...socialUrls, facebook: e.target.value })}
-                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="https://facebook.com/cyclepeaks"
-                    />
-                  </div>
-
-                  {/* YouTube */}
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-3 w-32">
-                      <Youtube className="h-6 w-6 text-red-600" />
-                      <span className="font-medium text-slate-700">YouTube</span>
-                    </div>
-                    <input
-                      type="url"
-                      value={socialUrls.youtube}
-                      onChange={(e) => setSocialUrls({ ...socialUrls, youtube: e.target.value })}
-                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="https://youtube.com/@cyclepeaks"
-                    />
-                  </div>
-
-                  {/* LinkedIn */}
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-3 w-32">
-                      <Linkedin className="h-6 w-6 text-blue-700" />
-                      <span className="font-medium text-slate-700">LinkedIn</span>
-                    </div>
-                    <input
-                      type="url"
-                      value={socialUrls.linkedin}
-                      onChange={(e) => setSocialUrls({ ...socialUrls, linkedin: e.target.value })}
-                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="https://linkedin.com/company/cyclepeaks"
-                    />
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="flex justify-end pt-6 border-t border-slate-200">
-                    <button
-                      onClick={handleSaveSocialUrls}
-                      className="flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                    >
-                      <Save className="h-4 w-4" />
-                      <span>Guardar URLs</span>
-                    </button>
-                  </div>
-
-                  {/* Preview Section */}
-                  <div className="bg-slate-50 rounded-lg p-6 border-t border-slate-200">
-                    <h4 className="text-md font-semibold text-slate-800 mb-4">Vista Previa</h4>
-                    <div className="flex space-x-4">
-                      <a 
-                        href={socialUrls.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-600 hover:text-pink-500 transition-colors"
-                      >
-                        <Instagram className="h-6 w-6" />
-                      </a>
-                      <a 
-                        href={socialUrls.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-600 hover:text-blue-600 transition-colors"
-                      >
-                        <Facebook className="h-6 w-6" />
-                      </a>
-                      <a 
-                        href={socialUrls.youtube}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-600 hover:text-red-600 transition-colors"
-                      >
-                        <Youtube className="h-6 w-6" />
-                      </a>
-                      <a 
-                        href={socialUrls.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-600 hover:text-blue-700 transition-colors"
-                      >
-                        <Linkedin className="h-6 w-6" />
-                      </a>
-                    </div>
-                    <p className="text-sm text-slate-500 mt-2">
-                      Así aparecerán los iconos en el footer de la página
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Other existing tabs would go here */}
-            {activeTab === 'passes' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">Gestión de Puertos</h3>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-slate-600">
-                      {passes.length} puertos totales
-                    </span>
-                    <button
-                      onClick={() => exportMountainPasses(passes)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Exportar CSV</span>
-                    </button>
-                  </div>
-                </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de puertos disponible próximamente
-                </p>
-              </div>
-            )}
-
-            {activeTab === 'brands' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">Gestión de Marcas</h3>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-slate-600">
-                      {brands.length} marcas totales
-                    </span>
-                    <button
-                      onClick={() => exportBrands(brands)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Exportar CSV</span>
-                    </button>
-                  </div>
-                </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de marcas disponible próximamente
-                </p>
-              </div>
-            )}
-
-            {activeTab === 'collaborators' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">Gestión de Colaboradores</h3>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-slate-600">
-                      {collaborators.length} colaboradores totales
-                    </span>
-                    <button
-                      onClick={() => exportCollaborators(collaborators)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Exportar CSV</span>
-                    </button>
-                  </div>
-                </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de colaboradores disponible próximamente
-                </p>
-              </div>
-            )}
-
-            {activeTab === 'news' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-800">Gestión de Noticias</h3>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-slate-600">
-                      {news.length} noticias totales
-                    </span>
-                    <button
-                      onClick={() => exportNews(news)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Exportar CSV</span>
-                    </button>
-                  </div>
-                </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de noticias disponible próximamente
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Edit Cyclist Modal */}
-        {editingCyclist && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-slate-800">{t.editCyclist}</h3>
+      {/* Tab Content */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        {activeTab === 'cyclists' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Ciclistas</h2>
+              <div className="flex gap-3">
                 <button
-                  onClick={() => setEditingCyclist(null)}
-                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                  onClick={() => setShowCyclistModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
-                  <X className="h-6 w-6" />
+                  <UserPlus className="w-4 h-4" />
+                  Nuevo Ciclista
+                </button>
+                <button
+                  onClick={handleExportCyclists}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
                 </button>
               </div>
-              
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      {t.name}
-                    </label>
-                    <input
-                      type="text"
-                      value={editingCyclist.name}
-                      onChange={(e) => setEditingCyclist({ ...editingCyclist, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={editingCyclist.email}
-                      onChange={(e) => setEditingCyclist({ ...editingCyclist, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      {t.phone}
-                    </label>
-                    <input
-                      type="tel"
-                      value={editingCyclist.phone}
-                      onChange={(e) => setEditingCyclist({ ...editingCyclist, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="isAdmin"
-                      checked={editingCyclist.isAdmin || false}
-                      onChange={(e) => setEditingCyclist({ ...editingCyclist, isAdmin: e.target.checked })}
-                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                    />
-                    <label htmlFor="isAdmin" className="text-sm font-medium text-slate-700">
-                      {t.adminRole}
-                    </label>
-                  </div>
-                  <p className="text-xs text-slate-500">{t.adminRoleDescription}</p>
+            </div>
+            
+            {/* Cyclists Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {cyclists.map((cyclist) => (
+                    <tr key={cyclist.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{cyclist.name}</div>
+                          {cyclist.alias && <div className="text-sm text-gray-500">{cyclist.alias}</div>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{cyclist.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{cyclist.phone}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          cyclist.isAdmin ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {cyclist.isAdmin ? 'Sí' : 'No'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditCyclist(cyclist)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCyclist(cyclist.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {cyclists.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No hay ciclistas registrados
                 </div>
-                
-                <div className="flex justify-end space-x-3 pt-6 border-t mt-6">
-                  <button
-                    onClick={() => setEditingCyclist(null)}
-                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    {t.cancel}
-                  </button>
-                  <button
-                    onClick={() => handleUpdateCyclist(editingCyclist)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                  >
-                    <Save className="h-4 w-4" />
-                    <span>{t.saveChanges}</span>
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-md w-full p-6">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">
-                {t.confirmDeleteCyclist}
-              </h3>
-              <div className="flex justify-end space-x-3">
+        {activeTab === 'passes' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
+              <div className="flex gap-3">
                 <button
-                  onClick={() => setShowDeleteConfirm(null)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  onClick={() => setShowImportModal(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
-                  {t.cancel}
+                  <Upload className="w-4 h-4" />
+                  Importar CSV
                 </button>
                 <button
-                  onClick={() => handleDeleteCyclist(showDeleteConfirm)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  onClick={() => exportMountainPasses(passes)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                 >
-                  Eliminar
+                  <Download className="h-4 w-4" />
+                  <span>Exportar Excel</span>
                 </button>
               </div>
+            </div>
+            
+            {/* Passes Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">País</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Altitud</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dificultad</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {passes.map((pass) => (
+                    <tr key={pass.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pass.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.country}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.maxAltitude}m</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {pass.difficulty}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            setEditingPass(pass);
+                            setPassForm({
+                              name: pass.name,
+                              country: pass.country,
+                              region: pass.region,
+                              maxAltitude: pass.maxAltitude,
+                              elevationGain: pass.elevationGain,
+                              averageGradient: pass.averageGradient,
+                              maxGradient: pass.maxGradient,
+                              distance: pass.distance,
+                              difficulty: pass.difficulty,
+                              description: pass.description,
+                              imageUrl: pass.imageUrl,
+                              category: pass.category
+                            });
+                            setShowPassModal(true);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'brands' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Marcas</h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBrandModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Tag className="w-4 h-4" />
+                  Nueva Marca
+                </button>
+                <button
+                  onClick={handleExportBrands}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
+            </div>
+            
+            {/* Brands Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">País</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destacada</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {brands.map((brand) => (
+                    <tr key={brand.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{brand.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{brand.category}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{brand.country || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          brand.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {brand.featured ? 'Sí' : 'No'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditBrand(brand)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBrand(brand.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {brands.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No hay marcas registradas
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'collaborators' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Colaboradores</h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCollaboratorModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  Nuevo Colaborador
+                </button>
+                <button
+                  onClick={handleExportCollaborators}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
+            </div>
+            
+            {/* Collaborators Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destacado</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {collaborators.map((collaborator) => (
+                    <tr key={collaborator.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{collaborator.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collaborator.category}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collaborator.contactInfo.email || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          collaborator.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {collaborator.featured ? 'Sí' : 'No'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditCollaborator(collaborator)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCollaborator(collaborator.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {collaborators.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No hay colaboradores registrados
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'news' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Noticias</h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowNewsModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Newspaper className="w-4 h-4" />
+                  Nueva Noticia
+                </button>
+                <button
+                  onClick={handleExportNews}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Excel
+                </button>
+              </div>
+            </div>
+            
+            {/* News Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Autor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destacada</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {news.map((article) => (
+                    <tr key={article.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{article.title}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{article.author}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{article.category}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          article.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {article.featured ? 'Sí' : 'No'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleEditNews(article)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteNews(article.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {news.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No hay noticias registradas
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
+
+      {/* Cyclist Modal */}
+      {showCyclistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingCyclist ? 'Editar Ciclista' : 'Nuevo Ciclista'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowCyclistModal(false);
+                  setEditingCyclist(null);
+                  resetCyclistForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  value={cyclistForm.name}
+                  onChange={(e) => setCyclistForm({...cyclistForm, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Alias</label>
+                <input
+                  type="text"
+                  value={cyclistForm.alias}
+                  onChange={(e) => setCyclistForm({...cyclistForm, alias: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={cyclistForm.email}
+                  onChange={(e) => setCyclistForm({...cyclistForm, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+                <input
+                  type="tel"
+                  value={cyclistForm.phone}
+                  onChange={(e) => setCyclistForm({...cyclistForm, phone: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Edad</label>
+                  <input
+                    type="number"
+                    value={cyclistForm.age}
+                    onChange={(e) => setCyclistForm({...cyclistForm, age: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={cyclistForm.weight}
+                    onChange={(e) => setCyclistForm({...cyclistForm, weight: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={cyclistForm.isAdmin}
+                    onChange={(e) => setCyclistForm({...cyclistForm, isAdmin: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Es administrador</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowCyclistModal(false);
+                  setEditingCyclist(null);
+                  resetCyclistForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingCyclist ? handleUpdateCyclist : handleCreateCyclist}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingCyclist ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Brand Modal */}
+      {showBrandModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingBrand ? 'Editar Marca' : 'Nueva Marca'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowBrandModal(false);
+                  setEditingBrand(null);
+                  resetBrandForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  value={brandForm.name}
+                  onChange={(e) => setBrandForm({...brandForm, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <select
+                  value={brandForm.category}
+                  onChange={(e) => setBrandForm({...brandForm, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Bicicletas">Bicicletas</option>
+                  <option value="Componentes">Componentes</option>
+                  <option value="Ropa">Ropa</option>
+                  <option value="Accesorios">Accesorios</option>
+                  <option value="Nutrición">Nutrición</option>
+                  <option value="Otros">Otros</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+                <textarea
+                  value={brandForm.description}
+                  onChange={(e) => setBrandForm({...brandForm, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+                <input
+                  type="url"
+                  value={brandForm.logo}
+                  onChange={(e) => setBrandForm({...brandForm, logo: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
+                <input
+                  type="url"
+                  value={brandForm.website}
+                  onChange={(e) => setBrandForm({...brandForm, website: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
+                  <input
+                    type="text"
+                    value={brandForm.country}
+                    onChange={(e) => setBrandForm({...brandForm, country: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Año Fundación</label>
+                  <input
+                    type="number"
+                    value={brandForm.foundedYear}
+                    onChange={(e) => setBrandForm({...brandForm, foundedYear: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Especialidades (separadas por comas)</label>
+                <input
+                  type="text"
+                  value={brandForm.specialties}
+                  onChange={(e) => setBrandForm({...brandForm, specialties: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Bicicletas de carretera, Mountain bikes"
+                />
+              </div>
+              
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={brandForm.featured}
+                    onChange={(e) => setBrandForm({...brandForm, featured: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Marca destacada</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowBrandModal(false);
+                  setEditingBrand(null);
+                  resetBrandForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingBrand ? handleUpdateBrand : handleCreateBrand}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingBrand ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collaborator Modal */}
+      {showCollaboratorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingCollaborator ? 'Editar Colaborador' : 'Nuevo Colaborador'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowCollaboratorModal(false);
+                  setEditingCollaborator(null);
+                  resetCollaboratorForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  value={collaboratorForm.name}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <select
+                  value={collaboratorForm.category}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Tienda de Bicicletas">Tienda de Bicicletas</option>
+                  <option value="Hotel">Hotel</option>
+                  <option value="Restaurante">Restaurante</option>
+                  <option value="Guía Turístico">Guía Turístico</option>
+                  <option value="Equipamiento">Equipamiento</option>
+                  <option value="Otros">Otros</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+                <textarea
+                  value={collaboratorForm.description}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={collaboratorForm.email}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <input
+                  type="tel"
+                  value={collaboratorForm.phone}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, phone: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
+                <input
+                  type="url"
+                  value={collaboratorForm.website}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, website: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <input
+                  type="text"
+                  value={collaboratorForm.address}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, address: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">URLs de Imágenes (separadas por comas)</label>
+                <textarea
+                  value={collaboratorForm.images}
+                  onChange={(e) => setCollaboratorForm({...collaboratorForm, images: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={2}
+                  placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
+                />
+              </div>
+              
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={collaboratorForm.featured}
+                    onChange={(e) => setCollaboratorForm({...collaboratorForm, featured: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Colaborador destacado</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowCollaboratorModal(false);
+                  setEditingCollaborator(null);
+                  resetCollaboratorForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingCollaborator ? handleUpdateCollaborator : handleCreateCollaborator}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingCollaborator ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* News Modal */}
+      {showNewsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingNews ? 'Editar Noticia' : 'Nueva Noticia'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowNewsModal(false);
+                  setEditingNews(null);
+                  resetNewsForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+                <input
+                  type="text"
+                  value={newsForm.title}
+                  onChange={(e) => setNewsForm({...newsForm, title: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Resumen *</label>
+                <textarea
+                  value={newsForm.summary}
+                  onChange={(e) => setNewsForm({...newsForm, summary: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={2}
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contenido *</label>
+                <textarea
+                  value={newsForm.content}
+                  onChange={(e) => setNewsForm({...newsForm, content: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Autor *</label>
+                  <input
+                    type="text"
+                    value={newsForm.author}
+                    onChange={(e) => setNewsForm({...newsForm, author: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                  <select
+                    value={newsForm.category}
+                    onChange={(e) => setNewsForm({...newsForm, category: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Noticias">Noticias</option>
+                    <option value="Entrevistas">Entrevistas</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen *</label>
+                <input
+                  type="url"
+                  value={newsForm.imageUrl}
+                  onChange={(e) => setNewsForm({...newsForm, imageUrl: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de Lectura (min)</label>
+                  <input
+                    type="number"
+                    value={newsForm.readTime}
+                    onChange={(e) => setNewsForm({...newsForm, readTime: parseInt(e.target.value) || 5})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    min="1"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">URL Externa</label>
+                  <input
+                    type="url"
+                    value={newsForm.externalUrl}
+                    onChange={(e) => setNewsForm({...newsForm, externalUrl: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={newsForm.featured}
+                    onChange={(e) => setNewsForm({...newsForm, featured: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Noticia destacada</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowNewsModal(false);
+                  setEditingNews(null);
+                  resetNewsForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingNews ? handleUpdateNews : handleCreateNews}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingNews ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import CSV Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Upload className="h-6 w-6 text-purple-500" />
+                <h3 className="text-xl font-semibold text-slate-800">Importar Puertos desde CSV</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportFile(null);
+                  setImportPreview([]);
+                }}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">📋 Formato del archivo CSV</h4>
+                <p className="text-blue-700 text-sm mb-3">
+                  El archivo debe tener las siguientes columnas en este orden:
+                </p>
+                <div className="bg-white rounded border p-3 font-mono text-xs overflow-x-auto">
+                  <div className="text-blue-600">
+                    id,name,country,region,maxAltitude,elevationGain,averageGradient,maxGradient,distance,difficulty,coordinates_lat,coordinates_lng,description,imageUrl,category
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-blue-700">
+                  <div>• <strong>id:</strong> Identificador único</div>
+                  <div>• <strong>name:</strong> Nombre del puerto</div>
+                  <div>• <strong>country:</strong> País</div>
+                  <div>• <strong>region:</strong> Región</div>
+                  <div>• <strong>maxAltitude:</strong> Altitud máxima (m)</div>
+                  <div>• <strong>elevationGain:</strong> Desnivel (m)</div>
+                  <div>• <strong>averageGradient:</strong> Pendiente media (%)</div>
+                  <div>• <strong>maxGradient:</strong> Pendiente máxima (%)</div>
+                  <div>• <strong>distance:</strong> Distancia (km)</div>
+                  <div>• <strong>difficulty:</strong> Cuarta/Tercera/Segunda/Primera/Especial</div>
+                  <div>• <strong>coordinates_lat:</strong> Latitud</div>
+                  <div>• <strong>coordinates_lng:</strong> Longitud</div>
+                  <div>• <strong>description:</strong> Descripción</div>
+                  <div>• <strong>imageUrl:</strong> URL de imagen</div>
+                  <div>• <strong>category:</strong> Categoría del puerto</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Seleccionar archivo CSV
+                </label>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileSelect}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {importPreview.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-slate-800 mb-3">Vista previa del archivo:</h4>
+                  <div className="bg-slate-50 rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-xs text-slate-700 whitespace-pre-wrap">
+                      {importPreview.join('\n')}
+                    </pre>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">
+                    Mostrando las primeras 5 filas del archivo...
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Importante</h4>
+                <ul className="text-yellow-700 text-sm space-y-1">
+                  <li>• Los puertos existentes con el mismo ID o nombre serán actualizados</li>
+                  <li>• Los puertos nuevos serán añadidos a la base de datos</li>
+                  <li>• Asegúrate de que el formato del CSV sea correcto</li>
+                  <li>• Se recomienda hacer una copia de seguridad antes de importar</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 p-6 border-t">
+              <button
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportFile(null);
+                  setImportPreview([]);
+                }}
+                className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleImportCSV}
+                disabled={!importFile}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                <span>Importar Puertos</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
