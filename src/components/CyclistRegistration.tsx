@@ -885,41 +885,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
           
           {/* Captcha Section */}
-          
-          {/* Terms and Conditions - Only for first user */}
-          {!hasRegisteredCyclists && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  id="acceptTerms"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className={`mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500 ${
-                    errors.terms ? 'border-red-500' : ''
-                  }`}
-                />
-                <label htmlFor="acceptTerms" className="text-sm text-slate-700 leading-relaxed">
-                  <span className="text-red-500">*</span> Como primer usuario, acepto los{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowTermsModal(true)}
-                    className="text-orange-600 hover:text-orange-700 underline font-medium"
-                  >
-                    términos y condiciones
-                  </button>{' '}
-                  de uso de la plataforma CyclePeaks
-                </label>
-              </div>
-              {errors.terms && (
-                <p className="text-red-500 text-sm mt-2 ml-6">{errors.terms}</p>
-              )}
-              <p className="text-yellow-700 text-xs mt-2 ml-6">
-                Es necesario aceptar los términos para crear la primera cuenta de administrador
-              </p>
-            </div>
-          )}
-          
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
               <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1137,94 +1102,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       
       {showLogin && <LoginModal />}
       {showPasswordRecovery && <PasswordRecoveryModal />}
-      
-      {/* Terms and Conditions Modal */}
-      {showTermsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 rounded-t-xl">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-slate-800">Términos y Condiciones</h2>
-                <button
-                  onClick={() => setShowTermsModal(false)}
-                  className="text-slate-500 hover:text-slate-700 transition-colors p-2 hover:bg-slate-100 rounded-lg"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <p className="text-orange-800 text-sm">
-                  <strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES')}
-                </p>
-              </div>
-
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">1. Aceptación de los Términos</h3>
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">2. Uso de la Plataforma</h3>
-                <ul className="list-disc list-inside text-slate-600 space-y-1">
-                  <li>Debes proporcionar información veraz y actualizada</li>
-                  <li>Eres responsable de mantener la confidencialidad de tu cuenta</li>
-                  <li>No debes usar la plataforma para actividades ilegales o no autorizadas</li>
-                  <li>Respetas los derechos de otros usuarios y de la plataforma</li>
-                </ul>
-              </section>
-                <p className="text-slate-600 leading-relaxed">
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">3. Contenido del Usuario</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Al subir fotos, notas o cualquier contenido a CyclePeaks, otorgas una licencia no exclusiva 
-                  para usar, mostrar y distribuir dicho contenido en relación con el servicio. 
-                  Mantienes todos los derechos sobre tu contenido.
-                </p>
-              </section>
-                  Al registrarte en CyclePeaks, aceptas cumplir con estos términos y condiciones. 
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">4. Privacidad y Datos</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Nos comprometemos a proteger tu privacidad. Los datos personales se procesan de acuerdo 
-                  con nuestra Política de Privacidad. No vendemos ni compartimos tu información personal 
-                  con terceros sin tu consentimiento.
-                </p>
-              </section>
-                  Si no estás de acuerdo con alguna parte de estos términos, no debes usar nuestra plataforma.
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">5. Limitación de Responsabilidad</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  CyclePeaks es una plataforma informativa. No somos responsables de accidentes, lesiones 
-                  o daños que puedan ocurrir durante la práctica del ciclismo. Siempre practica ciclismo 
-                  de forma segura y responsable.
-                </p>
-              </section>
-                </p>
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">6. Modificaciones</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Nos reservamos el derecho de modificar estos términos en cualquier momento. 
-                  Los cambios serán notificados a través de la plataforma y entrarán en vigor 
-                  inmediatamente después de su publicación.
-                </p>
-              </section>
-            </div>
-              </section>
-            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-6 rounded-b-xl">
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowTermsModal(false)}
-                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {showTermsModal && <TermsModal />}
     </div>
     </div>
   );
