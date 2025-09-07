@@ -81,6 +81,59 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
+  // Brand management states
+  const [showAddBrandModal, setShowAddBrandModal] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [showDeleteBrandConfirm, setShowDeleteBrandConfirm] = useState<string | null>(null);
+  const [newBrand, setNewBrand] = useState<Partial<Brand>>({
+    name: '',
+    category: 'Bicicletas',
+    description: '',
+    logo: '',
+    website: '',
+    country: '',
+    foundedYear: undefined,
+    specialties: [],
+    isActive: true,
+    featured: false
+  });
+
+  // Collaborator management states
+  const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [showDeleteCollaboratorConfirm, setShowDeleteCollaboratorConfirm] = useState<string | null>(null);
+  const [newCollaborator, setNewCollaborator] = useState<Partial<Collaborator>>({
+    name: '',
+    category: 'Tienda de Bicicletas',
+    description: '',
+    contactInfo: {
+      email: '',
+      phone: '',
+      website: '',
+      address: ''
+    },
+    images: [],
+    isActive: true,
+    featured: false
+  });
+
+  // News management states
+  const [showAddNewsModal, setShowAddNewsModal] = useState(false);
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+  const [showDeleteNewsConfirm, setShowDeleteNewsConfirm] = useState<string | null>(null);
+  const [newNews, setNewNews] = useState<Partial<NewsArticle>>({
+    title: '',
+    summary: '',
+    content: '',
+    author: '',
+    publishDate: new Date().toISOString().split('T')[0],
+    category: 'Noticias',
+    imageUrl: '',
+    readTime: 5,
+    featured: false,
+    externalUrl: ''
+  });
+
   useEffect(() => {
     setCyclists(loadCyclists());
     setBrands(loadBrands());
@@ -158,6 +211,159 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setShowDeletePortConfirm(null);
   };
 
+  // Brand management functions
+  const handleAddBrand = () => {
+    if (!newBrand.name || !newBrand.category || !newBrand.description) {
+      alert('Por favor completa al menos el nombre, categoría y descripción');
+      return;
+    }
+
+    const brandToAdd: Brand = {
+      id: editingBrand ? editingBrand.id : `brand-${Date.now()}`,
+      name: newBrand.name!,
+      category: newBrand.category as any,
+      description: newBrand.description!,
+      logo: newBrand.logo,
+      website: newBrand.website,
+      country: newBrand.country,
+      foundedYear: newBrand.foundedYear,
+      specialties: newBrand.specialties || [],
+      isActive: newBrand.isActive !== undefined ? newBrand.isActive : true,
+      featured: newBrand.featured !== undefined ? newBrand.featured : false
+    };
+
+    const updatedBrands = editingBrand 
+      ? brands.map(b => b.id === editingBrand.id ? brandToAdd : b)
+      : [...brands, brandToAdd];
+    
+    setBrands(updatedBrands);
+    saveBrands(updatedBrands);
+    setShowAddBrandModal(false);
+    setEditingBrand(null);
+    setNewBrand({
+      name: '',
+      category: 'Bicicletas',
+      description: '',
+      logo: '',
+      website: '',
+      country: '',
+      foundedYear: undefined,
+      specialties: [],
+      isActive: true,
+      featured: false
+    });
+  };
+
+  const handleDeleteBrand = (brandId: string) => {
+    const updatedBrands = brands.filter(b => b.id !== brandId);
+    setBrands(updatedBrands);
+    saveBrands(updatedBrands);
+    setShowDeleteBrandConfirm(null);
+  };
+
+  // Collaborator management functions
+  const handleAddCollaborator = () => {
+    if (!newCollaborator.name || !newCollaborator.category || !newCollaborator.description) {
+      alert('Por favor completa al menos el nombre, categoría y descripción');
+      return;
+    }
+
+    const collaboratorToAdd: Collaborator = {
+      id: editingCollaborator ? editingCollaborator.id : `collaborator-${Date.now()}`,
+      name: newCollaborator.name!,
+      category: newCollaborator.category as any,
+      description: newCollaborator.description!,
+      contactInfo: newCollaborator.contactInfo || {
+        email: '',
+        phone: '',
+        website: '',
+        address: ''
+      },
+      images: newCollaborator.images || [],
+      isActive: newCollaborator.isActive !== undefined ? newCollaborator.isActive : true,
+      featured: newCollaborator.featured !== undefined ? newCollaborator.featured : false
+    };
+
+    const updatedCollaborators = editingCollaborator 
+      ? collaborators.map(c => c.id === editingCollaborator.id ? collaboratorToAdd : c)
+      : [...collaborators, collaboratorToAdd];
+    
+    setCollaborators(updatedCollaborators);
+    saveCollaborators(updatedCollaborators);
+    setShowAddCollaboratorModal(false);
+    setEditingCollaborator(null);
+    setNewCollaborator({
+      name: '',
+      category: 'Tienda de Bicicletas',
+      description: '',
+      contactInfo: {
+        email: '',
+        phone: '',
+        website: '',
+        address: ''
+      },
+      images: [],
+      isActive: true,
+      featured: false
+    });
+  };
+
+  const handleDeleteCollaborator = (collaboratorId: string) => {
+    const updatedCollaborators = collaborators.filter(c => c.id !== collaboratorId);
+    setCollaborators(updatedCollaborators);
+    saveCollaborators(updatedCollaborators);
+    setShowDeleteCollaboratorConfirm(null);
+  };
+
+  // News management functions
+  const handleAddNews = () => {
+    if (!newNews.title || !newNews.summary || !newNews.author) {
+      alert('Por favor completa al menos el título, resumen y autor');
+      return;
+    }
+
+    const newsToAdd: NewsArticle = {
+      id: editingNews ? editingNews.id : `news-${Date.now()}`,
+      title: newNews.title!,
+      summary: newNews.summary!,
+      content: newNews.content || newNews.summary!,
+      author: newNews.author!,
+      publishDate: newNews.publishDate || new Date().toISOString().split('T')[0],
+      category: newNews.category as any || 'Noticias',
+      imageUrl: newNews.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+      readTime: newNews.readTime || 5,
+      featured: newNews.featured !== undefined ? newNews.featured : false,
+      externalUrl: newNews.externalUrl
+    };
+
+    const updatedNews = editingNews 
+      ? news.map(n => n.id === editingNews.id ? newsToAdd : n)
+      : [newsToAdd, ...news]; // Añadir al principio
+    
+    setNews(updatedNews);
+    saveNews(updatedNews);
+    setShowAddNewsModal(false);
+    setEditingNews(null);
+    setNewNews({
+      title: '',
+      summary: '',
+      content: '',
+      author: '',
+      publishDate: new Date().toISOString().split('T')[0],
+      category: 'Noticias',
+      imageUrl: '',
+      readTime: 5,
+      featured: false,
+      externalUrl: ''
+    });
+  };
+
+  const handleDeleteNews = (newsId: string) => {
+    const updatedNews = news.filter(n => n.id !== newsId);
+    setNews(updatedNews);
+    saveNews(updatedNews);
+    setShowDeleteNewsConfirm(null);
+  };
   const handleImportPorts = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -621,6 +827,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {brands.length} marcas totales
                     </span>
                     <button
+                      onClick={() => setShowAddBrandModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Marca</span>
+                    </button>
+                    <button
                       onClick={() => exportBrands(brands)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -629,9 +842,99 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de marcas disponible próximamente
-                </p>
+                
+                {/* Brands Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Marca</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">País</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Fundada</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Estado</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {brands.map((brand) => (
+                        <tr key={brand.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              {brand.logo && (
+                                <img 
+                                  src={brand.logo} 
+                                  alt={`${brand.name} logo`}
+                                  className="w-8 h-8 object-contain rounded"
+                                />
+                              )}
+                              <div>
+                                <p className="font-medium text-slate-800">{brand.name}</p>
+                                <p className="text-sm text-slate-500 line-clamp-1">{brand.description}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{brand.category}</td>
+                          <td className="py-3 px-4 text-slate-600">{brand.country || '-'}</td>
+                          <td className="py-3 px-4 text-slate-600">{brand.foundedYear || '-'}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                brand.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {brand.isActive ? 'Activa' : 'Inactiva'}
+                              </span>
+                              {brand.featured && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                  Destacada
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingBrand(brand);
+                                  setNewBrand({
+                                    name: brand.name,
+                                    category: brand.category,
+                                    description: brand.description,
+                                    logo: brand.logo,
+                                    website: brand.website,
+                                    country: brand.country,
+                                    foundedYear: brand.foundedYear,
+                                    specialties: brand.specialties,
+                                    isActive: brand.isActive,
+                                    featured: brand.featured
+                                  });
+                                  setShowAddBrandModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteBrandConfirm(brand.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {brands.length === 0 && (
+                  <div className="text-center py-12">
+                    <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-xl text-slate-600 mb-2">No hay marcas registradas</p>
+                    <p className="text-slate-500">Añade la primera marca para comenzar</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -644,6 +947,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {collaborators.length} colaboradores totales
                     </span>
                     <button
+                      onClick={() => setShowAddCollaboratorModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Colaborador</span>
+                    </button>
+                    <button
                       onClick={() => exportCollaborators(collaborators)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -652,9 +962,103 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de colaboradores disponible próximamente
-                </p>
+                
+                {/* Collaborators Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Colaborador</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Contacto</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Estado</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {collaborators.map((collaborator) => (
+                        <tr key={collaborator.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              {collaborator.images.length > 0 && (
+                                <img 
+                                  src={collaborator.images[0]} 
+                                  alt={collaborator.name}
+                                  className="w-8 h-8 object-cover rounded"
+                                />
+                              )}
+                              <div>
+                                <p className="font-medium text-slate-800">{collaborator.name}</p>
+                                <p className="text-sm text-slate-500 line-clamp-1">{collaborator.description}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{collaborator.category}</td>
+                          <td className="py-3 px-4">
+                            <div className="text-sm text-slate-600">
+                              {collaborator.contactInfo.email && (
+                                <p>{collaborator.contactInfo.email}</p>
+                              )}
+                              {collaborator.contactInfo.phone && (
+                                <p>{collaborator.contactInfo.phone}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                collaborator.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {collaborator.isActive ? 'Activo' : 'Inactivo'}
+                              </span>
+                              {collaborator.featured && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                  Destacado
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingCollaborator(collaborator);
+                                  setNewCollaborator({
+                                    name: collaborator.name,
+                                    category: collaborator.category,
+                                    description: collaborator.description,
+                                    contactInfo: collaborator.contactInfo,
+                                    images: collaborator.images,
+                                    isActive: collaborator.isActive,
+                                    featured: collaborator.featured
+                                  });
+                                  setShowAddCollaboratorModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteCollaboratorConfirm(collaborator.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {collaborators.length === 0 && (
+                  <div className="text-center py-12">
+                    <UserCheck className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-xl text-slate-600 mb-2">No hay colaboradores registrados</p>
+                    <p className="text-slate-500">Añade el primer colaborador para comenzar</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -667,6 +1071,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {news.length} noticias totales
                     </span>
                     <button
+                      onClick={() => setShowAddNewsModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Noticia</span>
+                    </button>
+                    <button
                       onClick={() => exportNews(news)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -675,9 +1086,97 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de noticias disponible próximamente
-                </p>
+                
+                {/* News Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Noticia</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Autor</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Fecha</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Estado</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {news.map((article) => (
+                        <tr key={article.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <img 
+                                src={article.imageUrl} 
+                                alt={article.title}
+                                className="w-8 h-8 object-cover rounded"
+                              />
+                              <div>
+                                <p className="font-medium text-slate-800 line-clamp-1">{article.title}</p>
+                                <p className="text-sm text-slate-500 line-clamp-1">{article.summary}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{article.author}</td>
+                          <td className="py-3 px-4 text-slate-600">{article.category}</td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {new Date(article.publishDate).toLocaleDateString('es-ES')}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                {article.readTime} min
+                              </span>
+                              {article.featured && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                  Destacada
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingNews(article);
+                                  setNewNews({
+                                    title: article.title,
+                                    summary: article.summary,
+                                    content: article.content,
+                                    author: article.author,
+                                    publishDate: article.publishDate,
+                                    category: article.category,
+                                    imageUrl: article.imageUrl,
+                                    readTime: article.readTime,
+                                    featured: article.featured,
+                                    externalUrl: article.externalUrl
+                                  });
+                                  setShowAddNewsModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteNewsConfirm(article.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {news.length === 0 && (
+                  <div className="text-center py-12">
+                    <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-xl text-slate-600 mb-2">No hay noticias registradas</p>
+                    <p className="text-slate-500">Añade la primera noticia para comenzar</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
