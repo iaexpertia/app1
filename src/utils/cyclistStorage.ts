@@ -42,9 +42,9 @@ export const setCurrentUser = (cyclistId: string): void => {
 
 export const isCurrentUserAdmin = (): boolean => {
   const currentUser = getCurrentUser();
-  // Solo permitir acceso admin si hay usuario actual Y es admin
+  // Permitir acceso admin si no hay usuario actual (para setup inicial)
   if (!currentUser) {
-    return false;
+    return true;
   }
   return currentUser?.isAdmin || false;
 };
