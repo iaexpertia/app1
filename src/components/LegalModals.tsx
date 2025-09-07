@@ -197,17 +197,44 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type })
                   <div className="border-l-4 border-orange-500 pl-4">
                     <h4 className="font-semibold text-slate-800">Cookies analíticas</h4>
                     <p className="text-slate-600 text-sm">
-                      Nos ayudan a entender cómo interactúas con la plataforma para mejorarla.
+                      Nos ayudan a entender cómo interactúas con la plataforma para mejorarla. 
+                      Incluye Google Analytics para análisis de uso.
                     </p>
                     <ul className="list-disc list-inside text-slate-600 text-sm mt-1">
-                      <li>Estadísticas de uso anónimas</li>
+                      <li>Google Analytics (estadísticas de uso anónimas)</li>
                       <li>Páginas más visitadas</li>
                       <li>Tiempo de navegación</li>
+                      <li>Datos demográficos generales</li>
+                      <li>Fuentes de tráfico</li>
                     </ul>
                   </div>
                 </div>
               </section>
 
+              <section>
+                <h3 className="text-lg font-semibold text-slate-800 mb-3">Google Analytics</h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Utilizamos Google Analytics para obtener información sobre cómo los visitantes usan nuestro sitio web. 
+                  Google Analytics recopila información de forma anónima, como el número de visitantes al sitio, 
+                  de dónde han llegado los visitantes y las páginas que visitaron.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">Información sobre Google Analytics:</h4>
+                  <ul className="list-disc list-inside text-blue-700 text-sm space-y-1">
+                    <li>Proveedor: Google Inc.</li>
+                    <li>Finalidad: Análisis estadístico del uso del sitio web</li>
+                    <li>Datos recopilados: Páginas visitadas, tiempo de sesión, ubicación aproximada, dispositivo</li>
+                    <li>Duración: Hasta 26 meses</li>
+                    <li>Transferencia internacional: Estados Unidos (Google LLC)</li>
+                  </ul>
+                  <p className="text-blue-700 text-sm mt-2">
+                    Más información: 
+                    <a href="https://policies.google.com/privacy" className="underline hover:text-blue-800" target="_blank" rel="noopener noreferrer">
+                      Política de Privacidad de Google
+                    </a>
+                  </p>
+                </div>
+              </section>
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">Gestión de cookies</h3>
                 <p className="text-slate-600 leading-relaxed mb-3">
@@ -217,6 +244,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type })
                   <li>Configuración del navegador: Bloquear o eliminar cookies</li>
                   <li>Navegación privada: No se almacenan cookies</li>
                   <li>Herramientas de terceros: Extensiones anti-tracking</li>
+                  <li>Desactivar Google Analytics: <a href="https://tools.google.com/dlpage/gaoptout" className="text-orange-600 hover:text-orange-700 underline" target="_blank" rel="noopener noreferrer">Complemento de inhabilitación</a></li>
                 </ul>
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
                   <p className="text-amber-800 text-sm">
@@ -228,8 +256,9 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type })
               <section>
                 <h3 className="text-lg font-semibold text-slate-800 mb-3">Cookies de terceros</h3>
                 <p className="text-slate-600 leading-relaxed">
-                  Actualmente no utilizamos cookies de terceros. Si en el futuro integramos servicios externos 
-                  (como Google Analytics), te informaremos y solicitaremos tu consentimiento.
+                  Utilizamos Google Analytics, que establece cookies de terceros para el análisis estadístico. 
+                  Estas cookies son gestionadas por Google conforme a su propia política de privacidad. 
+                  Si integramos otros servicios externos en el futuro, te informaremos y solicitaremos tu consentimiento.
                 </p>
               </section>
 
