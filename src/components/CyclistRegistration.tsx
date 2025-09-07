@@ -6,16 +6,18 @@ import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
-import { 
+import { addCyclist } from '../utils/cyclistStorage';
+import {
   User, 
+  Mail, 
   Phone, 
   Calendar, 
   Weight, 
-  Bike as LucideBikeIcon,
-  Plus,
-  Trash2,
+  Bike as BikeIcon2,
+  Plus as Plus2,
+  Trash2 as Trash22,
   Save,
-  UserPlus
+  UserPlus as UserPlus2
 } from 'lucide-react';
 
 interface CyclistRegistrationProps {
@@ -591,6 +593,16 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               <p className="text-red-500 text-sm">{loginErrors.general}</p>
             )}
 
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowPasswordRecovery(true)}
+                className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+
             <div className="flex space-x-3">
               <button
                 type="button"
@@ -1018,7 +1030,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           <div className="border-t pt-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-800 flex items-center">
-                <LucideBikeIcon className="h-5 w-5 mr-2" />
+                <BikeIcon className="h-5 w-5 mr-2" />
                 {t.bikes}
               </h3>
               <button
