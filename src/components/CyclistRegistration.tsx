@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
-import { Eye, EyeOff, Plus, Trash2, UserPlus, LogIn, Bike as BikeIcon, FileText, X } from 'lucide-react';
+import { addCyclist } from '../utils/cyclistStorage';
 import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
@@ -57,8 +57,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   // Captcha state
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
   const [captchaInput, setCaptchaInput] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
   const [captchaError, setCaptchaError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -324,10 +322,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       newErrors.captcha = 'Captcha incorrecto';
     } else {
       setCaptchaError('');
-    }
-    
-    if (!acceptedTerms) {
-      newErrors.terms = 'Debes aceptar los términos y condiciones para continuar';
     }
     
     setErrors(newErrors);
@@ -1167,36 +1161,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 <p className="text-orange-800 text-sm">
                   <strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES')}
                 </p>
-              </div>
-              
-              {/* Terms and Conditions */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    id="acceptTerms"
-                    checked={acceptedTerms}
-                    onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                  />
-                  <label htmlFor="acceptTerms" className="text-sm text-slate-700 leading-relaxed">
-                    Acepto los{' '}
-                    <button
-                      type="button"
-                      onClick={() => setShowTermsModal(true)}
-                      className="text-orange-600 hover:text-orange-700 underline font-medium"
-                    >
-                      términos y condiciones
-                    </button>{' '}
-                    <span className="text-red-500">*</span>
-                  </label>
-                </div>
-                <p className="text-xs text-slate-600 mt-2 ml-6">
-                  Es obligatorio aceptar los términos y condiciones para completar el registro.
-                </p>
-                {errors.terms && (
-                  <p className="text-red-600 text-sm mt-2 ml-6">{errors.terms}</p>
-                )}
               </div>
 
               <section>
