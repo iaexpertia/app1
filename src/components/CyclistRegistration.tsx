@@ -6,12 +6,12 @@ import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
-import { 
   User, 
+  Mail, 
   Phone, 
   Calendar, 
   Weight, 
-  Bike as LucideBikeIcon,
+  Bike as BikeIcon,
   Plus,
   Trash2,
   Save,
@@ -1018,7 +1018,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           <div className="border-t pt-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-800 flex items-center">
-                <LucideBikeIcon className="h-5 w-5 mr-2" />
+                <BikeIcon className="h-5 w-5 mr-2" />
                 {t.bikes}
               </h3>
               <button
