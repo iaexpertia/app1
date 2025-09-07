@@ -1570,6 +1570,578 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
             </div>
           </div>
         )}
+
+        {/* Add Brand Modal */}
+        {showAddBrandModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingBrand ? 'Editar Marca' : 'Añadir Nueva Marca'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddBrandModal(false);
+                    setEditingBrand(null);
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Nombre de la Marca <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newBrand.name || ''}
+                      onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Trek, Specialized..."
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Categoría <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newBrand.category || 'Bicicletas'}
+                      onChange={(e) => setNewBrand({ ...newBrand, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Bicicletas">Bicicletas</option>
+                      <option value="Componentes">Componentes</option>
+                      <option value="Ropa">Ropa</option>
+                      <option value="Accesorios">Accesorios</option>
+                      <option value="Nutrición">Nutrición</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">País</label>
+                    <input
+                      type="text"
+                      value={newBrand.country || ''}
+                      onChange={(e) => setNewBrand({ ...newBrand, country: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Estados Unidos"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Año de Fundación</label>
+                    <input
+                      type="number"
+                      value={newBrand.foundedYear || ''}
+                      onChange={(e) => setNewBrand({ ...newBrand, foundedYear: parseInt(e.target.value) || undefined })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 1976"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Descripción <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newBrand.description || ''}
+                    onChange={(e) => setNewBrand({ ...newBrand, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Descripción de la marca..."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL del Logo</label>
+                  <input
+                    type="url"
+                    value={newBrand.logo || ''}
+                    onChange={(e) => setNewBrand({ ...newBrand, logo: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://ejemplo.com/logo.png"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+                  <input
+                    type="url"
+                    value={newBrand.website || ''}
+                    onChange={(e) => setNewBrand({ ...newBrand, website: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://www.marca.com"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newBrand.isActive !== undefined ? newBrand.isActive : true}
+                      onChange={(e) => setNewBrand({ ...newBrand, isActive: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Marca Activa</span>
+                  </label>
+                  
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newBrand.featured !== undefined ? newBrand.featured : false}
+                      onChange={(e) => setNewBrand({ ...newBrand, featured: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Marca Destacada</span>
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddBrandModal(false);
+                      setEditingBrand(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddBrand}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingBrand ? 'Actualizar Marca' : 'Añadir Marca'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Collaborator Modal */}
+        {showAddCollaboratorModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingCollaborator ? 'Editar Colaborador' : 'Añadir Nuevo Colaborador'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddCollaboratorModal(false);
+                    setEditingCollaborator(null);
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Nombre <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newCollaborator.name || ''}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Ciclos Montaña Pro"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Categoría <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newCollaborator.category || 'Tienda de Bicicletas'}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Tienda de Bicicletas">Tienda de Bicicletas</option>
+                      <option value="Hotel">Hotel</option>
+                      <option value="Restaurante">Restaurante</option>
+                      <option value="Guía Turístico">Guía Turístico</option>
+                      <option value="Equipamiento">Equipamiento</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Descripción <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newCollaborator.description || ''}
+                    onChange={(e) => setNewCollaborator({ ...newCollaborator, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Descripción del colaborador..."
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={newCollaborator.contactInfo?.email || ''}
+                      onChange={(e) => setNewCollaborator({ 
+                        ...newCollaborator, 
+                        contactInfo: { ...newCollaborator.contactInfo, email: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="contacto@colaborador.com"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+                    <input
+                      type="tel"
+                      value={newCollaborator.contactInfo?.phone || ''}
+                      onChange={(e) => setNewCollaborator({ 
+                        ...newCollaborator, 
+                        contactInfo: { ...newCollaborator.contactInfo, phone: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="+34 123 456 789"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+                  <input
+                    type="url"
+                    value={newCollaborator.contactInfo?.website || ''}
+                    onChange={(e) => setNewCollaborator({ 
+                      ...newCollaborator, 
+                      contactInfo: { ...newCollaborator.contactInfo, website: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://www.colaborador.com"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+                  <input
+                    type="text"
+                    value={newCollaborator.contactInfo?.address || ''}
+                    onChange={(e) => setNewCollaborator({ 
+                      ...newCollaborator, 
+                      contactInfo: { ...newCollaborator.contactInfo, address: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="Calle Principal 123, Ciudad"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newCollaborator.isActive !== undefined ? newCollaborator.isActive : true}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, isActive: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Colaborador Activo</span>
+                  </label>
+                  
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newCollaborator.featured !== undefined ? newCollaborator.featured : false}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, featured: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Colaborador Destacado</span>
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddCollaboratorModal(false);
+                      setEditingCollaborator(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddCollaborator}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingCollaborator ? 'Actualizar Colaborador' : 'Añadir Colaborador'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add News Modal */}
+        {showAddNewsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingNews ? 'Editar Noticia' : 'Añadir Nueva Noticia'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddNewsModal(false);
+                    setEditingNews(null);
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Título <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newNews.title || ''}
+                      onChange={(e) => setNewNews({ ...newNews, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Título de la noticia..."
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Autor <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newNews.author || ''}
+                      onChange={(e) => setNewNews({ ...newNews, author: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Nombre del autor"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+                    <select
+                      value={newNews.category || 'Noticias'}
+                      onChange={(e) => setNewNews({ ...newNews, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Competición">Competición</option>
+                      <option value="Equipamiento">Equipamiento</option>
+                      <option value="Rutas">Rutas</option>
+                      <option value="Noticias">Noticias</option>
+                      <option value="Entrevistas">Entrevistas</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Publicación</label>
+                    <input
+                      type="date"
+                      value={newNews.publishDate || ''}
+                      onChange={(e) => setNewNews({ ...newNews, publishDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Tiempo de Lectura (min)</label>
+                    <input
+                      type="number"
+                      value={newNews.readTime || ''}
+                      onChange={(e) => setNewNews({ ...newNews, readTime: parseInt(e.target.value) || 5 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="5"
+                      min="1"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Resumen <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newNews.summary || ''}
+                    onChange={(e) => setNewNews({ ...newNews, summary: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Resumen breve de la noticia..."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Contenido Completo</label>
+                  <textarea
+                    value={newNews.content || ''}
+                    onChange={(e) => setNewNews({ ...newNews, content: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={6}
+                    placeholder="Contenido completo de la noticia..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL de Imagen</label>
+                  <input
+                    type="url"
+                    value={newNews.imageUrl || ''}
+                    onChange={(e) => setNewNews({ ...newNews, imageUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://images.pexels.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL Externa (opcional)</label>
+                  <input
+                    type="url"
+                    value={newNews.externalUrl || ''}
+                    onChange={(e) => setNewNews({ ...newNews, externalUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://sitio-externo.com/noticia"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newNews.featured !== undefined ? newNews.featured : false}
+                      onChange={(e) => setNewNews({ ...newNews, featured: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Noticia Destacada</span>
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddNewsModal(false);
+                      setEditingNews(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddNews}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingNews ? 'Actualizar Noticia' : 'Añadir Noticia'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Brand Confirmation Modal */}
+        {showDeleteBrandConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar esta marca?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteBrandConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteBrand(showDeleteBrandConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Collaborator Confirmation Modal */}
+        {showDeleteCollaboratorConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar este colaborador?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteCollaboratorConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteCollaborator(showDeleteCollaboratorConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete News Confirmation Modal */}
+        {showDeleteNewsConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar esta noticia?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteNewsConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteNews(showDeleteNewsConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
