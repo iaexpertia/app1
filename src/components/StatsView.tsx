@@ -1,24 +1,20 @@
 import React from 'react';
 import { UserStats, MountainPass } from '../types';
-import { Translation } from '../i18n/translations';
 import { 
   Mountain, 
   TrendingUp, 
   Award, 
   Globe,
   Target,
-  BarChart3,
-  Info
+  BarChart3
 } from 'lucide-react';
 
 interface StatsViewProps {
   stats: UserStats;
   conqueredPasses: MountainPass[];
-  t: Translation;
 }
 
-export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t }) => {
-  const [showTooltip, setShowTooltip] = React.useState(false);
+export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses }) => {
   const progressPercentage = (stats.conqueredPasses / stats.totalPasses) * 100;
   
   const difficultyStats = conqueredPasses.reduce((acc, pass) => {
@@ -32,23 +28,22 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
   }, {} as Record<string, number>);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">{t.statsTitle}</h2>
-        <p className="text-slate-600">{t.statsDescription}</p>
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">Your Conquest Statistics</h2>
+        <p className="text-slate-600">Track your progress as you conquer the world's greatest climbs.</p>
       </div>
       
       {/* Progress Overview */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div className="flex items-center mb-6">
           <Target className="h-6 w-6 text-orange-500 mr-3" />
-          <h3 className="text-xl font-semibold text-slate-800">{t.overallProgress}</h3>
+          <h3 className="text-xl font-semibold text-slate-800">Overall Progress</h3>
         </div>
         
         <div className="mb-6">
           <div className="flex justify-between text-sm text-slate-600 mb-2">
-            <span>{t.passesConqueredStat}</span>
+            <span>Passes Conquered</span>
             <span>{stats.conqueredPasses} / {stats.totalPasses}</span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-3">
@@ -58,7 +53,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
             ></div>
           </div>
           <p className="text-right text-lg font-bold text-orange-600 mt-2">
-            {progressPercentage.toFixed(1)}% {t.complete}
+            {progressPercentage.toFixed(1)}% Complete
           </p>
         </div>
       </div>
@@ -70,7 +65,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
             <Mountain className="h-8 w-8 text-orange-500" />
             <span className="text-2xl font-bold text-slate-800">{stats.conqueredPasses}</span>
           </div>
-          <h3 className="text-sm font-medium text-slate-600">{t.passesConqueredStat}</h3>
+          <h3 className="text-sm font-medium text-slate-600">Passes Conquered</h3>
         </div>
         
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -80,32 +75,15 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
               {(stats.totalElevationGain / 1000).toFixed(1)}k
             </span>
           </div>
-          <h3 className="text-sm font-medium text-slate-600">{t.elevationGained}</h3>
+          <h3 className="text-sm font-medium text-slate-600">Elevation Gained (m)</h3>
         </div>
         
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <Award className="h-8 w-8 text-purple-500" />
-              <div className="relative">
-                <button
-                  onMouseEnter={() => setShowTooltip(true)}
-                  onMouseLeave={() => setShowTooltip(false)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <Info className="h-4 w-4" />
-                </button>
-                {showTooltip && (
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-10">
-                    Por ejemplo, si has conquistado puertos con pendientes de 8%, 6% y 10%, la dificultad media será 8.0%.
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <Award className="h-8 w-8 text-purple-500" />
             <span className="text-2xl font-bold text-slate-800">{stats.averageDifficulty}</span>
           </div>
-          <h3 className="text-sm font-medium text-slate-600">{t.avgDifficulty}</h3>
+          <h3 className="text-sm font-medium text-slate-600">Avg Difficulty</h3>
         </div>
         
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -113,7 +91,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
             <Globe className="h-8 w-8 text-blue-500" />
             <span className="text-2xl font-bold text-slate-800">{stats.countriesVisited.length}</span>
           </div>
-          <h3 className="text-sm font-medium text-slate-600">{t.countriesVisited}</h3>
+          <h3 className="text-sm font-medium text-slate-600">Countries Visited</h3>
         </div>
       </div>
       
@@ -122,25 +100,23 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex items-center mb-6">
             <BarChart3 className="h-6 w-6 text-orange-500 mr-3" />
-            <h3 className="text-xl font-semibold text-slate-800">{t.difficultyBreakdown}</h3>
+            <h3 className="text-xl font-semibold text-slate-800">Difficulty Breakdown</h3>
           </div>
           
           <div className="space-y-4">
             {Object.entries(difficultyStats).map(([difficulty, count]) => {
               const percentage = (count / stats.conqueredPasses) * 100;
               const colorMap: Record<string, string> = {
-                Cuarta: 'bg-green-500',
-                Tercera: 'bg-blue-500',
-                Segunda: 'bg-yellow-500',
-                Primera: 'bg-orange-500',
-                Especial: 'bg-red-500',
-                HC: 'bg-purple-500'
+                Easy: 'bg-green-500',
+                Medium: 'bg-yellow-500',
+                Hard: 'bg-orange-500',
+                Extreme: 'bg-red-500'
               };
               
               return (
                 <div key={difficulty}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-700">{t[difficulty.toLowerCase() as keyof Translation] || difficulty}</span>
+                    <span className="text-slate-700">{difficulty}</span>
                     <span className="text-slate-600">{count} passes</span>
                   </div>
                   <div className="w-full bg-slate-200 rounded-full h-2">
@@ -158,19 +134,18 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex items-center mb-6">
             <Globe className="h-6 w-6 text-orange-500 mr-3" />
-            <h3 className="text-xl font-semibold text-slate-800">{t.regionalDistribution}</h3>
+            <h3 className="text-xl font-semibold text-slate-800">Regional Distribution</h3>
           </div>
           
           <div className="space-y-4">
             {Object.entries(categoryStats).map(([category, count]) => {
               const percentage = (count / stats.conqueredPasses) * 100;
               const colorMap: Record<string, string> = {
-                'Alpes': 'bg-blue-500',
-                'Pirineos': 'bg-purple-500', 
-                'Dolomitas': 'bg-pink-500',
-                'Andes': 'bg-emerald-500',
-                'Otros': 'bg-gray-500',
-                'Provenza': 'bg-yellow-500'
+                Alps: 'bg-blue-500',
+                Pyrenees: 'bg-purple-500',
+                Dolomites: 'bg-pink-500',
+                Andes: 'bg-emerald-500',
+                Other: 'bg-slate-500'
               };
               
               return (
@@ -197,34 +172,21 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
         <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
           <div className="flex items-center mb-6">
             <Globe className="h-6 w-6 text-orange-500 mr-3" />
-            <h3 className="text-xl font-semibold text-slate-800">{t.countriesConquered}</h3>
+            <h3 className="text-xl font-semibold text-slate-800">Countries Conquered</h3>
           </div>
           
           <div className="flex flex-wrap gap-2">
-            {stats.countriesVisited.map(country => {
-              const getCountryText = (country: string) => {
-                const countryMap: Record<string, keyof Translation> = {
-                  'France': 'france',
-                  'Italy': 'italy',
-                  'Spain': 'spain',
-                  'England': 'england'
-                };
-                return t[countryMap[country]] || country;
-              };
-              
-              return (
-                <span 
-                  key={country}
-                  className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium"
-                >
-                  {getCountryText(country)}
-                </span>
-              );
-            })}
+            {stats.countriesVisited.map(country => (
+              <span 
+                key={country}
+                className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium"
+              >
+                {country}
+              </span>
+            ))}
           </div>
         </div>
       )}
-    </div>
     </div>
   );
 };

@@ -8,7 +8,7 @@ export interface MountainPass {
   averageGradient: number;
   maxGradient: number;
   distance: number;
-  difficulty: 'Cuarta' | 'Tercera' | 'Segunda' | 'Primera' | 'Especial';
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Extreme';
   coordinates: {
     lat: number;
     lng: number;
@@ -21,7 +21,7 @@ export interface MountainPass {
     time?: string;
   }[];
   imageUrl: string;
-  category: string;
+  category: 'Alps' | 'Pyrenees' | 'Dolomites' | 'Andes' | 'Other';
 }
 
 export interface ConquestData {
@@ -29,7 +29,6 @@ export interface ConquestData {
   dateCompleted: string;
   timeCompleted?: string;
   personalNotes?: string;
-  photos?: string[];
 }
 
 export interface UserStats {
@@ -38,70 +37,4 @@ export interface UserStats {
   totalElevationGain: number;
   averageDifficulty: string;
   countriesVisited: string[];
-}
-
-export interface Cyclist {
-  id: string;
-  name: string;
-  alias?: string;
-  email: string;
-  password?: string;
-  phone: string;
-  age?: number;
-  weight?: number;
-  bikes: Bike[];
-  registrationDate: string;
-  isAdmin?: boolean;
-}
-
-export interface Bike {
-  id: string;
-  brand: string;
-  model: string;
-  year?: number;
-  type: 'Road' | 'Mountain' | 'Gravel' | 'Electric' | 'Other';
-}
-
-export interface Collaborator {
-  id: string;
-  name: string;
-  category: 'Tienda de Bicicletas' | 'Hotel' | 'Restaurante' | 'Guía Turístico' | 'Equipamiento' | 'Otros';
-  description: string;
-  contactInfo: {
-    email?: string;
-    phone?: string;
-    website?: string;
-    address?: string;
-  };
-  images: string[];
-  isActive: boolean;
-  featured: boolean;
-}
-
-export interface Brand {
-  id: string;
-  name: string;
-  category: 'Bicicletas' | 'Componentes' | 'Ropa' | 'Accesorios' | 'Nutrición' | 'Otros';
-  description: string;
-  logo?: string;
-  website?: string;
-  country?: string;
-  foundedYear?: number;
-  specialties: string[];
-  isActive: boolean;
-  featured: boolean;
-}
-
-export interface NewsArticle {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
-  author: string;
-  publishDate: string;
-  category: 'Competición' | 'Equipamiento' | 'Rutas' | 'Noticias' | 'Entrevistas';
-  imageUrl: string;
-  readTime: number;
-  featured: boolean;
-  externalUrl?: string;
 }
