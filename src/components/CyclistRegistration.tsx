@@ -354,10 +354,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     if (success) {
      // Redirect to main passes page after successful login
      if (onRegistrationSuccess) {
-      if (!phoneNumber.trim()) {
-       onRegistrationSuccess();
-     }
       onRegistrationSuccess();
+      }
       return true;
     }
     return false;
