@@ -28,7 +28,9 @@ import {
   Facebook,
   Youtube,
   Linkedin,
-  Globe
+  Globe,
+  Plus,
+  Upload
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -58,7 +60,79 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   });
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
   const [editingPass, setEditingPass] = useState<MountainPass | null>(null);
+  const [editingPort, setEditingPort] = useState<MountainPass | null>(null);
+  const [showAddPortModal, setShowAddPortModal] = useState(false);
+  const [showDeletePortConfirm, setShowDeletePortConfirm] = useState<string | null>(null);
+  const [newPort, setNewPort] = useState<Partial<MountainPass>>({
+    name: '',
+    country: '',
+    region: '',
+    maxAltitude: 0,
+    elevationGain: 0,
+    averageGradient: 0,
+    maxGradient: 0,
+    distance: 0,
+    difficulty: 'Cuarta',
+    coordinates: { lat: 0, lng: 0 },
+    description: '',
+    imageUrl: '',
+    category: 'Otros',
+    famousWinners: []
+  });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  // Brand management states
+  const [showAddBrandModal, setShowAddBrandModal] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [showDeleteBrandConfirm, setShowDeleteBrandConfirm] = useState<string | null>(null);
+  const [newBrand, setNewBrand] = useState<Partial<Brand>>({
+    name: '',
+    category: 'Bicicletas',
+    description: '',
+    logo: '',
+    website: '',
+    country: '',
+    foundedYear: undefined,
+    specialties: [],
+    isActive: true,
+    featured: false
+  });
+
+  // Collaborator management states
+  const [showAddCollaboratorModal, setShowAddCollaboratorModal] = useState(false);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [showDeleteCollaboratorConfirm, setShowDeleteCollaboratorConfirm] = useState<string | null>(null);
+  const [newCollaborator, setNewCollaborator] = useState<Partial<Collaborator>>({
+    name: '',
+    category: 'Tienda de Bicicletas',
+    description: '',
+    contactInfo: {
+      email: '',
+      phone: '',
+      website: '',
+      address: ''
+    },
+    images: [],
+    isActive: true,
+    featured: false
+  });
+
+  // News management states
+  const [showAddNewsModal, setShowAddNewsModal] = useState(false);
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+  const [showDeleteNewsConfirm, setShowDeleteNewsConfirm] = useState<string | null>(null);
+  const [newNews, setNewNews] = useState<Partial<NewsArticle>>({
+    title: '',
+    summary: '',
+    content: '',
+    author: '',
+    publishDate: new Date().toISOString().split('T')[0],
+    category: 'Noticias',
+    imageUrl: '',
+    readTime: 5,
+    featured: false,
+    externalUrl: ''
+  });
 
   useEffect(() => {
     setCyclists(loadCyclists());
@@ -83,6 +157,288 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const handleUpdatePass = (pass: MountainPass) => {
     onUpdatePass(pass);
     setEditingPass(null);
+  };
+
+  const handleAddPort = () => {
+    if (!newPort.name || !newPort.country || !newPort.region) {
+      alert('Por favor completa al menos el nombre, país y región');
+      return;
+    }
+
+    const portToAdd: MountainPass = {
+      id: editingPort ? editingPort.id : `port-${Date.now()}`,
+      name: newPort.name!,
+      country: newPort.country!,
+      region: newPort.region!,
+      maxAltitude: newPort.maxAltitude || 0,
+      elevationGain: newPort.elevationGain || 0,
+      averageGradient: newPort.averageGradient || 0,
+      maxGradient: newPort.maxGradient || 0,
+      distance: newPort.distance || 0,
+      difficulty: newPort.difficulty as any || 'Cuarta',
+      coordinates: newPort.coordinates || { lat: 0, lng: 0 },
+      description: newPort.description || '',
+      famousWinners: newPort.famousWinners || [],
+      imageUrl: newPort.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+      category: newPort.category || 'Otros'
+    };
+
+    onUpdatePass(portToAdd);
+    setShowAddPortModal(false);
+    setEditingPort(null);
+    setNewPort({
+      name: '',
+      country: '',
+      region: '',
+      maxAltitude: 0,
+      elevationGain: 0,
+      averageGradient: 0,
+      maxGradient: 0,
+      distance: 0,
+      difficulty: 'Cuarta',
+      coordinates: { lat: 0, lng: 0 },
+      description: '',
+      imageUrl: '',
+      category: 'Otros',
+      famousWinners: []
+    });
+  };
+
+  const handleDeletePort = (portId: string) => {
+    // In a real app, you would call a delete function
+    // For now, we'll just show an alert
+    alert('Funcionalidad de eliminación disponible próximamente');
+    setShowDeletePortConfirm(null);
+  };
+
+  // Brand management functions
+  const handleAddBrand = () => {
+    if (!newBrand.name || !newBrand.category || !newBrand.description) {
+      alert('Por favor completa al menos el nombre, categoría y descripción');
+      return;
+    }
+
+    const brandToAdd: Brand = {
+      id: editingBrand ? editingBrand.id : `brand-${Date.now()}`,
+      name: newBrand.name!,
+      category: newBrand.category as any,
+      description: newBrand.description!,
+      logo: newBrand.logo,
+      website: newBrand.website,
+      country: newBrand.country,
+      foundedYear: newBrand.foundedYear,
+      specialties: newBrand.specialties || [],
+      isActive: newBrand.isActive !== undefined ? newBrand.isActive : true,
+      featured: newBrand.featured !== undefined ? newBrand.featured : false
+    };
+
+    const updatedBrands = editingBrand 
+      ? brands.map(b => b.id === editingBrand.id ? brandToAdd : b)
+      : [...brands, brandToAdd];
+    
+    setBrands(updatedBrands);
+    saveBrands(updatedBrands);
+    setShowAddBrandModal(false);
+    setEditingBrand(null);
+    setNewBrand({
+      name: '',
+      category: 'Bicicletas',
+      description: '',
+      logo: '',
+      website: '',
+      country: '',
+      foundedYear: undefined,
+      specialties: [],
+      isActive: true,
+      featured: false
+    });
+  };
+
+  const handleDeleteBrand = (brandId: string) => {
+    const updatedBrands = brands.filter(b => b.id !== brandId);
+    setBrands(updatedBrands);
+    saveBrands(updatedBrands);
+    setShowDeleteBrandConfirm(null);
+  };
+
+  // Collaborator management functions
+  const handleAddCollaborator = () => {
+    if (!newCollaborator.name || !newCollaborator.category || !newCollaborator.description) {
+      alert('Por favor completa al menos el nombre, categoría y descripción');
+      return;
+    }
+
+    const collaboratorToAdd: Collaborator = {
+      id: editingCollaborator ? editingCollaborator.id : `collaborator-${Date.now()}`,
+      name: newCollaborator.name!,
+      category: newCollaborator.category as any,
+      description: newCollaborator.description!,
+      contactInfo: newCollaborator.contactInfo || {
+        email: '',
+        phone: '',
+        website: '',
+        address: ''
+      },
+      images: newCollaborator.images || [],
+      isActive: newCollaborator.isActive !== undefined ? newCollaborator.isActive : true,
+      featured: newCollaborator.featured !== undefined ? newCollaborator.featured : false
+    };
+
+    const updatedCollaborators = editingCollaborator 
+      ? collaborators.map(c => c.id === editingCollaborator.id ? collaboratorToAdd : c)
+      : [...collaborators, collaboratorToAdd];
+    
+    setCollaborators(updatedCollaborators);
+    saveCollaborators(updatedCollaborators);
+    setShowAddCollaboratorModal(false);
+    setEditingCollaborator(null);
+    setNewCollaborator({
+      name: '',
+      category: 'Tienda de Bicicletas',
+      description: '',
+      contactInfo: {
+        email: '',
+        phone: '',
+        website: '',
+        address: ''
+      },
+      images: [],
+      isActive: true,
+      featured: false
+    });
+  };
+
+  const handleDeleteCollaborator = (collaboratorId: string) => {
+    const updatedCollaborators = collaborators.filter(c => c.id !== collaboratorId);
+    setCollaborators(updatedCollaborators);
+    saveCollaborators(updatedCollaborators);
+    setShowDeleteCollaboratorConfirm(null);
+  };
+
+  // News management functions
+  const handleAddNews = () => {
+    if (!newNews.title || !newNews.summary || !newNews.author) {
+      alert('Por favor completa al menos el título, resumen y autor');
+      return;
+    }
+
+    const newsToAdd: NewsArticle = {
+      id: editingNews ? editingNews.id : `news-${Date.now()}`,
+      title: newNews.title!,
+      summary: newNews.summary!,
+      content: newNews.content || newNews.summary!,
+      author: newNews.author!,
+      publishDate: newNews.publishDate || new Date().toISOString().split('T')[0],
+      category: newNews.category as any || 'Noticias',
+      imageUrl: newNews.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+      readTime: newNews.readTime || 5,
+      featured: newNews.featured !== undefined ? newNews.featured : false,
+      externalUrl: newNews.externalUrl
+    };
+
+    const updatedNews = editingNews 
+      ? news.map(n => n.id === editingNews.id ? newsToAdd : n)
+      : [newsToAdd, ...news]; // Añadir al principio
+    
+    setNews(updatedNews);
+    saveNews(updatedNews);
+    setShowAddNewsModal(false);
+    setEditingNews(null);
+    setNewNews({
+      title: '',
+      summary: '',
+      content: '',
+      author: '',
+      publishDate: new Date().toISOString().split('T')[0],
+      category: 'Noticias',
+      imageUrl: '',
+      readTime: 5,
+      featured: false,
+      externalUrl: ''
+    });
+  };
+
+  const handleDeleteNews = (newsId: string) => {
+    const updatedNews = news.filter(n => n.id !== newsId);
+    setNews(updatedNews);
+    saveNews(updatedNews);
+    setShowDeleteNewsConfirm(null);
+  };
+  const handleImportPorts = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const csv = e.target?.result as string;
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        
+        let importedCount = 0;
+        
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          
+          const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+          
+          if (values.length >= headers.length) {
+            const port: MountainPass = {
+              id: values[0] || `imported-${Date.now()}-${i}`,
+              name: values[1] || `Puerto ${i}`,
+              country: values[2] || 'España',
+              region: values[3] || 'Región',
+              maxAltitude: parseInt(values[4]) || 1000,
+              elevationGain: parseInt(values[5]) || 500,
+              averageGradient: parseFloat(values[6]) || 7.0,
+              maxGradient: parseFloat(values[7]) || 12.0,
+              distance: parseFloat(values[8]) || 10.0,
+              difficulty: (values[9] as any) || 'Segunda',
+              coordinates: {
+                lat: parseFloat(values[10]) || 40.0,
+                lng: parseFloat(values[11]) || -3.0
+              },
+              description: values[12] || 'Puerto importado desde CSV',
+              imageUrl: values[13] || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+              category: values[14] || 'Otros',
+              famousWinners: []
+            };
+            
+            onUpdatePass(port);
+            importedCount++;
+          }
+        }
+        
+        alert(`Se importaron ${importedCount} puertos exitosamente`);
+      } catch (error) {
+        alert('Error al importar el archivo CSV. Verifica el formato.');
+      }
+    };
+    
+    reader.readAsText(file);
+    event.target.value = ''; // Reset file input
+  };
+
+  const handleEditPort = (port: MountainPass) => {
+    setEditingPort(port);
+    setNewPort({
+      name: port.name,
+      country: port.country,
+      region: port.region,
+      maxAltitude: port.maxAltitude,
+      elevationGain: port.elevationGain,
+      averageGradient: port.averageGradient,
+      maxGradient: port.maxGradient,
+      distance: port.distance,
+      difficulty: port.difficulty,
+      coordinates: port.coordinates,
+      description: port.description,
+      imageUrl: port.imageUrl,
+      category: port.category,
+      famousWinners: port.famousWinners
+    });
+    setShowAddPortModal(true);
   };
 
   const handleSaveSocialUrls = () => {
@@ -365,6 +721,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {passes.length} puertos totales
                     </span>
                     <button
+                      onClick={() => setShowAddPortModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Puerto</span>
+                    </button>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleImportPorts}
+                        className="hidden"
+                        id="import-ports"
+                      />
+                      <label
+                        htmlFor="import-ports"
+                        className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors cursor-pointer"
+                      >
+                        <Upload className="h-4 w-4" />
+                        <span>Importar CSV</span>
+                      </label>
+                    </div>
+                    <button
                       onClick={() => exportMountainPasses(passes)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -373,9 +752,69 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de puertos disponible próximamente
-                </p>
+                
+                {/* Ports Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Nombre</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">País</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Región</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Altitud</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Dificultad</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {passes.map((pass) => (
+                        <tr key={pass.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div>
+                              <p className="font-medium text-slate-800">{pass.name}</p>
+                              <p className="text-sm text-slate-500">{pass.distance}km, {pass.averageGradient}%</p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{pass.country}</td>
+                          <td className="py-3 px-4 text-slate-600">{pass.region}</td>
+                          <td className="py-3 px-4 text-slate-600">{pass.maxAltitude}m</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              pass.difficulty === 'Especial' ? 'bg-red-100 text-red-800' :
+                              pass.difficulty === 'Primera' ? 'bg-orange-100 text-orange-800' :
+                              pass.difficulty === 'Segunda' ? 'bg-yellow-100 text-yellow-800' :
+                              pass.difficulty === 'Tercera' ? 'bg-blue-100 text-blue-800' :
+                              'bg-green-100 text-green-800'
+                            }`}>
+                              {pass.difficulty}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{pass.category}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingPort(pass);
+                                  setShowAddPortModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeletePortConfirm(pass.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 
@@ -388,6 +827,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {brands.length} marcas totales
                     </span>
                     <button
+                      onClick={() => setShowAddBrandModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Marca</span>
+                    </button>
+                    <button
                       onClick={() => exportBrands(brands)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -396,9 +842,99 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de marcas disponible próximamente
-                </p>
+                
+                {/* Brands Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Marca</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">País</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Fundada</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Estado</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {brands.map((brand) => (
+                        <tr key={brand.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              {brand.logo && (
+                                <img 
+                                  src={brand.logo} 
+                                  alt={`${brand.name} logo`}
+                                  className="w-8 h-8 object-contain rounded"
+                                />
+                              )}
+                              <div>
+                                <p className="font-medium text-slate-800">{brand.name}</p>
+                                <p className="text-sm text-slate-500 line-clamp-1">{brand.description}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{brand.category}</td>
+                          <td className="py-3 px-4 text-slate-600">{brand.country || '-'}</td>
+                          <td className="py-3 px-4 text-slate-600">{brand.foundedYear || '-'}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                brand.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {brand.isActive ? 'Activa' : 'Inactiva'}
+                              </span>
+                              {brand.featured && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                  Destacada
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingBrand(brand);
+                                  setNewBrand({
+                                    name: brand.name,
+                                    category: brand.category,
+                                    description: brand.description,
+                                    logo: brand.logo,
+                                    website: brand.website,
+                                    country: brand.country,
+                                    foundedYear: brand.foundedYear,
+                                    specialties: brand.specialties,
+                                    isActive: brand.isActive,
+                                    featured: brand.featured
+                                  });
+                                  setShowAddBrandModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteBrandConfirm(brand.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {brands.length === 0 && (
+                  <div className="text-center py-12">
+                    <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-xl text-slate-600 mb-2">No hay marcas registradas</p>
+                    <p className="text-slate-500">Añade la primera marca para comenzar</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -411,6 +947,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {collaborators.length} colaboradores totales
                     </span>
                     <button
+                      onClick={() => setShowAddCollaboratorModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Colaborador</span>
+                    </button>
+                    <button
                       onClick={() => exportCollaborators(collaborators)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -419,9 +962,103 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de colaboradores disponible próximamente
-                </p>
+                
+                {/* Collaborators Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Colaborador</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Contacto</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Estado</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {collaborators.map((collaborator) => (
+                        <tr key={collaborator.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              {collaborator.images.length > 0 && (
+                                <img 
+                                  src={collaborator.images[0]} 
+                                  alt={collaborator.name}
+                                  className="w-8 h-8 object-cover rounded"
+                                />
+                              )}
+                              <div>
+                                <p className="font-medium text-slate-800">{collaborator.name}</p>
+                                <p className="text-sm text-slate-500 line-clamp-1">{collaborator.description}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{collaborator.category}</td>
+                          <td className="py-3 px-4">
+                            <div className="text-sm text-slate-600">
+                              {collaborator.contactInfo.email && (
+                                <p>{collaborator.contactInfo.email}</p>
+                              )}
+                              {collaborator.contactInfo.phone && (
+                                <p>{collaborator.contactInfo.phone}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                collaborator.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {collaborator.isActive ? 'Activo' : 'Inactivo'}
+                              </span>
+                              {collaborator.featured && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                  Destacado
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingCollaborator(collaborator);
+                                  setNewCollaborator({
+                                    name: collaborator.name,
+                                    category: collaborator.category,
+                                    description: collaborator.description,
+                                    contactInfo: collaborator.contactInfo,
+                                    images: collaborator.images,
+                                    isActive: collaborator.isActive,
+                                    featured: collaborator.featured
+                                  });
+                                  setShowAddCollaboratorModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteCollaboratorConfirm(collaborator.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {collaborators.length === 0 && (
+                  <div className="text-center py-12">
+                    <UserCheck className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-xl text-slate-600 mb-2">No hay colaboradores registrados</p>
+                    <p className="text-slate-500">Añade el primer colaborador para comenzar</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -434,6 +1071,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                       {news.length} noticias totales
                     </span>
                     <button
+                      onClick={() => setShowAddNewsModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Añadir Noticia</span>
+                    </button>
+                    <button
                       onClick={() => exportNews(news)}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
@@ -442,9 +1086,97 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     </button>
                   </div>
                 </div>
-                <p className="text-slate-500 text-center py-8">
-                  Gestión de noticias disponible próximamente
-                </p>
+                
+                {/* News Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Noticia</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Autor</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Categoría</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Fecha</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Estado</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-700">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {news.map((article) => (
+                        <tr key={article.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <img 
+                                src={article.imageUrl} 
+                                alt={article.title}
+                                className="w-8 h-8 object-cover rounded"
+                              />
+                              <div>
+                                <p className="font-medium text-slate-800 line-clamp-1">{article.title}</p>
+                                <p className="text-sm text-slate-500 line-clamp-1">{article.summary}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">{article.author}</td>
+                          <td className="py-3 px-4 text-slate-600">{article.category}</td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {new Date(article.publishDate).toLocaleDateString('es-ES')}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                {article.readTime} min
+                              </span>
+                              {article.featured && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                  Destacada
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingNews(article);
+                                  setNewNews({
+                                    title: article.title,
+                                    summary: article.summary,
+                                    content: article.content,
+                                    author: article.author,
+                                    publishDate: article.publishDate,
+                                    category: article.category,
+                                    imageUrl: article.imageUrl,
+                                    readTime: article.readTime,
+                                    featured: article.featured,
+                                    externalUrl: article.externalUrl
+                                  });
+                                  setShowAddNewsModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteNewsConfirm(article.id)}
+                                className="text-red-600 hover:text-red-800 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {news.length === 0 && (
+                  <div className="text-center py-12">
+                    <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-xl text-slate-600 mb-2">No hay noticias registradas</p>
+                    <p className="text-slate-500">Añade la primera noticia para comenzar</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -553,6 +1285,855 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 </button>
                 <button
                   onClick={() => handleDeleteCyclist(showDeleteConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add/Edit Port Modal */}
+        {showAddPortModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingPort ? 'Editar Puerto' : 'Añadir Nuevo Puerto'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddPortModal(false);
+                    setEditingPort(null);
+                    setNewPort({
+                      name: '',
+                      country: '',
+                      region: '',
+                      maxAltitude: 0,
+                      elevationGain: 0,
+                      averageGradient: 0,
+                      maxGradient: 0,
+                      distance: 0,
+                      difficulty: 'Cuarta',
+                      coordinates: { lat: 0, lng: 0 },
+                      description: '',
+                      imageUrl: '',
+                      category: 'Otros',
+                      famousWinners: []
+                    });
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Nombre del Puerto <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newPort.name || ''}
+                      onChange={(e) => setNewPort({ ...newPort, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Col du Galibier"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      País <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newPort.country || ''}
+                      onChange={(e) => setNewPort({ ...newPort, country: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Francia"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Región <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newPort.region || ''}
+                      onChange={(e) => setNewPort({ ...newPort, region: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Alpes"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+                    <select
+                      value={newPort.category || 'Otros'}
+                      onChange={(e) => setNewPort({ ...newPort, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Alpes">Alpes</option>
+                      <option value="Pirineos">Pirineos</option>
+                      <option value="Dolomitas">Dolomitas</option>
+                      <option value="Andes">Andes</option>
+                      <option value="Provenza">Provenza</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Altitud Máxima (m)</label>
+                    <input
+                      type="number"
+                      value={newPort.maxAltitude || ''}
+                      onChange={(e) => setNewPort({ ...newPort, maxAltitude: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 2645"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Desnivel (m)</label>
+                    <input
+                      type="number"
+                      value={newPort.elevationGain || ''}
+                      onChange={(e) => setNewPort({ ...newPort, elevationGain: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 1200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Distancia (km)</label>
+                    <input
+                      type="number"
+                      value={newPort.distance || ''}
+                      onChange={(e) => setNewPort({ ...newPort, distance: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 18.1"
+                      step="0.1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Pendiente Media (%)</label>
+                    <input
+                      type="number"
+                      value={newPort.averageGradient || ''}
+                      onChange={(e) => setNewPort({ ...newPort, averageGradient: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 6.9"
+                      step="0.1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Pendiente Máxima (%)</label>
+                    <input
+                      type="number"
+                      value={newPort.maxGradient || ''}
+                      onChange={(e) => setNewPort({ ...newPort, maxGradient: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 13.0"
+                      step="0.1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Dificultad UCI</label>
+                    <select
+                      value={newPort.difficulty || 'Cuarta'}
+                      onChange={(e) => setNewPort({ ...newPort, difficulty: e.target.value as any })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Cuarta">4ª Categoría</option>
+                      <option value="Tercera">3ª Categoría</option>
+                      <option value="Segunda">2ª Categoría</option>
+                      <option value="Primera">1ª Categoría</option>
+                      <option value="Especial">Categoría Especial</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Latitud</label>
+                    <input
+                      type="number"
+                      value={newPort.coordinates?.lat || ''}
+                      onChange={(e) => setNewPort({ 
+                        ...newPort, 
+                        coordinates: { 
+                          ...newPort.coordinates, 
+                          lat: parseFloat(e.target.value) || 0 
+                        } 
+                      })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 45.0914"
+                      step="0.000001"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Longitud</label>
+                    <input
+                      type="number"
+                      value={newPort.coordinates?.lng || ''}
+                      onChange={(e) => setNewPort({ 
+                        ...newPort, 
+                        coordinates: { 
+                          ...newPort.coordinates, 
+                          lng: parseFloat(e.target.value) || 0 
+                        } 
+                      })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 6.0669"
+                      step="0.000001"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL de Imagen</label>
+                  <input
+                    type="url"
+                    value={newPort.imageUrl || ''}
+                    onChange={(e) => setNewPort({ ...newPort, imageUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://images.pexels.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                  <textarea
+                    value={newPort.description || ''}
+                    onChange={(e) => setNewPort({ ...newPort, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Descripción del puerto de montaña..."
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddPortModal(false);
+                      setEditingPort(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddPort}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingPort ? 'Actualizar Puerto' : 'Añadir Puerto'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Port Confirmation Modal */}
+        {showDeletePortConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar este puerto?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeletePortConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeletePort(showDeletePortConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Brand Modal */}
+        {showAddBrandModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingBrand ? 'Editar Marca' : 'Añadir Nueva Marca'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddBrandModal(false);
+                    setEditingBrand(null);
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Nombre de la Marca <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newBrand.name || ''}
+                      onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Trek, Specialized..."
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Categoría <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newBrand.category || 'Bicicletas'}
+                      onChange={(e) => setNewBrand({ ...newBrand, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Bicicletas">Bicicletas</option>
+                      <option value="Componentes">Componentes</option>
+                      <option value="Ropa">Ropa</option>
+                      <option value="Accesorios">Accesorios</option>
+                      <option value="Nutrición">Nutrición</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">País</label>
+                    <input
+                      type="text"
+                      value={newBrand.country || ''}
+                      onChange={(e) => setNewBrand({ ...newBrand, country: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Estados Unidos"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Año de Fundación</label>
+                    <input
+                      type="number"
+                      value={newBrand.foundedYear || ''}
+                      onChange={(e) => setNewBrand({ ...newBrand, foundedYear: parseInt(e.target.value) || undefined })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: 1976"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Descripción <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newBrand.description || ''}
+                    onChange={(e) => setNewBrand({ ...newBrand, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Descripción de la marca..."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL del Logo</label>
+                  <input
+                    type="url"
+                    value={newBrand.logo || ''}
+                    onChange={(e) => setNewBrand({ ...newBrand, logo: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://ejemplo.com/logo.png"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+                  <input
+                    type="url"
+                    value={newBrand.website || ''}
+                    onChange={(e) => setNewBrand({ ...newBrand, website: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://www.marca.com"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newBrand.isActive !== undefined ? newBrand.isActive : true}
+                      onChange={(e) => setNewBrand({ ...newBrand, isActive: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Marca Activa</span>
+                  </label>
+                  
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newBrand.featured !== undefined ? newBrand.featured : false}
+                      onChange={(e) => setNewBrand({ ...newBrand, featured: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Marca Destacada</span>
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddBrandModal(false);
+                      setEditingBrand(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddBrand}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingBrand ? 'Actualizar Marca' : 'Añadir Marca'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Collaborator Modal */}
+        {showAddCollaboratorModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingCollaborator ? 'Editar Colaborador' : 'Añadir Nuevo Colaborador'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddCollaboratorModal(false);
+                    setEditingCollaborator(null);
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Nombre <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newCollaborator.name || ''}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Ciclos Montaña Pro"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Categoría <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newCollaborator.category || 'Tienda de Bicicletas'}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Tienda de Bicicletas">Tienda de Bicicletas</option>
+                      <option value="Hotel">Hotel</option>
+                      <option value="Restaurante">Restaurante</option>
+                      <option value="Guía Turístico">Guía Turístico</option>
+                      <option value="Equipamiento">Equipamiento</option>
+                      <option value="Otros">Otros</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Descripción <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newCollaborator.description || ''}
+                    onChange={(e) => setNewCollaborator({ ...newCollaborator, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Descripción del colaborador..."
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={newCollaborator.contactInfo?.email || ''}
+                      onChange={(e) => setNewCollaborator({ 
+                        ...newCollaborator, 
+                        contactInfo: { ...newCollaborator.contactInfo, email: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="contacto@colaborador.com"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+                    <input
+                      type="tel"
+                      value={newCollaborator.contactInfo?.phone || ''}
+                      onChange={(e) => setNewCollaborator({ 
+                        ...newCollaborator, 
+                        contactInfo: { ...newCollaborator.contactInfo, phone: e.target.value }
+                      })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="+34 123 456 789"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web</label>
+                  <input
+                    type="url"
+                    value={newCollaborator.contactInfo?.website || ''}
+                    onChange={(e) => setNewCollaborator({ 
+                      ...newCollaborator, 
+                      contactInfo: { ...newCollaborator.contactInfo, website: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://www.colaborador.com"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+                  <input
+                    type="text"
+                    value={newCollaborator.contactInfo?.address || ''}
+                    onChange={(e) => setNewCollaborator({ 
+                      ...newCollaborator, 
+                      contactInfo: { ...newCollaborator.contactInfo, address: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="Calle Principal 123, Ciudad"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newCollaborator.isActive !== undefined ? newCollaborator.isActive : true}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, isActive: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Colaborador Activo</span>
+                  </label>
+                  
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newCollaborator.featured !== undefined ? newCollaborator.featured : false}
+                      onChange={(e) => setNewCollaborator({ ...newCollaborator, featured: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Colaborador Destacado</span>
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddCollaboratorModal(false);
+                      setEditingCollaborator(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddCollaborator}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingCollaborator ? 'Actualizar Colaborador' : 'Añadir Colaborador'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add News Modal */}
+        {showAddNewsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-800">
+                  {editingNews ? 'Editar Noticia' : 'Añadir Nueva Noticia'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddNewsModal(false);
+                    setEditingNews(null);
+                  }}
+                  className="text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Título <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newNews.title || ''}
+                      onChange={(e) => setNewNews({ ...newNews, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Título de la noticia..."
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Autor <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newNews.author || ''}
+                      onChange={(e) => setNewNews({ ...newNews, author: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Nombre del autor"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+                    <select
+                      value={newNews.category || 'Noticias'}
+                      onChange={(e) => setNewNews({ ...newNews, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="Competición">Competición</option>
+                      <option value="Equipamiento">Equipamiento</option>
+                      <option value="Rutas">Rutas</option>
+                      <option value="Noticias">Noticias</option>
+                      <option value="Entrevistas">Entrevistas</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Publicación</label>
+                    <input
+                      type="date"
+                      value={newNews.publishDate || ''}
+                      onChange={(e) => setNewNews({ ...newNews, publishDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Tiempo de Lectura (min)</label>
+                    <input
+                      type="number"
+                      value={newNews.readTime || ''}
+                      onChange={(e) => setNewNews({ ...newNews, readTime: parseInt(e.target.value) || 5 })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="5"
+                      min="1"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Resumen <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newNews.summary || ''}
+                    onChange={(e) => setNewNews({ ...newNews, summary: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Resumen breve de la noticia..."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Contenido Completo</label>
+                  <textarea
+                    value={newNews.content || ''}
+                    onChange={(e) => setNewNews({ ...newNews, content: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    rows={6}
+                    placeholder="Contenido completo de la noticia..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL de Imagen</label>
+                  <input
+                    type="url"
+                    value={newNews.imageUrl || ''}
+                    onChange={(e) => setNewNews({ ...newNews, imageUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://images.pexels.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL Externa (opcional)</label>
+                  <input
+                    type="url"
+                    value={newNews.externalUrl || ''}
+                    onChange={(e) => setNewNews({ ...newNews, externalUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://sitio-externo.com/noticia"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newNews.featured !== undefined ? newNews.featured : false}
+                      onChange={(e) => setNewNews({ ...newNews, featured: e.target.checked })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Noticia Destacada</span>
+                  </label>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <button
+                    onClick={() => {
+                      setShowAddNewsModal(false);
+                      setEditingNews(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddNews}
+                    className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{editingNews ? 'Actualizar Noticia' : 'Añadir Noticia'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Brand Confirmation Modal */}
+        {showDeleteBrandConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar esta marca?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteBrandConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteBrand(showDeleteBrandConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Collaborator Confirmation Modal */}
+        {showDeleteCollaboratorConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar este colaborador?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteCollaboratorConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteCollaborator(showDeleteCollaboratorConfirm)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete News Confirmation Modal */}
+        {showDeleteNewsConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                ¿Estás seguro de que quieres eliminar esta noticia?
+              </h3>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteNewsConfirm(null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleDeleteNews(showDeleteNewsConfirm)}
                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                 >
                   Eliminar
