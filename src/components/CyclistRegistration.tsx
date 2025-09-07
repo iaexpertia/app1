@@ -51,8 +51,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoveryStatus, setRecoveryStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
-  const [selectedCountryCode, setSelectedCountryCode] = useState('+34');
-  const [phoneNumber, setPhoneNumber] = useState('');
   
   // Captcha state
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
@@ -60,213 +58,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [captchaError, setCaptchaError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-
-  // Country codes database
-  const countryCodes = [
-    { code: '+1', country: 'Estados Unidos / Canadá', flag: '🇺🇸' },
-    { code: '+7', country: 'Rusia', flag: '🇷🇺' },
-    { code: '+20', country: 'Egipto', flag: '🇪🇬' },
-    { code: '+27', country: 'Sudáfrica', flag: '🇿🇦' },
-    { code: '+30', country: 'Grecia', flag: '🇬🇷' },
-    { code: '+31', country: 'Países Bajos', flag: '🇳🇱' },
-    { code: '+32', country: 'Bélgica', flag: '🇧🇪' },
-    { code: '+33', country: 'Francia', flag: '🇫🇷' },
-    { code: '+34', country: 'España', flag: '🇪🇸' },
-    { code: '+39', country: 'Italia', flag: '🇮🇹' },
-    { code: '+41', country: 'Suiza', flag: '🇨🇭' },
-    { code: '+43', country: 'Austria', flag: '🇦🇹' },
-    { code: '+44', country: 'Reino Unido', flag: '🇬🇧' },
-    { code: '+45', country: 'Dinamarca', flag: '🇩🇰' },
-    { code: '+46', country: 'Suecia', flag: '🇸🇪' },
-    { code: '+47', country: 'Noruega', flag: '🇳🇴' },
-    { code: '+48', country: 'Polonia', flag: '🇵🇱' },
-    { code: '+49', country: 'Alemania', flag: '🇩🇪' },
-    { code: '+51', country: 'Perú', flag: '🇵🇪' },
-    { code: '+52', country: 'México', flag: '🇲🇽' },
-    { code: '+53', country: 'Cuba', flag: '🇨🇺' },
-    { code: '+54', country: 'Argentina', flag: '🇦🇷' },
-    { code: '+55', country: 'Brasil', flag: '🇧🇷' },
-    { code: '+56', country: 'Chile', flag: '🇨🇱' },
-    { code: '+57', country: 'Colombia', flag: '🇨🇴' },
-    { code: '+58', country: 'Venezuela', flag: '🇻🇪' },
-    { code: '+60', country: 'Malasia', flag: '🇲🇾' },
-    { code: '+61', country: 'Australia', flag: '🇦🇺' },
-    { code: '+62', country: 'Indonesia', flag: '🇮🇩' },
-    { code: '+63', country: 'Filipinas', flag: '🇵🇭' },
-    { code: '+64', country: 'Nueva Zelanda', flag: '🇳🇿' },
-    { code: '+65', country: 'Singapur', flag: '🇸🇬' },
-    { code: '+66', country: 'Tailandia', flag: '🇹🇭' },
-    { code: '+81', country: 'Japón', flag: '🇯🇵' },
-    { code: '+82', country: 'Corea del Sur', flag: '🇰🇷' },
-    { code: '+84', country: 'Vietnam', flag: '🇻🇳' },
-    { code: '+86', country: 'China', flag: '🇨🇳' },
-    { code: '+90', country: 'Turquía', flag: '🇹🇷' },
-    { code: '+91', country: 'India', flag: '🇮🇳' },
-    { code: '+92', country: 'Pakistán', flag: '🇵🇰' },
-    { code: '+93', country: 'Afganistán', flag: '🇦🇫' },
-    { code: '+94', country: 'Sri Lanka', flag: '🇱🇰' },
-    { code: '+95', country: 'Myanmar', flag: '🇲🇲' },
-    { code: '+98', country: 'Irán', flag: '🇮🇷' },
-    { code: '+212', country: 'Marruecos', flag: '🇲🇦' },
-    { code: '+213', country: 'Argelia', flag: '🇩🇿' },
-    { code: '+216', country: 'Túnez', flag: '🇹🇳' },
-    { code: '+218', country: 'Libia', flag: '🇱🇾' },
-    { code: '+220', country: 'Gambia', flag: '🇬🇲' },
-    { code: '+221', country: 'Senegal', flag: '🇸🇳' },
-    { code: '+222', country: 'Mauritania', flag: '🇲🇷' },
-    { code: '+223', country: 'Malí', flag: '🇲🇱' },
-    { code: '+224', country: 'Guinea', flag: '🇬🇳' },
-    { code: '+225', country: 'Costa de Marfil', flag: '🇨🇮' },
-    { code: '+226', country: 'Burkina Faso', flag: '🇧🇫' },
-    { code: '+227', country: 'Níger', flag: '🇳🇪' },
-    { code: '+228', country: 'Togo', flag: '🇹🇬' },
-    { code: '+229', country: 'Benín', flag: '🇧🇯' },
-    { code: '+230', country: 'Mauricio', flag: '🇲🇺' },
-    { code: '+231', country: 'Liberia', flag: '🇱🇷' },
-    { code: '+232', country: 'Sierra Leona', flag: '🇸🇱' },
-    { code: '+233', country: 'Ghana', flag: '🇬🇭' },
-    { code: '+234', country: 'Nigeria', flag: '🇳🇬' },
-    { code: '+235', country: 'Chad', flag: '🇹🇩' },
-    { code: '+236', country: 'República Centroafricana', flag: '🇨🇫' },
-    { code: '+237', country: 'Camerún', flag: '🇨🇲' },
-    { code: '+238', country: 'Cabo Verde', flag: '🇨🇻' },
-    { code: '+239', country: 'Santo Tomé y Príncipe', flag: '🇸🇹' },
-    { code: '+240', country: 'Guinea Ecuatorial', flag: '🇬🇶' },
-    { code: '+241', country: 'Gabón', flag: '🇬🇦' },
-    { code: '+242', country: 'República del Congo', flag: '🇨🇬' },
-    { code: '+243', country: 'República Democrática del Congo', flag: '🇨🇩' },
-    { code: '+244', country: 'Angola', flag: '🇦🇴' },
-    { code: '+245', country: 'Guinea-Bisáu', flag: '🇬🇼' },
-    { code: '+246', country: 'Territorio Británico del Océano Índico', flag: '🇮🇴' },
-    { code: '+248', country: 'Seychelles', flag: '🇸🇨' },
-    { code: '+249', country: 'Sudán', flag: '🇸🇩' },
-    { code: '+250', country: 'Ruanda', flag: '🇷🇼' },
-    { code: '+251', country: 'Etiopía', flag: '🇪🇹' },
-    { code: '+252', country: 'Somalia', flag: '🇸🇴' },
-    { code: '+253', country: 'Yibuti', flag: '🇩🇯' },
-    { code: '+254', country: 'Kenia', flag: '🇰🇪' },
-    { code: '+255', country: 'Tanzania', flag: '🇹🇿' },
-    { code: '+256', country: 'Uganda', flag: '🇺🇬' },
-    { code: '+257', country: 'Burundi', flag: '🇧🇮' },
-    { code: '+258', country: 'Mozambique', flag: '🇲🇿' },
-    { code: '+260', country: 'Zambia', flag: '🇿🇲' },
-    { code: '+261', country: 'Madagascar', flag: '🇲🇬' },
-    { code: '+262', country: 'Reunión', flag: '🇷🇪' },
-    { code: '+263', country: 'Zimbabue', flag: '🇿🇼' },
-    { code: '+264', country: 'Namibia', flag: '🇳🇦' },
-    { code: '+265', country: 'Malaui', flag: '🇲🇼' },
-    { code: '+266', country: 'Lesoto', flag: '🇱🇸' },
-    { code: '+267', country: 'Botsuana', flag: '🇧🇼' },
-    { code: '+268', country: 'Esuatini', flag: '🇸🇿' },
-    { code: '+269', country: 'Comoras', flag: '🇰🇲' },
-    { code: '+290', country: 'Santa Elena', flag: '🇸🇭' },
-    { code: '+291', country: 'Eritrea', flag: '🇪🇷' },
-    { code: '+297', country: 'Aruba', flag: '🇦🇼' },
-    { code: '+298', country: 'Islas Feroe', flag: '🇫🇴' },
-    { code: '+299', country: 'Groenlandia', flag: '🇬🇱' },
-    { code: '+350', country: 'Gibraltar', flag: '🇬🇮' },
-    { code: '+351', country: 'Portugal', flag: '🇵🇹' },
-    { code: '+352', country: 'Luxemburgo', flag: '🇱🇺' },
-    { code: '+353', country: 'Irlanda', flag: '🇮🇪' },
-    { code: '+354', country: 'Islandia', flag: '🇮🇸' },
-    { code: '+355', country: 'Albania', flag: '🇦🇱' },
-    { code: '+356', country: 'Malta', flag: '🇲🇹' },
-    { code: '+357', country: 'Chipre', flag: '🇨🇾' },
-    { code: '+358', country: 'Finlandia', flag: '🇫🇮' },
-    { code: '+359', country: 'Bulgaria', flag: '🇧🇬' },
-    { code: '+370', country: 'Lituania', flag: '🇱🇹' },
-    { code: '+371', country: 'Letonia', flag: '🇱🇻' },
-    { code: '+372', country: 'Estonia', flag: '🇪🇪' },
-    { code: '+373', country: 'Moldavia', flag: '🇲🇩' },
-    { code: '+374', country: 'Armenia', flag: '🇦🇲' },
-    { code: '+375', country: 'Bielorrusia', flag: '🇧🇾' },
-    { code: '+376', country: 'Andorra', flag: '🇦🇩' },
-    { code: '+377', country: 'Mónaco', flag: '🇲🇨' },
-    { code: '+378', country: 'San Marino', flag: '🇸🇲' },
-    { code: '+380', country: 'Ucrania', flag: '🇺🇦' },
-    { code: '+381', country: 'Serbia', flag: '🇷🇸' },
-    { code: '+382', country: 'Montenegro', flag: '🇲🇪' },
-    { code: '+383', country: 'Kosovo', flag: '🇽🇰' },
-    { code: '+385', country: 'Croacia', flag: '🇭🇷' },
-    { code: '+386', country: 'Eslovenia', flag: '🇸🇮' },
-    { code: '+387', country: 'Bosnia y Herzegovina', flag: '🇧🇦' },
-    { code: '+389', country: 'Macedonia del Norte', flag: '🇲🇰' },
-    { code: '+420', country: 'República Checa', flag: '🇨🇿' },
-    { code: '+421', country: 'Eslovaquia', flag: '🇸🇰' },
-    { code: '+423', country: 'Liechtenstein', flag: '🇱🇮' },
-    { code: '+500', country: 'Islas Malvinas', flag: '🇫🇰' },
-    { code: '+501', country: 'Belice', flag: '🇧🇿' },
-    { code: '+502', country: 'Guatemala', flag: '🇬🇹' },
-    { code: '+503', country: 'El Salvador', flag: '🇸🇻' },
-    { code: '+504', country: 'Honduras', flag: '🇭🇳' },
-    { code: '+505', country: 'Nicaragua', flag: '🇳🇮' },
-    { code: '+506', country: 'Costa Rica', flag: '🇨🇷' },
-    { code: '+507', country: 'Panamá', flag: '🇵🇦' },
-    { code: '+508', country: 'San Pedro y Miquelón', flag: '🇵🇲' },
-    { code: '+509', country: 'Haití', flag: '🇭🇹' },
-    { code: '+590', country: 'Guadalupe', flag: '🇬🇵' },
-    { code: '+591', country: 'Bolivia', flag: '🇧🇴' },
-    { code: '+592', country: 'Guyana', flag: '🇬🇾' },
-    { code: '+593', country: 'Ecuador', flag: '🇪🇨' },
-    { code: '+594', country: 'Guayana Francesa', flag: '🇬🇫' },
-    { code: '+595', country: 'Paraguay', flag: '🇵🇾' },
-    { code: '+596', country: 'Martinica', flag: '🇲🇶' },
-    { code: '+597', country: 'Surinam', flag: '🇸🇷' },
-    { code: '+598', country: 'Uruguay', flag: '🇺🇾' },
-    { code: '+599', country: 'Antillas Neerlandesas', flag: '🇧🇶' },
-    { code: '+670', country: 'Timor Oriental', flag: '🇹🇱' },
-    { code: '+672', country: 'Territorio Antártico Australiano', flag: '🇦🇶' },
-    { code: '+673', country: 'Brunéi', flag: '🇧🇳' },
-    { code: '+674', country: 'Nauru', flag: '🇳🇷' },
-    { code: '+675', country: 'Papúa Nueva Guinea', flag: '🇵🇬' },
-    { code: '+676', country: 'Tonga', flag: '🇹🇴' },
-    { code: '+677', country: 'Islas Salomón', flag: '🇸🇧' },
-    { code: '+678', country: 'Vanuatu', flag: '🇻🇺' },
-    { code: '+679', country: 'Fiyi', flag: '🇫🇯' },
-    { code: '+680', country: 'Palaos', flag: '🇵🇼' },
-    { code: '+681', country: 'Wallis y Futuna', flag: '🇼🇫' },
-    { code: '+682', country: 'Islas Cook', flag: '🇨🇰' },
-    { code: '+683', country: 'Niue', flag: '🇳🇺' },
-    { code: '+684', country: 'Samoa Americana', flag: '🇦🇸' },
-    { code: '+685', country: 'Samoa', flag: '🇼🇸' },
-    { code: '+686', country: 'Kiribati', flag: '🇰🇮' },
-    { code: '+687', country: 'Nueva Caledonia', flag: '🇳🇨' },
-    { code: '+688', country: 'Tuvalu', flag: '🇹🇻' },
-    { code: '+689', country: 'Polinesia Francesa', flag: '🇵🇫' },
-    { code: '+690', country: 'Tokelau', flag: '🇹🇰' },
-    { code: '+691', country: 'Estados Federados de Micronesia', flag: '🇫🇲' },
-    { code: '+692', country: 'Islas Marshall', flag: '🇲🇭' },
-    { code: '+850', country: 'Corea del Norte', flag: '🇰🇵' },
-    { code: '+852', country: 'Hong Kong', flag: '🇭🇰' },
-    { code: '+853', country: 'Macao', flag: '🇲🇴' },
-    { code: '+855', country: 'Camboya', flag: '🇰🇭' },
-    { code: '+856', country: 'Laos', flag: '🇱🇦' },
-    { code: '+880', country: 'Bangladés', flag: '🇧🇩' },
-    { code: '+886', country: 'Taiwán', flag: '🇹🇼' },
-    { code: '+960', country: 'Maldivas', flag: '🇲🇻' },
-    { code: '+961', country: 'Líbano', flag: '🇱🇧' },
-    { code: '+962', country: 'Jordania', flag: '🇯🇴' },
-    { code: '+963', country: 'Siria', flag: '🇸🇾' },
-    { code: '+964', country: 'Irak', flag: '🇮🇶' },
-    { code: '+965', country: 'Kuwait', flag: '🇰🇼' },
-    { code: '+966', country: 'Arabia Saudí', flag: '🇸🇦' },
-    { code: '+967', country: 'Yemen', flag: '🇾🇪' },
-    { code: '+968', country: 'Omán', flag: '🇴🇲' },
-    { code: '+970', country: 'Palestina', flag: '🇵🇸' },
-    { code: '+971', country: 'Emiratos Árabes Unidos', flag: '🇦🇪' },
-    { code: '+972', country: 'Israel', flag: '🇮🇱' },
-    { code: '+973', country: 'Baréin', flag: '🇧🇭' },
-    { code: '+974', country: 'Catar', flag: '🇶🇦' },
-    { code: '+975', country: 'Bután', flag: '🇧🇹' },
-    { code: '+976', country: 'Mongolia', flag: '🇲🇳' },
-    { code: '+977', country: 'Nepal', flag: '🇳🇵' },
-    { code: '+992', country: 'Tayikistán', flag: '🇹🇯' },
-    { code: '+993', country: 'Turkmenistán', flag: '🇹🇲' },
-    { code: '+994', country: 'Azerbaiyán', flag: '🇦🇿' },
-    { code: '+995', country: 'Georgia', flag: '🇬🇪' },
-    { code: '+996', country: 'Kirguistán', flag: '🇰🇬' },
-    { code: '+998', country: 'Uzbekistán', flag: '🇺🇿' }
-  ];
 
   // Generate new captcha
   const generateCaptcha = () => {
@@ -352,10 +143,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     const success = loginUser(email.trim(), password);
     
     if (success) {
-     // Redirect to main passes page after successful login
-     if (onRegistrationSuccess) {
       onRegistrationSuccess();
-      }
       return true;
     }
     return false;
@@ -407,7 +195,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         name: formData.name.trim(),
         alias: formData.alias.trim() || undefined,
         email: formData.email.trim(),
-        phone: `${selectedCountryCode} ${phoneNumber.trim()}`,
+        phone: formData.phone.trim(),
         password: formData.password.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
@@ -772,7 +560,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Email <span className="text-red-500">*</span>
+                <Mail className="h-4 w-4 inline mr-1" />
+                {t.email} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -820,33 +609,18 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Teléfono <span className="text-red-500">*</span>
+                <Phone className="h-4 w-4 inline mr-1" />
+                {t.phone} <span className="text-red-500">*</span>
               </label>
-              <div className="flex space-x-2">
-                <select
-                  value={selectedCountryCode}
-                  onChange={(e) => setSelectedCountryCode(e.target.value)}
-                  className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 bg-white ${
-                    errors.phone ? 'border-red-500' : 'border-slate-300'
-                  }`}
-                  style={{ minWidth: '120px' }}
-                >
-                  {countryCodes.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.flag} {country.code}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
-                    errors.phone ? 'border-red-500' : 'border-slate-300'
-                  }`}
-                  placeholder="123 456 789"
-                />
-              </div>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
+                  errors.phone ? 'border-red-500' : 'border-slate-300'
+                }`}
+                placeholder={t.phonePlaceholder}
+              />
               {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
             </div>
 
