@@ -14,19 +14,16 @@ export const calculateUserStats = (
   
   const countries = [...new Set(conqueredPasses.map(pass => pass.country))];
   
-  const difficultyMap = { Easy: 1, Medium: 2, Hard: 3, Extreme: 4 };
-  const avgDifficulty = conqueredPasses.length > 0 
-    ? conqueredPasses.reduce((sum, pass) => sum + difficultyMap[pass.difficulty], 0) / conqueredPasses.length
+  // Calcular dificultad media basada en el promedio de pendientes
+  const avgDifficultyPercentage = conqueredPasses.length > 0 
+    ? conqueredPasses.reduce((sum, pass) => sum + pass.averageGradient, 0) / conqueredPasses.length
     : 0;
-    
-  const difficultyNames = ['Easy', 'Medium', 'Hard', 'Extreme'];
-  const averageDifficultyName = difficultyNames[Math.round(avgDifficulty) - 1] || 'Beginner';
 
   return {
     totalPasses: allPasses.length,
     conqueredPasses: conquests.length,
     totalElevationGain,
-    averageDifficulty: averageDifficultyName,
+    averageDifficulty: `${avgDifficultyPercentage.toFixed(1)}%`,
     countriesVisited: countries
   };
 };
