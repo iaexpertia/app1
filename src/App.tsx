@@ -127,8 +127,6 @@ function App() {
     // Actualizar estado de admin después del registro/login
     const currentUserIsAdmin = isCurrentUserAdmin();
     setIsAdmin(currentUserIsAdmin);
-   // Redirect to passes tab after successful login/registration
-   setActiveTab('passes');
   };
 
   const handleUpdatePass = (updatedPass: MountainPass) => {

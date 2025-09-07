@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
-import { Eye, EyeOff, Plus, Trash2, UserPlus, LogIn, Bike as BikeIcon, FileText, X } from 'lucide-react';
+import { addCyclist } from '../utils/cyclistStorage';
 import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
-import { addCyclist } from '../utils/cyclistStorage';
-import {
+import { 
   User, 
   Mail, 
   Phone, 
   Calendar, 
   Weight, 
-  Bike as BikeIcon2,
-  Plus as Plus2,
-  Trash2 as Trash22,
+  Bike as BikeIcon,
+  Plus,
+  Trash2,
   Save,
-  UserPlus as UserPlus2
+  UserPlus
 } from 'lucide-react';
 
 interface CyclistRegistrationProps {
@@ -52,222 +51,13 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoveryStatus, setRecoveryStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
-  const [selectedCountryCode, setSelectedCountryCode] = useState('+34');
-  const [phoneNumber, setPhoneNumber] = useState('');
   
   // Captcha state
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
   const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [captchaError, setCaptchaError] = useState('');
-
-  // Country codes database
-  const countryCodes = [
-    { code: '+1', country: 'Estados Unidos / Canadá', flag: '🇺🇸' },
-    { code: '+7', country: 'Rusia', flag: '🇷🇺' },
-    { code: '+20', country: 'Egipto', flag: '🇪🇬' },
-    { code: '+27', country: 'Sudáfrica', flag: '🇿🇦' },
-    { code: '+30', country: 'Grecia', flag: '🇬🇷' },
-    { code: '+31', country: 'Países Bajos', flag: '🇳🇱' },
-    { code: '+32', country: 'Bélgica', flag: '🇧🇪' },
-    { code: '+33', country: 'Francia', flag: '🇫🇷' },
-    { code: '+34', country: 'España', flag: '🇪🇸' },
-    { code: '+39', country: 'Italia', flag: '🇮🇹' },
-    { code: '+41', country: 'Suiza', flag: '🇨🇭' },
-    { code: '+43', country: 'Austria', flag: '🇦🇹' },
-    { code: '+44', country: 'Reino Unido', flag: '🇬🇧' },
-    { code: '+45', country: 'Dinamarca', flag: '🇩🇰' },
-    { code: '+46', country: 'Suecia', flag: '🇸🇪' },
-    { code: '+47', country: 'Noruega', flag: '🇳🇴' },
-    { code: '+48', country: 'Polonia', flag: '🇵🇱' },
-    { code: '+49', country: 'Alemania', flag: '🇩🇪' },
-    { code: '+51', country: 'Perú', flag: '🇵🇪' },
-    { code: '+52', country: 'México', flag: '🇲🇽' },
-    { code: '+53', country: 'Cuba', flag: '🇨🇺' },
-    { code: '+54', country: 'Argentina', flag: '🇦🇷' },
-    { code: '+55', country: 'Brasil', flag: '🇧🇷' },
-    { code: '+56', country: 'Chile', flag: '🇨🇱' },
-    { code: '+57', country: 'Colombia', flag: '🇨🇴' },
-    { code: '+58', country: 'Venezuela', flag: '🇻🇪' },
-    { code: '+60', country: 'Malasia', flag: '🇲🇾' },
-    { code: '+61', country: 'Australia', flag: '🇦🇺' },
-    { code: '+62', country: 'Indonesia', flag: '🇮🇩' },
-    { code: '+63', country: 'Filipinas', flag: '🇵🇭' },
-    { code: '+64', country: 'Nueva Zelanda', flag: '🇳🇿' },
-    { code: '+65', country: 'Singapur', flag: '🇸🇬' },
-    { code: '+66', country: 'Tailandia', flag: '🇹🇭' },
-    { code: '+81', country: 'Japón', flag: '🇯🇵' },
-    { code: '+82', country: 'Corea del Sur', flag: '🇰🇷' },
-    { code: '+84', country: 'Vietnam', flag: '🇻🇳' },
-    { code: '+86', country: 'China', flag: '🇨🇳' },
-    { code: '+90', country: 'Turquía', flag: '🇹🇷' },
-    { code: '+91', country: 'India', flag: '🇮🇳' },
-    { code: '+92', country: 'Pakistán', flag: '🇵🇰' },
-    { code: '+93', country: 'Afganistán', flag: '🇦🇫' },
-    { code: '+94', country: 'Sri Lanka', flag: '🇱🇰' },
-    { code: '+95', country: 'Myanmar', flag: '🇲🇲' },
-    { code: '+98', country: 'Irán', flag: '🇮🇷' },
-    { code: '+212', country: 'Marruecos', flag: '🇲🇦' },
-    { code: '+213', country: 'Argelia', flag: '🇩🇿' },
-    { code: '+216', country: 'Túnez', flag: '🇹🇳' },
-    { code: '+218', country: 'Libia', flag: '🇱🇾' },
-    { code: '+220', country: 'Gambia', flag: '🇬🇲' },
-    { code: '+221', country: 'Senegal', flag: '🇸🇳' },
-    { code: '+222', country: 'Mauritania', flag: '🇲🇷' },
-    { code: '+223', country: 'Malí', flag: '🇲🇱' },
-    { code: '+224', country: 'Guinea', flag: '🇬🇳' },
-    { code: '+225', country: 'Costa de Marfil', flag: '🇨🇮' },
-    { code: '+226', country: 'Burkina Faso', flag: '🇧🇫' },
-    { code: '+227', country: 'Níger', flag: '🇳🇪' },
-    { code: '+228', country: 'Togo', flag: '🇹🇬' },
-    { code: '+229', country: 'Benín', flag: '🇧🇯' },
-    { code: '+230', country: 'Mauricio', flag: '🇲🇺' },
-    { code: '+231', country: 'Liberia', flag: '🇱🇷' },
-    { code: '+232', country: 'Sierra Leona', flag: '🇸🇱' },
-    { code: '+233', country: 'Ghana', flag: '🇬🇭' },
-    { code: '+234', country: 'Nigeria', flag: '🇳🇬' },
-    { code: '+235', country: 'Chad', flag: '🇹🇩' },
-    { code: '+236', country: 'República Centroafricana', flag: '🇨🇫' },
-    { code: '+237', country: 'Camerún', flag: '🇨🇲' },
-    { code: '+238', country: 'Cabo Verde', flag: '🇨🇻' },
-    { code: '+239', country: 'Santo Tomé y Príncipe', flag: '🇸🇹' },
-    { code: '+240', country: 'Guinea Ecuatorial', flag: '🇬🇶' },
-    { code: '+241', country: 'Gabón', flag: '🇬🇦' },
-    { code: '+242', country: 'República del Congo', flag: '🇨🇬' },
-    { code: '+243', country: 'República Democrática del Congo', flag: '🇨🇩' },
-    { code: '+244', country: 'Angola', flag: '🇦🇴' },
-    { code: '+245', country: 'Guinea-Bisáu', flag: '🇬🇼' },
-    { code: '+246', country: 'Territorio Británico del Océano Índico', flag: '🇮🇴' },
-    { code: '+248', country: 'Seychelles', flag: '🇸🇨' },
-    { code: '+249', country: 'Sudán', flag: '🇸🇩' },
-    { code: '+250', country: 'Ruanda', flag: '🇷🇼' },
-    { code: '+251', country: 'Etiopía', flag: '🇪🇹' },
-    { code: '+252', country: 'Somalia', flag: '🇸🇴' },
-    { code: '+253', country: 'Yibuti', flag: '🇩🇯' },
-    { code: '+254', country: 'Kenia', flag: '🇰🇪' },
-    { code: '+255', country: 'Tanzania', flag: '🇹🇿' },
-    { code: '+256', country: 'Uganda', flag: '🇺🇬' },
-    { code: '+257', country: 'Burundi', flag: '🇧🇮' },
-    { code: '+258', country: 'Mozambique', flag: '🇲🇿' },
-    { code: '+260', country: 'Zambia', flag: '🇿🇲' },
-    { code: '+261', country: 'Madagascar', flag: '🇲🇬' },
-    { code: '+262', country: 'Reunión', flag: '🇷🇪' },
-    { code: '+263', country: 'Zimbabue', flag: '🇿🇼' },
-    { code: '+264', country: 'Namibia', flag: '🇳🇦' },
-    { code: '+265', country: 'Malaui', flag: '🇲🇼' },
-    { code: '+266', country: 'Lesoto', flag: '🇱🇸' },
-    { code: '+267', country: 'Botsuana', flag: '🇧🇼' },
-    { code: '+268', country: 'Esuatini', flag: '🇸🇿' },
-    { code: '+269', country: 'Comoras', flag: '🇰🇲' },
-    { code: '+290', country: 'Santa Elena', flag: '🇸🇭' },
-    { code: '+291', country: 'Eritrea', flag: '🇪🇷' },
-    { code: '+297', country: 'Aruba', flag: '🇦🇼' },
-    { code: '+298', country: 'Islas Feroe', flag: '🇫🇴' },
-    { code: '+299', country: 'Groenlandia', flag: '🇬🇱' },
-    { code: '+350', country: 'Gibraltar', flag: '🇬🇮' },
-    { code: '+351', country: 'Portugal', flag: '🇵🇹' },
-    { code: '+352', country: 'Luxemburgo', flag: '🇱🇺' },
-    { code: '+353', country: 'Irlanda', flag: '🇮🇪' },
-    { code: '+354', country: 'Islandia', flag: '🇮🇸' },
-    { code: '+355', country: 'Albania', flag: '🇦🇱' },
-    { code: '+356', country: 'Malta', flag: '🇲🇹' },
-    { code: '+357', country: 'Chipre', flag: '🇨🇾' },
-    { code: '+358', country: 'Finlandia', flag: '🇫🇮' },
-    { code: '+359', country: 'Bulgaria', flag: '🇧🇬' },
-    { code: '+370', country: 'Lituania', flag: '🇱🇹' },
-    { code: '+371', country: 'Letonia', flag: '🇱🇻' },
-    { code: '+372', country: 'Estonia', flag: '🇪🇪' },
-    { code: '+373', country: 'Moldavia', flag: '🇲🇩' },
-    { code: '+374', country: 'Armenia', flag: '🇦🇲' },
-    { code: '+375', country: 'Bielorrusia', flag: '🇧🇾' },
-    { code: '+376', country: 'Andorra', flag: '🇦🇩' },
-    { code: '+377', country: 'Mónaco', flag: '🇲🇨' },
-    { code: '+378', country: 'San Marino', flag: '🇸🇲' },
-    { code: '+380', country: 'Ucrania', flag: '🇺🇦' },
-    { code: '+381', country: 'Serbia', flag: '🇷🇸' },
-    { code: '+382', country: 'Montenegro', flag: '🇲🇪' },
-    { code: '+383', country: 'Kosovo', flag: '🇽🇰' },
-    { code: '+385', country: 'Croacia', flag: '🇭🇷' },
-    { code: '+386', country: 'Eslovenia', flag: '🇸🇮' },
-    { code: '+387', country: 'Bosnia y Herzegovina', flag: '🇧🇦' },
-    { code: '+389', country: 'Macedonia del Norte', flag: '🇲🇰' },
-    { code: '+420', country: 'República Checa', flag: '🇨🇿' },
-    { code: '+421', country: 'Eslovaquia', flag: '🇸🇰' },
-    { code: '+423', country: 'Liechtenstein', flag: '🇱🇮' },
-    { code: '+500', country: 'Islas Malvinas', flag: '🇫🇰' },
-    { code: '+501', country: 'Belice', flag: '🇧🇿' },
-    { code: '+502', country: 'Guatemala', flag: '🇬🇹' },
-    { code: '+503', country: 'El Salvador', flag: '🇸🇻' },
-    { code: '+504', country: 'Honduras', flag: '🇭🇳' },
-    { code: '+505', country: 'Nicaragua', flag: '🇳🇮' },
-    { code: '+506', country: 'Costa Rica', flag: '🇨🇷' },
-    { code: '+507', country: 'Panamá', flag: '🇵🇦' },
-    { code: '+508', country: 'San Pedro y Miquelón', flag: '🇵🇲' },
-    { code: '+509', country: 'Haití', flag: '🇭🇹' },
-    { code: '+590', country: 'Guadalupe', flag: '🇬🇵' },
-    { code: '+591', country: 'Bolivia', flag: '🇧🇴' },
-    { code: '+592', country: 'Guyana', flag: '🇬🇾' },
-    { code: '+593', country: 'Ecuador', flag: '🇪🇨' },
-    { code: '+594', country: 'Guayana Francesa', flag: '🇬🇫' },
-    { code: '+595', country: 'Paraguay', flag: '🇵🇾' },
-    { code: '+596', country: 'Martinica', flag: '🇲🇶' },
-    { code: '+597', country: 'Surinam', flag: '🇸🇷' },
-    { code: '+598', country: 'Uruguay', flag: '🇺🇾' },
-    { code: '+599', country: 'Antillas Neerlandesas', flag: '🇧🇶' },
-    { code: '+670', country: 'Timor Oriental', flag: '🇹🇱' },
-    { code: '+672', country: 'Territorio Antártico Australiano', flag: '🇦🇶' },
-    { code: '+673', country: 'Brunéi', flag: '🇧🇳' },
-    { code: '+674', country: 'Nauru', flag: '🇳🇷' },
-    { code: '+675', country: 'Papúa Nueva Guinea', flag: '🇵🇬' },
-    { code: '+676', country: 'Tonga', flag: '🇹🇴' },
-    { code: '+677', country: 'Islas Salomón', flag: '🇸🇧' },
-    { code: '+678', country: 'Vanuatu', flag: '🇻🇺' },
-    { code: '+679', country: 'Fiyi', flag: '🇫🇯' },
-    { code: '+680', country: 'Palaos', flag: '🇵🇼' },
-    { code: '+681', country: 'Wallis y Futuna', flag: '🇼🇫' },
-    { code: '+682', country: 'Islas Cook', flag: '🇨🇰' },
-    { code: '+683', country: 'Niue', flag: '🇳🇺' },
-    { code: '+684', country: 'Samoa Americana', flag: '🇦🇸' },
-    { code: '+685', country: 'Samoa', flag: '🇼🇸' },
-    { code: '+686', country: 'Kiribati', flag: '🇰🇮' },
-    { code: '+687', country: 'Nueva Caledonia', flag: '🇳🇨' },
-    { code: '+688', country: 'Tuvalu', flag: '🇹🇻' },
-    { code: '+689', country: 'Polinesia Francesa', flag: '🇵🇫' },
-    { code: '+690', country: 'Tokelau', flag: '🇹🇰' },
-    { code: '+691', country: 'Estados Federados de Micronesia', flag: '🇫🇲' },
-    { code: '+692', country: 'Islas Marshall', flag: '🇲🇭' },
-    { code: '+850', country: 'Corea del Norte', flag: '🇰🇵' },
-    { code: '+852', country: 'Hong Kong', flag: '🇭🇰' },
-    { code: '+853', country: 'Macao', flag: '🇲🇴' },
-    { code: '+855', country: 'Camboya', flag: '🇰🇭' },
-    { code: '+856', country: 'Laos', flag: '🇱🇦' },
-    { code: '+880', country: 'Bangladés', flag: '🇧🇩' },
-    { code: '+886', country: 'Taiwán', flag: '🇹🇼' },
-    { code: '+960', country: 'Maldivas', flag: '🇲🇻' },
-    { code: '+961', country: 'Líbano', flag: '🇱🇧' },
-    { code: '+962', country: 'Jordania', flag: '🇯🇴' },
-    { code: '+963', country: 'Siria', flag: '🇸🇾' },
-    { code: '+964', country: 'Irak', flag: '🇮🇶' },
-    { code: '+965', country: 'Kuwait', flag: '🇰🇼' },
-    { code: '+966', country: 'Arabia Saudí', flag: '🇸🇦' },
-    { code: '+967', country: 'Yemen', flag: '🇾🇪' },
-    { code: '+968', country: 'Omán', flag: '🇴🇲' },
-    { code: '+970', country: 'Palestina', flag: '🇵🇸' },
-    { code: '+971', country: 'Emiratos Árabes Unidos', flag: '🇦🇪' },
-    { code: '+972', country: 'Israel', flag: '🇮🇱' },
-    { code: '+973', country: 'Baréin', flag: '🇧🇭' },
-    { code: '+974', country: 'Catar', flag: '🇶🇦' },
-    { code: '+975', country: 'Bután', flag: '🇧🇹' },
-    { code: '+976', country: 'Mongolia', flag: '🇲🇳' },
-    { code: '+977', country: 'Nepal', flag: '🇳🇵' },
-    { code: '+992', country: 'Tayikistán', flag: '🇹🇯' },
-    { code: '+993', country: 'Turkmenistán', flag: '🇹🇲' },
-    { code: '+994', country: 'Azerbaiyán', flag: '🇦🇿' },
-    { code: '+995', country: 'Georgia', flag: '🇬🇪' },
-    { code: '+996', country: 'Kirguistán', flag: '🇰🇬' },
-    { code: '+998', country: 'Uzbekistán', flag: '🇺🇿' }
-  ];
 
   // Generate new captcha
   const generateCaptcha = () => {
@@ -325,10 +115,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       setCaptchaError('');
     }
     
-    if (!acceptedTerms) {
-      newErrors.terms = 'Debes aceptar los términos y condiciones para continuar';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -357,10 +143,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     const success = loginUser(email.trim(), password);
     
     if (success) {
-     // Redirect to main passes page after successful login
-     if (onRegistrationSuccess) {
       onRegistrationSuccess();
-      }
       return true;
     }
     return false;
@@ -412,7 +195,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         name: formData.name.trim(),
         alias: formData.alias.trim() || undefined,
         email: formData.email.trim(),
-        phone: `${selectedCountryCode} ${phoneNumber.trim()}`,
+        phone: formData.phone.trim(),
         password: formData.password.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
@@ -592,16 +375,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             {loginErrors.general && (
               <p className="text-red-500 text-sm">{loginErrors.general}</p>
             )}
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setShowPasswordRecovery(true)}
-                className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
-              >
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
 
             <div className="flex space-x-3">
               <button
@@ -787,7 +560,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Email <span className="text-red-500">*</span>
+                <Mail className="h-4 w-4 inline mr-1" />
+                {t.email} <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -835,33 +609,18 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Teléfono <span className="text-red-500">*</span>
+                <Phone className="h-4 w-4 inline mr-1" />
+                {t.phone} <span className="text-red-500">*</span>
               </label>
-              <div className="flex space-x-2">
-                <select
-                  value={selectedCountryCode}
-                  onChange={(e) => setSelectedCountryCode(e.target.value)}
-                  className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 bg-white ${
-                    errors.phone ? 'border-red-500' : 'border-slate-300'
-                  }`}
-                  style={{ minWidth: '120px' }}
-                >
-                  {countryCodes.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.flag} {country.code}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
-                    errors.phone ? 'border-red-500' : 'border-slate-300'
-                  }`}
-                  placeholder="123 456 789"
-                />
-              </div>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
+                  errors.phone ? 'border-red-500' : 'border-slate-300'
+                }`}
+                placeholder={t.phonePlaceholder}
+              />
               {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
             </div>
 
@@ -900,41 +659,6 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           </div>
           
           {/* Captcha Section */}
-          
-          {/* Terms and Conditions - Only for first user */}
-          {!hasRegisteredCyclists && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  id="acceptTerms"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className={`mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500 ${
-                    errors.terms ? 'border-red-500' : ''
-                  }`}
-                />
-                <label htmlFor="acceptTerms" className="text-sm text-slate-700 leading-relaxed">
-                  <span className="text-red-500">*</span> Como primer usuario, acepto los{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowTermsModal(true)}
-                    className="text-orange-600 hover:text-orange-700 underline font-medium"
-                  >
-                    términos y condiciones
-                  </button>{' '}
-                  de uso de la plataforma CyclePeaks
-                </label>
-              </div>
-              {errors.terms && (
-                <p className="text-red-500 text-sm mt-2 ml-6">{errors.terms}</p>
-              )}
-              <p className="text-yellow-700 text-xs mt-2 ml-6">
-                Es necesario aceptar los términos para crear la primera cuenta de administrador
-              </p>
-            </div>
-          )}
-          
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
               <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1152,247 +876,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       
       {showLogin && <LoginModal />}
       {showPasswordRecovery && <PasswordRecoveryModal />}
-      
-      {/* Terms and Conditions Modal */}
-      {showTermsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 rounded-t-xl">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-slate-800">Términos y Condiciones</h2>
-                <button
-                  onClick={() => setShowTermsModal(false)}
-                  className="text-slate-500 hover:text-slate-700 transition-colors p-2 hover:bg-slate-100 rounded-lg"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <p className="text-orange-800 text-sm">
-                  <strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES')}
-                </p>
-              </div>
-              
-              {/* Terms and Conditions */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    id="acceptTerms"
-                    checked={acceptedTerms}
-                    onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                  />
-                  <label htmlFor="acceptTerms" className="text-sm text-slate-700 leading-relaxed">
-                    Acepto los{' '}
-                    <button
-                      type="button"
-                      onClick={() => setShowTermsModal(true)}
-                      className="text-orange-600 hover:text-orange-700 underline font-medium"
-                    >
-                      términos y condiciones
-                    </button>{' '}
-                    <span className="text-red-500">*</span>
-                  </label>
-                </div>
-                <p className="text-xs text-slate-600 mt-2 ml-6">
-                  Es obligatorio aceptar los términos y condiciones para completar el registro.
-                </p>
-                {errors.terms && (
-                  <p className="text-red-600 text-sm mt-2 ml-6">{errors.terms}</p>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">1. Objeto y Aceptación</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    Los presentes términos y condiciones regulan el uso de la plataforma CyclePeaks y el registro 
-                    como usuario ciclista. Al marcar la casilla de aceptación y completar el registro, el usuario 
-                    acepta expresamente y sin reservas estos términos y condiciones, así como la política de 
-                    privacidad de la plataforma.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">2. Registro y Datos Personales</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    Para el registro como ciclista, es necesario proporcionar datos personales veraces, exactos 
-                    y actualizados. El usuario se compromete a:
-                  </p>
-                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
-                    <li>Proporcionar información personal veraz y actualizada</li>
-                    <li>Mantener la confidencialidad de sus credenciales de acceso</li>
-                    <li>Notificar cualquier uso no autorizado de su cuenta</li>
-                    <li>Actualizar sus datos cuando sea necesario</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">3. Uso de la Plataforma</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    El usuario se compromete a utilizar la plataforma de forma adecuada y conforme a la ley, 
-                    la moral, las buenas costumbres y el orden público. Queda prohibido:
-                  </p>
-                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
-                    <li>Utilizar la plataforma para fines distintos a los previstos</li>
-                    <li>Reproducir, copiar, distribuir o modificar los contenidos sin autorización</li>
-                    <li>Introducir virus, programas maliciosos o dañinos</li>
-                    <li>Intentar acceder a áreas restringidas del sistema</li>
-                    <li>Suplantar la identidad de otros usuarios</li>
-                    <li>Realizar actividades que puedan dañar la imagen de CyclePeaks</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">4. Contenido del Usuario</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    Los usuarios pueden subir fotografías, notas y otros contenidos relacionados con sus 
-                    actividades ciclistas. Al hacerlo, el usuario:
-                  </p>
-                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
-                    <li>Garantiza que es titular de los derechos sobre el contenido subido</li>
-                    <li>Otorga a CyclePeaks licencia para mostrar y almacenar dicho contenido</li>
-                    <li>Se responsabiliza de que el contenido no infrinja derechos de terceros</li>
-                    <li>Acepta que CyclePeaks puede moderar y eliminar contenido inapropiado</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">5. Protección de Datos y Privacidad</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    CyclePeaks se compromete a proteger la privacidad y los datos personales de los usuarios 
-                    conforme al Reglamento General de Protección de Datos (RGPD) y la legislación aplicable. 
-                    Los datos se utilizarán para:
-                  </p>
-                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
-                    <li>Gestionar el registro y la cuenta del usuario</li>
-                    <li>Proporcionar los servicios de la plataforma</li>
-                    <li>Mejorar la experiencia del usuario</li>
-                    <li>Enviar comunicaciones relacionadas con el servicio</li>
-                    <li>Cumplir con obligaciones legales</li>
-                  </ul>
-                  <p className="text-slate-600 leading-relaxed mt-2">
-                    Para más información, consulte nuestra Política de Privacidad.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">6. Limitación de Responsabilidad</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    CyclePeaks es una plataforma digital informativa y de registro de actividades ciclistas. 
-                    La plataforma no se responsabiliza de:
-                  </p>
-                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
-                    <li>Accidentes, lesiones o daños durante actividades ciclistas</li>
-                    <li>La exactitud de la información sobre rutas o puertos de montaña</li>
-                    <li>Interrupciones temporales del servicio</li>
-                    <li>Pérdida de datos por causas técnicas</li>
-                    <li>Daños derivados del uso indebido de la plataforma</li>
-                  </ul>
-                  <p className="text-slate-600 leading-relaxed mt-2">
-                    El usuario practica ciclismo bajo su propia responsabilidad y riesgo.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">7. Propiedad Intelectual</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    Todos los contenidos de CyclePeaks (diseño, código, textos, logotipos, etc.) están 
-                    protegidos por derechos de propiedad intelectual. Queda prohibida su reproducción, 
-                    distribución o modificación sin autorización expresa.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">8. Duración y Terminación</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    El usuario puede darse de baja en cualquier momento. CyclePeaks se reserva el derecho 
-                    de suspender o cancelar cuentas que incumplan estos términos. En caso de baja, 
-                    se procederá conforme a la política de privacidad respecto al tratamiento de datos.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">9. Modificaciones</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    CyclePeaks se reserva el derecho de modificar estos términos y condiciones en cualquier 
-                    momento. Los cambios se notificarán a los usuarios y entrarán en vigor tras su publicación. 
-                    El uso continuado de la plataforma implica la aceptación de las modificaciones.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">10. Legislación Aplicable y Jurisdicción</h3>
-                  <p className="text-slate-600 leading-relaxed">
-                    Estos términos se rigen por la legislación española. Para cualquier controversia, 
-                    las partes se someten a los juzgados y tribunales de Madrid, renunciando expresamente 
-                    a cualquier otro fuero que pudiera corresponderles.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-3">11. Contacto</h3>
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <p className="text-slate-700">
-                      <strong>Email:</strong> legal@cyclepeaks.com<br/>
-                      <strong>Atención al usuario:</strong> support@cyclepeaks.com<br/>
-                      <strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES')}
-                    </p>
-                  </div>
-                </section>
-              </div>
-            </div>
-            <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-6 rounded-b-xl">
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowTermsModal(false)}
-                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
-                >
-                  Cerrar
-                </button>
-              </div>
-              
-              {/* Terms and Conditions Checkbox */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    id="acceptedTerms"
-                    checked={acceptedTerms}
-                    onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="acceptedTerms" className="text-sm text-slate-700 cursor-pointer">
-                      Acepto los{' '}
-                      <button
-                        type="button"
-                        onClick={() => setShowTermsModal(true)}
-                        className="text-orange-600 hover:text-orange-700 underline font-medium"
-                      >
-                        términos y condiciones
-                      </button>{' '}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Es obligatorio aceptar los términos y condiciones para completar el registro.
-                    </p>
-                  </div>
-                </div>
-                {errors.terms && (
-                  <p className="text-red-500 text-sm mt-2 ml-6">{errors.terms}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {showTermsModal && <TermsModal />}
     </div>
     </div>
   );

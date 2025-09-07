@@ -109,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden xl:inline whitespace-nowrap">{item.label}</span>
+                      <span className="hidden xl:inline">{item.label}</span>
                     </button>
                     
                     {/* Tooltip */}
@@ -125,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
             </nav>
             
             {/* User Actions */}
-            <div className="flex items-center space-x-2 border-l border-slate-200 pl-4">
+            <div className="flex items-center space-x-1 border-l border-slate-200 pl-4">
               {userActions.map((action) => {
                 const Icon = action.icon;
                 return (
@@ -141,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden xl:inline whitespace-nowrap">{action.label}</span>
+                      <span className="hidden xl:inline">{action.label}</span>
                     </button>
                     
                     {/* Tooltip */}
@@ -154,13 +154,12 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 );
               })}
-              
-              {/* Language Selector integrated directly */}
-              <LanguageSelector
-                currentLanguage={language}
-                onLanguageChange={onLanguageChange}
-              />
             </div>
+            
+            <LanguageSelector
+              currentLanguage={language}
+              onLanguageChange={onLanguageChange}
+            />
           </div>
 
           {/* Mobile Menu Button and Language Selector */}
