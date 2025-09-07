@@ -12,7 +12,7 @@ import {
   Phone, 
   Calendar, 
   Weight, 
-  Bike as BikeIcon,
+  Bike as LucideBikeIcon,
   Plus,
   Trash2,
   Save,
