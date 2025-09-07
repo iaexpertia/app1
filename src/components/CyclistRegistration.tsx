@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Cyclist, Bike } from '../types';
 import { Translation } from '../i18n/translations';
-import { addCyclist } from '../utils/cyclistStorage';
+import { Eye, EyeOff, Plus, Trash2, UserPlus, LogIn, Bike as BikeIcon, FileText, X } from 'lucide-react';
 import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
-import { 
+import { addCyclist } from '../utils/cyclistStorage';
+import {
   User, 
   Mail, 
   Phone, 
   Calendar, 
   Weight, 
-  Bike as BikeIcon,
-  Plus,
-  Trash2,
+  Bike as BikeIcon2,
+  Plus as Plus2,
+  Trash2 as Trash22,
   Save,
-  UserPlus
+  UserPlus as UserPlus2
 } from 'lucide-react';
 
 interface CyclistRegistrationProps {
@@ -57,9 +58,9 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   // Captcha state
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
   const [captchaInput, setCaptchaInput] = useState('');
-  const [captchaError, setCaptchaError] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [captchaError, setCaptchaError] = useState('');
 
   // Country codes database
   const countryCodes = [
@@ -322,6 +323,10 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       newErrors.captcha = 'Captcha incorrecto';
     } else {
       setCaptchaError('');
+    }
+    
+    if (!acceptedTerms) {
+      newErrors.terms = 'Debes aceptar los términos y condiciones para continuar';
     }
     
     setErrors(newErrors);
@@ -587,6 +592,16 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             {loginErrors.general && (
               <p className="text-red-500 text-sm">{loginErrors.general}</p>
             )}
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowPasswordRecovery(true)}
+                className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
 
             <div className="flex space-x-3">
               <button
@@ -1162,60 +1177,176 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                   <strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES')}
                 </p>
               </div>
-
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">1. Aceptación de los Términos</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Al registrarte en CyclePeaks, aceptas cumplir con estos términos y condiciones. 
-                  Si no estás de acuerdo con alguna parte de estos términos, no debes usar nuestra plataforma.
+              
+              {/* Terms and Conditions */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="acceptTerms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                  />
+                  <label htmlFor="acceptTerms" className="text-sm text-slate-700 leading-relaxed">
+                    Acepto los{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="text-orange-600 hover:text-orange-700 underline font-medium"
+                    >
+                      términos y condiciones
+                    </button>{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+                </div>
+                <p className="text-xs text-slate-600 mt-2 ml-6">
+                  Es obligatorio aceptar los términos y condiciones para completar el registro.
                 </p>
-              </section>
+                {errors.terms && (
+                  <p className="text-red-600 text-sm mt-2 ml-6">{errors.terms}</p>
+                )}
+              </div>
 
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">2. Uso de la Plataforma</h3>
-                <ul className="list-disc list-inside text-slate-600 space-y-1">
-                  <li>Debes proporcionar información veraz y actualizada</li>
-                  <li>Eres responsable de mantener la confidencialidad de tu cuenta</li>
-                  <li>No debes usar la plataforma para actividades ilegales o no autorizadas</li>
-                  <li>Respetas los derechos de otros usuarios y de la plataforma</li>
-                </ul>
-              </section>
+              <div className="space-y-6">
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">1. Objeto y Aceptación</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    Los presentes términos y condiciones regulan el uso de la plataforma CyclePeaks y el registro 
+                    como usuario ciclista. Al marcar la casilla de aceptación y completar el registro, el usuario 
+                    acepta expresamente y sin reservas estos términos y condiciones, así como la política de 
+                    privacidad de la plataforma.
+                  </p>
+                </section>
 
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">3. Contenido del Usuario</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Al subir fotos, notas o cualquier contenido a CyclePeaks, otorgas una licencia no exclusiva 
-                  para usar, mostrar y distribuir dicho contenido en relación con el servicio. 
-                  Mantienes todos los derechos sobre tu contenido.
-                </p>
-              </section>
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">2. Registro y Datos Personales</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    Para el registro como ciclista, es necesario proporcionar datos personales veraces, exactos 
+                    y actualizados. El usuario se compromete a:
+                  </p>
+                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
+                    <li>Proporcionar información personal veraz y actualizada</li>
+                    <li>Mantener la confidencialidad de sus credenciales de acceso</li>
+                    <li>Notificar cualquier uso no autorizado de su cuenta</li>
+                    <li>Actualizar sus datos cuando sea necesario</li>
+                  </ul>
+                </section>
 
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">4. Privacidad y Datos</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Nos comprometemos a proteger tu privacidad. Los datos personales se procesan de acuerdo 
-                  con nuestra Política de Privacidad. No vendemos ni compartimos tu información personal 
-                  con terceros sin tu consentimiento.
-                </p>
-              </section>
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">3. Uso de la Plataforma</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    El usuario se compromete a utilizar la plataforma de forma adecuada y conforme a la ley, 
+                    la moral, las buenas costumbres y el orden público. Queda prohibido:
+                  </p>
+                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
+                    <li>Utilizar la plataforma para fines distintos a los previstos</li>
+                    <li>Reproducir, copiar, distribuir o modificar los contenidos sin autorización</li>
+                    <li>Introducir virus, programas maliciosos o dañinos</li>
+                    <li>Intentar acceder a áreas restringidas del sistema</li>
+                    <li>Suplantar la identidad de otros usuarios</li>
+                    <li>Realizar actividades que puedan dañar la imagen de CyclePeaks</li>
+                  </ul>
+                </section>
 
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">5. Limitación de Responsabilidad</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  CyclePeaks es una plataforma informativa. No somos responsables de accidentes, lesiones 
-                  o daños que puedan ocurrir durante la práctica del ciclismo. Siempre practica ciclismo 
-                  de forma segura y responsable.
-                </p>
-              </section>
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">4. Contenido del Usuario</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    Los usuarios pueden subir fotografías, notas y otros contenidos relacionados con sus 
+                    actividades ciclistas. Al hacerlo, el usuario:
+                  </p>
+                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
+                    <li>Garantiza que es titular de los derechos sobre el contenido subido</li>
+                    <li>Otorga a CyclePeaks licencia para mostrar y almacenar dicho contenido</li>
+                    <li>Se responsabiliza de que el contenido no infrinja derechos de terceros</li>
+                    <li>Acepta que CyclePeaks puede moderar y eliminar contenido inapropiado</li>
+                  </ul>
+                </section>
 
-              <section>
-                <h3 className="text-lg font-semibold text-slate-800 mb-3">6. Modificaciones</h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Nos reservamos el derecho de modificar estos términos en cualquier momento. 
-                  Los cambios serán notificados a través de la plataforma y entrarán en vigor 
-                  inmediatamente después de su publicación.
-                </p>
-              </section>
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">5. Protección de Datos y Privacidad</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    CyclePeaks se compromete a proteger la privacidad y los datos personales de los usuarios 
+                    conforme al Reglamento General de Protección de Datos (RGPD) y la legislación aplicable. 
+                    Los datos se utilizarán para:
+                  </p>
+                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
+                    <li>Gestionar el registro y la cuenta del usuario</li>
+                    <li>Proporcionar los servicios de la plataforma</li>
+                    <li>Mejorar la experiencia del usuario</li>
+                    <li>Enviar comunicaciones relacionadas con el servicio</li>
+                    <li>Cumplir con obligaciones legales</li>
+                  </ul>
+                  <p className="text-slate-600 leading-relaxed mt-2">
+                    Para más información, consulte nuestra Política de Privacidad.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">6. Limitación de Responsabilidad</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    CyclePeaks es una plataforma digital informativa y de registro de actividades ciclistas. 
+                    La plataforma no se responsabiliza de:
+                  </p>
+                  <ul className="list-disc list-inside text-slate-600 mt-2 space-y-1">
+                    <li>Accidentes, lesiones o daños durante actividades ciclistas</li>
+                    <li>La exactitud de la información sobre rutas o puertos de montaña</li>
+                    <li>Interrupciones temporales del servicio</li>
+                    <li>Pérdida de datos por causas técnicas</li>
+                    <li>Daños derivados del uso indebido de la plataforma</li>
+                  </ul>
+                  <p className="text-slate-600 leading-relaxed mt-2">
+                    El usuario practica ciclismo bajo su propia responsabilidad y riesgo.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">7. Propiedad Intelectual</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    Todos los contenidos de CyclePeaks (diseño, código, textos, logotipos, etc.) están 
+                    protegidos por derechos de propiedad intelectual. Queda prohibida su reproducción, 
+                    distribución o modificación sin autorización expresa.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">8. Duración y Terminación</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    El usuario puede darse de baja en cualquier momento. CyclePeaks se reserva el derecho 
+                    de suspender o cancelar cuentas que incumplan estos términos. En caso de baja, 
+                    se procederá conforme a la política de privacidad respecto al tratamiento de datos.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">9. Modificaciones</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    CyclePeaks se reserva el derecho de modificar estos términos y condiciones en cualquier 
+                    momento. Los cambios se notificarán a los usuarios y entrarán en vigor tras su publicación. 
+                    El uso continuado de la plataforma implica la aceptación de las modificaciones.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">10. Legislación Aplicable y Jurisdicción</h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    Estos términos se rigen por la legislación española. Para cualquier controversia, 
+                    las partes se someten a los juzgados y tribunales de Madrid, renunciando expresamente 
+                    a cualquier otro fuero que pudiera corresponderles.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-3">11. Contacto</h3>
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <p className="text-slate-700">
+                      <strong>Email:</strong> legal@cyclepeaks.com<br/>
+                      <strong>Atención al usuario:</strong> support@cyclepeaks.com<br/>
+                      <strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES')}
+                    </p>
+                  </div>
+                </section>
+              </div>
             </div>
             <div className="sticky bottom-0 bg-slate-50 border-t border-slate-200 p-6 rounded-b-xl">
               <div className="flex justify-end">
@@ -1225,6 +1356,38 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 >
                   Cerrar
                 </button>
+              </div>
+              
+              {/* Terms and Conditions Checkbox */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="acceptedTerms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="acceptedTerms" className="text-sm text-slate-700 cursor-pointer">
+                      Acepto los{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowTermsModal(true)}
+                        className="text-orange-600 hover:text-orange-700 underline font-medium"
+                      >
+                        términos y condiciones
+                      </button>{' '}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Es obligatorio aceptar los términos y condiciones para completar el registro.
+                    </p>
+                  </div>
+                </div>
+                {errors.terms && (
+                  <p className="text-red-500 text-sm mt-2 ml-6">{errors.terms}</p>
+                )}
               </div>
             </div>
           </div>
