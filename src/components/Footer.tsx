@@ -16,8 +16,8 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="relative w-[75px] h-[75px]">
+            <div className="flex items-center space-x-3">
+              <div className="relative w-[100px] h-[100px]">
                 <svg viewBox="0 0 100 100" className="w-full h-full">
                   <circle cx="35" cy="65" r="8" fill="none" stroke="#f97316" strokeWidth="2.5"/>
                   <circle cx="65" cy="65" r="8" fill="none" stroke="#f97316" strokeWidth="2.5"/>
