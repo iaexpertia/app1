@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, RefreshCw } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
-import { getAllPassesFromDB, createPassInDB, updatePassInDB, deletePassFromDB, syncPassesToDB, importPassesFromCSV } from '../utils/passesService';
+import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { 
   loadCyclists, 
   addCyclist, 
@@ -37,12 +37,10 @@ import {
 interface AdminPanelProps {
   passes: MountainPass[];
   onUpdatePass: (pass: MountainPass) => void;
-  onAddPass?: (pass: MountainPass) => void;
-  onRemovePass?: (passId: string) => void;
   t: (key: string) => string;
 }
 
-export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, onAddPass, onRemovePass, t }) => {
+export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t }) => {
   const [activeTab, setActiveTab] = useState('cyclists');
   
   // Data states
@@ -69,8 +67,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<string[]>([]);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncMessage, setSyncMessage] = useState<string>('');
+  const [importType, setImportType] = useState<'csv' | 'excel'>('excel');
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
@@ -80,7 +77,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [passForm, setPassForm] = useState({
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-    description: '', imageUrl: '', category: 'Otros', coordinatesLat: 0, coordinatesLng: 0
+    description: '', imageUrl: '', category: 'Otros'
   });
   
   const [brandForm, setBrandForm] = useState({
@@ -113,159 +110,84 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   // Import handlers
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
+    if (!file) return;
+
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    const isCsv = file.type === 'text/csv' || file.name.endsWith('.csv');
+
+    if (isExcel || isCsv) {
       setImportFile(file);
-      
-      // Read file preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const lines = text.split('\n').slice(0, 6); // First 6 lines (header + 5 data rows)
-        setImportPreview(lines);
-      };
-      reader.readAsText(file);
+      setImportType(isExcel ? 'excel' : 'csv');
+
+      if (isCsv) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          const lines = text.split('\n').slice(0, 6);
+          setImportPreview(lines);
+        };
+        reader.readAsText(file);
+      } else {
+        setImportPreview([]);
+      }
+    } else {
+      alert('Por favor selecciona un archivo CSV o Excel (.xlsx)');
     }
   };
 
-  const handleImportCSV = async () => {
+  const handleImport = async () => {
     if (!importFile) return;
 
     try {
-      const text = await importFile.text();
-      const { passes: newPasses, errors } = await importPassesFromCSV(text);
+      let newPasses: MountainPass[] = [];
 
-      if (errors.length > 0) {
-        console.error('Errores durante la importación:', errors);
+      if (importType === 'excel') {
+        newPasses = await importPassesFromExcel(importFile);
+      } else {
+        const text = await importFile.text();
+        const lines = text.split('\n').filter(line => line.trim());
+        const headers = lines[0].split(',');
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',');
+          if (values.length >= headers.length) {
+            const pass: MountainPass = {
+              id: values[0] || `imported-${Date.now()}-${i}`,
+              name: values[1] || '',
+              country: values[2] || '',
+              region: values[3] || '',
+              maxAltitude: parseInt(values[4]) || 0,
+              elevationGain: parseInt(values[5]) || 0,
+              averageGradient: parseFloat(values[6]) || 0,
+              maxGradient: parseFloat(values[7]) || 0,
+              distance: parseFloat(values[8]) || 0,
+              difficulty: values[9] as any || 'Cuarta',
+              coordinates: {
+                lat: parseFloat(values[10]) || 0,
+                lng: parseFloat(values[11]) || 0
+              },
+              description: values[12] || '',
+              imageUrl: values[13] || '',
+              category: values[14] || 'Otros',
+              famousWinners: []
+            };
+            newPasses.push(pass);
+          }
+        }
       }
 
-      // Sincronizar con la base de datos
-      setIsSyncing(true);
-      const result = await syncPassesToDB(newPasses);
-      setIsSyncing(false);
-
-      // Update passes through parent component
       newPasses.forEach(pass => {
-        if (onAddPass) {
-          onAddPass(pass);
-        }
+        onUpdatePass(pass);
       });
 
-      alert(`Se han importado ${result.success} puertos correctamente a la base de datos. Errores: ${result.errors}`);
+      alert(`Se han importado ${newPasses.length} puertos correctamente.`);
       setShowImportModal(false);
       setImportFile(null);
       setImportPreview([]);
     } catch (error) {
-      console.error('Error importing CSV:', error);
-      alert('Error al importar el archivo CSV. Verifica el formato.');
-      setIsSyncing(false);
+      console.error('Error importing file:', error);
+      alert(`Error al importar el archivo. Verifica el formato.`);
     }
-  };
-
-  const handleSyncToDatabase = async () => {
-    if (confirm('¿Deseas sincronizar todos los puertos actuales con la base de datos?')) {
-      setIsSyncing(true);
-      setSyncMessage('Sincronizando...');
-
-      const result = await syncPassesToDB(passes);
-
-      setIsSyncing(false);
-      setSyncMessage(`Sincronizados: ${result.success}, Errores: ${result.errors}`);
-
-      setTimeout(() => setSyncMessage(''), 5000);
-    }
-  };
-
-  const handleCreatePass = async () => {
-    const newPass: MountainPass = {
-      id: `pass-${Date.now()}`,
-      name: passForm.name,
-      country: passForm.country,
-      region: passForm.region,
-      maxAltitude: passForm.maxAltitude,
-      elevationGain: passForm.elevationGain,
-      averageGradient: passForm.averageGradient,
-      maxGradient: passForm.maxGradient,
-      distance: passForm.distance,
-      difficulty: passForm.difficulty as MountainPass['difficulty'],
-      coordinates: {
-        lat: passForm.coordinatesLat,
-        lng: passForm.coordinatesLng,
-      },
-      description: passForm.description,
-      imageUrl: passForm.imageUrl,
-      category: passForm.category,
-      famousWinners: [],
-    };
-
-    // Crear en la base de datos
-    const createdPass = await createPassInDB(newPass);
-
-    if (createdPass && onAddPass) {
-      onAddPass(createdPass);
-      alert('Puerto creado exitosamente en la base de datos');
-      setShowPassModal(false);
-      resetPassForm();
-    } else {
-      alert('Error al crear el puerto en la base de datos');
-    }
-  };
-
-  const handleUpdatePassDB = async () => {
-    if (!editingPass) return;
-
-    const updatedPass: MountainPass = {
-      ...editingPass,
-      name: passForm.name,
-      country: passForm.country,
-      region: passForm.region,
-      maxAltitude: passForm.maxAltitude,
-      elevationGain: passForm.elevationGain,
-      averageGradient: passForm.averageGradient,
-      maxGradient: passForm.maxGradient,
-      distance: passForm.distance,
-      difficulty: passForm.difficulty as MountainPass['difficulty'],
-      coordinates: {
-        lat: passForm.coordinatesLat,
-        lng: passForm.coordinatesLng,
-      },
-      description: passForm.description,
-      imageUrl: passForm.imageUrl,
-      category: passForm.category,
-    };
-
-    // Actualizar en la base de datos
-    const updated = await updatePassInDB(updatedPass);
-
-    if (updated) {
-      onUpdatePass(updated);
-      alert('Puerto actualizado exitosamente en la base de datos');
-      setShowPassModal(false);
-      setEditingPass(null);
-      resetPassForm();
-    } else {
-      alert('Error al actualizar el puerto en la base de datos');
-    }
-  };
-
-  const handleDeletePass = async (passId: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este puerto de la base de datos?')) {
-      const deleted = await deletePassFromDB(passId);
-
-      if (deleted && onRemovePass) {
-        onRemovePass(passId);
-        alert('Puerto eliminado exitosamente de la base de datos');
-      } else {
-        alert('Error al eliminar el puerto de la base de datos');
-      }
-    }
-  };
-
-  const resetPassForm = () => {
-    setPassForm({
-      name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
-      averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-      description: '', imageUrl: '', category: 'Otros', coordinatesLat: 0, coordinatesLng: 0
-    });
   };
 
   // Export handlers
@@ -706,41 +628,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
         {activeTab === 'passes' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
-                {syncMessage && (
-                  <p className="text-sm text-green-600 mt-1">{syncMessage}</p>
-                )}
-              </div>
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
               <div className="flex gap-3">
                 <button
-                  onClick={() => {
-                    setEditingPass(null);
-                    resetPassForm();
-                    setShowPassModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                  onClick={downloadExcelTemplate}
+                  className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
-                  Nuevo Puerto
-                </button>
-                <button
-                  onClick={handleSyncToDatabase}
-                  disabled={isSyncing}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  Sincronizar BD
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Plantilla Excel
                 </button>
                 <button
                   onClick={() => setShowImportModal(true)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
                   <Upload className="w-4 h-4" />
-                  Importar CSV
+                  Importar
                 </button>
                 <button
-                  onClick={() => exportMountainPasses(passes)}
+                  onClick={() => exportPassesToExcel(passes)}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                 >
                   <Download className="h-4 w-4" />
@@ -788,21 +693,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                               difficulty: pass.difficulty,
                               description: pass.description,
                               imageUrl: pass.imageUrl,
-                              category: pass.category,
-                              coordinatesLat: pass.coordinates.lat,
-                              coordinatesLng: pass.coordinates.lng
+                              category: pass.category
                             });
                             setShowPassModal(true);
                           }}
-                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                          className="text-indigo-600 hover:text-indigo-900"
                         >
                           <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePass(pass.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
@@ -1602,222 +1499,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
         </div>
       )}
 
-      {/* Pass Modal */}
-      {showPassModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">
-                {editingPass ? 'Editar Puerto' : 'Nuevo Puerto'}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowPassModal(false);
-                  setEditingPass(null);
-                  resetPassForm();
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-                  <input
-                    type="text"
-                    value={passForm.name}
-                    onChange={(e) => setPassForm({...passForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">País *</label>
-                  <input
-                    type="text"
-                    value={passForm.country}
-                    onChange={(e) => setPassForm({...passForm, country: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Región *</label>
-                  <input
-                    type="text"
-                    value={passForm.region}
-                    onChange={(e) => setPassForm({...passForm, region: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                  <input
-                    type="text"
-                    value={passForm.category}
-                    onChange={(e) => setPassForm({...passForm, category: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Altitud (m)</label>
-                  <input
-                    type="number"
-                    value={passForm.maxAltitude}
-                    onChange={(e) => setPassForm({...passForm, maxAltitude: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Desnivel (m)</label>
-                  <input
-                    type="number"
-                    value={passForm.elevationGain}
-                    onChange={(e) => setPassForm({...passForm, elevationGain: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Distancia (km)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={passForm.distance}
-                    onChange={(e) => setPassForm({...passForm, distance: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pendiente Media (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={passForm.averageGradient}
-                    onChange={(e) => setPassForm({...passForm, averageGradient: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pendiente Máx (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={passForm.maxGradient}
-                    onChange={(e) => setPassForm({...passForm, maxGradient: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dificultad</label>
-                  <select
-                    value={passForm.difficulty}
-                    onChange={(e) => setPassForm({...passForm, difficulty: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Cuarta">Cuarta</option>
-                    <option value="Tercera">Tercera</option>
-                    <option value="Segunda">Segunda</option>
-                    <option value="Primera">Primera</option>
-                    <option value="Especial">Especial</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    value={passForm.coordinatesLat}
-                    onChange={(e) => setPassForm({...passForm, coordinatesLat: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    value={passForm.coordinatesLng}
-                    onChange={(e) => setPassForm({...passForm, coordinatesLng: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                <textarea
-                  value={passForm.description}
-                  onChange={(e) => setPassForm({...passForm, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen</label>
-                <input
-                  type="url"
-                  value={passForm.imageUrl}
-                  onChange={(e) => setPassForm({...passForm, imageUrl: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div className="p-6 border-t flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowPassModal(false);
-                  setEditingPass(null);
-                  resetPassForm();
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={editingPass ? handleUpdatePassDB : handleCreatePass}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {editingPass ? 'Actualizar' : 'Crear'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Import CSV Modal */}
+      {/* Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Upload className="h-6 w-6 text-purple-500" />
-                <h3 className="text-xl font-semibold text-slate-800">Importar Puertos desde CSV</h3>
+                <Upload className="h-6 w-6 text-blue-500" />
+                <h3 className="text-xl font-semibold text-slate-800">Importar Puertos de Montaña</h3>
               </div>
               <button
                 onClick={() => {
@@ -1830,52 +1519,65 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                 <X className="h-6 w-6" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-6">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">📋 Formato del archivo CSV</h4>
+                <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                  <FileSpreadsheet className="w-5 h-5" />
+                  Formatos admitidos
+                </h4>
                 <p className="text-blue-700 text-sm mb-3">
-                  El archivo debe tener las siguientes columnas en este orden:
+                  Puedes importar archivos en formato Excel (.xlsx) o CSV (.csv)
                 </p>
-                <div className="bg-white rounded border p-3 font-mono text-xs overflow-x-auto">
+                <div className="bg-white rounded border p-3 text-xs space-y-2">
                   <div className="text-blue-600">
-                    id,name,country,region,maxAltitude,elevationGain,averageGradient,maxGradient,distance,difficulty,coordinates_lat,coordinates_lng,description,imageUrl,category
+                    <strong>Columnas requeridas:</strong>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-blue-700">
+                    <div>• <strong>ID:</strong> Identificador único</div>
+                    <div>• <strong>Nombre:</strong> Nombre del puerto</div>
+                    <div>• <strong>País:</strong> País</div>
+                    <div>• <strong>Región:</strong> Región</div>
+                    <div>• <strong>Altitud Máxima (m):</strong> Altitud</div>
+                    <div>• <strong>Desnivel (m):</strong> Desnivel</div>
+                    <div>• <strong>Pendiente Media (%):</strong> Pendiente media</div>
+                    <div>• <strong>Pendiente Máxima (%):</strong> Pendiente máxima</div>
+                    <div>• <strong>Distancia (km):</strong> Distancia</div>
+                    <div>• <strong>Dificultad:</strong> Cuarta/Tercera/Segunda/Primera/Especial</div>
+                    <div>• <strong>Latitud:</strong> Coordenada latitud</div>
+                    <div>• <strong>Longitud:</strong> Coordenada longitud</div>
+                    <div>• <strong>Descripción:</strong> Descripción del puerto</div>
+                    <div>• <strong>Categoría:</strong> Categoría</div>
+                    <div>• <strong>URL Imagen:</strong> URL de la imagen</div>
                   </div>
                 </div>
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-blue-700">
-                  <div>• <strong>id:</strong> Identificador único</div>
-                  <div>• <strong>name:</strong> Nombre del puerto</div>
-                  <div>• <strong>country:</strong> País</div>
-                  <div>• <strong>region:</strong> Región</div>
-                  <div>• <strong>maxAltitude:</strong> Altitud máxima (m)</div>
-                  <div>• <strong>elevationGain:</strong> Desnivel (m)</div>
-                  <div>• <strong>averageGradient:</strong> Pendiente media (%)</div>
-                  <div>• <strong>maxGradient:</strong> Pendiente máxima (%)</div>
-                  <div>• <strong>distance:</strong> Distancia (km)</div>
-                  <div>• <strong>difficulty:</strong> Cuarta/Tercera/Segunda/Primera/Especial</div>
-                  <div>• <strong>coordinates_lat:</strong> Latitud</div>
-                  <div>• <strong>coordinates_lng:</strong> Longitud</div>
-                  <div>• <strong>description:</strong> Descripción</div>
-                  <div>• <strong>imageUrl:</strong> URL de imagen</div>
-                  <div>• <strong>category:</strong> Categoría del puerto</div>
+                <div className="mt-3 flex items-center gap-2 text-sm text-blue-700">
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Descarga la plantilla de Excel para ver el formato correcto</span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Seleccionar archivo CSV
+                  Seleccionar archivo (Excel o CSV)
                 </label>
                 <input
                   type="file"
-                  accept=".csv"
+                  accept=".xlsx,.xls,.csv"
                   onChange={handleFileSelect}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                {importFile && (
+                  <div className="mt-2 text-sm text-green-600 flex items-center gap-2">
+                    <Database className="w-4 h-4" />
+                    Archivo seleccionado: {importFile.name} ({importType.toUpperCase()})
+                  </div>
+                )}
               </div>
 
               {importPreview.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-slate-800 mb-3">Vista previa del archivo:</h4>
+                  <h4 className="font-semibold text-slate-800 mb-3">Vista previa del archivo CSV:</h4>
                   <div className="bg-slate-50 rounded-lg p-4 overflow-x-auto">
                     <pre className="text-xs text-slate-700 whitespace-pre-wrap">
                       {importPreview.join('\n')}
@@ -1888,16 +1590,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               )}
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Importante</h4>
+                <h4 className="font-semibold text-yellow-800 mb-2">Importante</h4>
                 <ul className="text-yellow-700 text-sm space-y-1">
-                  <li>• Los puertos existentes con el mismo ID o nombre serán actualizados</li>
+                  <li>• Los puertos con el mismo ID serán actualizados</li>
                   <li>• Los puertos nuevos serán añadidos a la base de datos</li>
-                  <li>• Asegúrate de que el formato del CSV sea correcto</li>
-                  <li>• Se recomienda hacer una copia de seguridad antes de importar</li>
+                  <li>• Verifica que el formato del archivo sea correcto antes de importar</li>
+                  <li>• Se recomienda hacer una exportación antes de importar como respaldo</li>
                 </ul>
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3 p-6 border-t">
               <button
                 onClick={() => {
@@ -1910,9 +1612,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                 Cancelar
               </button>
               <button
-                onClick={handleImportCSV}
+                onClick={handleImport}
                 disabled={!importFile}
-                className="flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Upload className="h-4 w-4" />
                 <span>Importar Puertos</span>
