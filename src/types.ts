@@ -54,6 +54,7 @@ export interface Cyclist {
   country?: string;
   age?: number;
   weight?: number;
+  profilePhoto?: string;
   bikes: Bike[];
   registrationDate: string;
   isAdmin?: boolean;

@@ -18,7 +18,9 @@ import {
   Trash2,
   Save,
   UserPlus,
-  MapPin
+  MapPin,
+  Camera,
+  X
 } from 'lucide-react';
 
 interface CyclistRegistrationProps {
@@ -48,6 +50,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     country: '',
     age: '',
     weight: '',
+    profilePhoto: '',
     isAdmin: false,
   });
   
@@ -59,6 +62,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoveryStatus, setRecoveryStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   
   // Captcha state
   const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0 });
@@ -125,6 +129,38 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setErrors({ ...errors, photo: 'Por favor selecciona una imagen válida' });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ ...errors, photo: 'La imagen no debe superar los 5MB' });
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFormData({ ...formData, profilePhoto: base64String });
+        setPhotoPreview(base64String);
+        setErrors({ ...errors, photo: '' });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = () => {
+    setFormData({ ...formData, profilePhoto: '' });
+    setPhotoPreview(null);
   };
 
   const addBike = () => {
@@ -218,6 +254,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         password: formData.password.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        profilePhoto: formData.profilePhoto || undefined,
         isAdmin: formData.isAdmin,
         bikes: bikes.map(bike => ({
           ...bike,
@@ -557,6 +594,52 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
           )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Profile Photo Section */}
+          <div className="flex flex-col items-center space-y-4 pb-6 border-b border-slate-200">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-lg">
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt="Profile preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-16 h-16 text-slate-400" />
+                  </div>
+                )}
+              </div>
+              {photoPreview && (
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  title="Eliminar foto"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <div className="text-center">
+              <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                <Camera className="w-4 h-4" />
+                <span>{photoPreview ? 'Cambiar foto' : 'Subir foto de perfil'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-slate-500 mt-2">
+                Opcional. Máximo 5MB. JPG, PNG o GIF
+              </p>
+              {errors.photo && <p className="text-red-500 text-sm mt-1">{errors.photo}</p>}
+            </div>
+          </div>
+
           {/* Personal Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
@@ -80,8 +80,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
-    name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', password: '', isAdmin: false
+    name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', password: '', profilePhoto: '', isAdmin: false
   });
+  const [cyclistPhotoPreview, setCyclistPhotoPreview] = useState<string | null>(null);
   
   const [passForm, setPassForm] = useState({
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
@@ -192,6 +193,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     exportRaces(races);
   };
 
+  // Cyclist photo handlers
+  const handleCyclistPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor selecciona una imagen válida');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no debe superar los 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setCyclistForm({ ...cyclistForm, profilePhoto: base64String });
+        setCyclistPhotoPreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeCyclistPhoto = () => {
+    setCyclistForm({ ...cyclistForm, profilePhoto: '' });
+    setCyclistPhotoPreview(null);
+  };
+
   // Cyclist handlers
   const handleCreateCyclist = async () => {
     const newCyclist: Cyclist = {
@@ -205,6 +233,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
       weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
       password: cyclistForm.password,
+      profilePhoto: cyclistForm.profilePhoto || undefined,
       bikes: [],
       registrationDate: new Date().toISOString().split('T')[0],
       isAdmin: cyclistForm.isAdmin
@@ -236,8 +265,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       age: cyclist.age?.toString() || '',
       weight: cyclist.weight?.toString() || '',
       password: cyclist.password || '',
+      profilePhoto: cyclist.profilePhoto || '',
       isAdmin: cyclist.isAdmin || false
     });
+    setCyclistPhotoPreview(cyclist.profilePhoto || null);
     setShowCyclistModal(true);
   };
 
@@ -255,6 +286,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
       weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
       password: cyclistForm.password || editingCyclist.password,
+      profilePhoto: cyclistForm.profilePhoto || undefined,
       isAdmin: cyclistForm.isAdmin
     };
 
@@ -274,8 +306,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const resetCyclistForm = () => {
     setCyclistForm({
-      name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', password: '', isAdmin: false
+      name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', password: '', profilePhoto: '', isAdmin: false
     });
+    setCyclistPhotoPreview(null);
   };
 
   // Brand handlers
@@ -1143,8 +1176,46 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 <X className="h-6 w-6" />
               </button>
             </div>
-            
+
             <div className="p-6 space-y-4">
+              {/* Profile Photo Section */}
+              <div className="flex flex-col items-center space-y-3 pb-4 border-b border-gray-200">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-300">
+                    {cyclistPhotoPreview ? (
+                      <img
+                        src={cyclistPhotoPreview}
+                        alt="Profile preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-12 h-12 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  {cyclistPhotoPreview && (
+                    <button
+                      type="button"
+                      onClick={removeCyclistPhoto}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                  <Camera className="w-4 h-4" />
+                  <span>{cyclistPhotoPreview ? 'Cambiar' : 'Subir foto'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCyclistPhotoUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
                 <input
