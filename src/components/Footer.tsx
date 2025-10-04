@@ -17,7 +17,31 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <Mountain className="h-8 w-8 text-orange-500" />
+              <div className="relative w-10 h-10">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <path
+                    d="M10 85 L30 45 L50 20 L70 45 L90 85 Z"
+                    fill="#f97316"
+                    opacity="0.9"
+                  />
+                  <circle cx="35" cy="65" r="8" fill="none" stroke="white" strokeWidth="2.5"/>
+                  <circle cx="65" cy="65" r="8" fill="none" stroke="white" strokeWidth="2.5"/>
+                  <path
+                    d="M35 65 L50 45 L65 65 M50 45 L50 50 M48 50 L52 50"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M35 65 L65 65"
+                    stroke="white"
+                    strokeWidth="2"
+                    fill="none"
+                  />
+                </svg>
+              </div>
               <h3 className="text-xl font-bold">CyclePeaks</h3>
             </div>
             <p className="text-slate-300 leading-relaxed">
