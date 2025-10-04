@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-2">
             <nav className="flex space-x-1 relative">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -122,16 +122,16 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={() => handleTabChange(item.key as any)}
                       onMouseEnter={() => setHoveredItem(item.key)}
                       onMouseLeave={() => setHoveredItem(null)}
-                      className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                      className={`px-2 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
                         activeTab === item.key
                           ? 'bg-orange-500 text-white shadow-lg'
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden xl:inline">{item.label}</span>
+                      <span className="hidden xl:inline text-sm">{item.label}</span>
                     </button>
-                    
+
                     {/* Tooltip */}
                     {hoveredItem === item.key && (
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
@@ -143,9 +143,9 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               })}
             </nav>
-            
+
             {/* User Actions */}
-            <div className="flex items-center space-x-1 border-l border-slate-200 pl-4">
+            <div className="flex items-center space-x-1 border-l border-slate-200 pl-2">
               {userActions.map((action) => {
                 const Icon = action.icon;
                 return (
@@ -154,16 +154,16 @@ export const Header: React.FC<HeaderProps> = ({
                       onClick={action.action}
                       onMouseEnter={() => setHoveredItem(action.key)}
                       onMouseLeave={() => setHoveredItem(null)}
-                      className={`px-3 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                      className={`px-2 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 ${
                         action.key === 'logout'
                           ? 'text-red-600 hover:bg-red-50'
                           : 'text-slate-600 hover:bg-slate-100'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden xl:inline">{action.label}</span>
+                      <span className="hidden xl:inline text-sm">{action.label}</span>
                     </button>
-                    
+
                     {/* Tooltip */}
                     {hoveredItem === action.key && (
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
@@ -175,11 +175,13 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               })}
             </div>
-            
-            <LanguageSelector
-              currentLanguage={language}
-              onLanguageChange={onLanguageChange}
-            />
+
+            <div className="border-l border-slate-200 pl-2">
+              <LanguageSelector
+                currentLanguage={language}
+                onLanguageChange={onLanguageChange}
+              />
+            </div>
           </div>
 
           {/* Mobile Menu Button and Language Selector */}
