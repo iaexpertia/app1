@@ -47,6 +47,8 @@ export interface Cyclist {
   email: string;
   password?: string;
   phone: string;
+  city?: string;
+  country?: string;
   age?: number;
   weight?: number;
   bikes: Bike[];

@@ -79,7 +79,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
-    name: '', alias: '', email: '', phone: '', age: '', weight: '', isAdmin: false
+    name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', isAdmin: false
   });
   
   const [passForm, setPassForm] = useState({
@@ -199,13 +199,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       alias: cyclistForm.alias || undefined,
       email: cyclistForm.email,
       phone: cyclistForm.phone,
+      city: cyclistForm.city || undefined,
+      country: cyclistForm.country || undefined,
       age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
       weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
       bikes: [],
       registrationDate: new Date().toISOString().split('T')[0],
       isAdmin: cyclistForm.isAdmin
     };
-    
+
     addCyclist(newCyclist);
     setCyclists(loadCyclists());
     setShowCyclistModal(false);
@@ -219,6 +221,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       alias: cyclist.alias || '',
       email: cyclist.email,
       phone: cyclist.phone,
+      city: cyclist.city || '',
+      country: cyclist.country || '',
       age: cyclist.age?.toString() || '',
       weight: cyclist.weight?.toString() || '',
       isAdmin: cyclist.isAdmin || false
@@ -228,18 +232,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const handleUpdateCyclist = () => {
     if (!editingCyclist) return;
-    
+
     const updatedCyclist: Cyclist = {
       ...editingCyclist,
       name: cyclistForm.name,
       alias: cyclistForm.alias || undefined,
       email: cyclistForm.email,
       phone: cyclistForm.phone,
+      city: cyclistForm.city || undefined,
+      country: cyclistForm.country || undefined,
       age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
       weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
       isAdmin: cyclistForm.isAdmin
     };
-    
+
     updateCyclist(updatedCyclist);
     setCyclists(loadCyclists());
     setShowCyclistModal(false);
@@ -256,7 +262,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const resetCyclistForm = () => {
     setCyclistForm({
-      name: '', alias: '', email: '', phone: '', age: '', weight: '', isAdmin: false
+      name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', isAdmin: false
     });
   };
 
@@ -1169,7 +1175,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   required
                 />
               </div>
-              
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                <input
+                  type="text"
+                  value={cyclistForm.city}
+                  onChange={(e) => setCyclistForm({...cyclistForm, city: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
+                <input
+                  type="text"
+                  value={cyclistForm.country}
+                  onChange={(e) => setCyclistForm({...cyclistForm, country: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Edad</label>

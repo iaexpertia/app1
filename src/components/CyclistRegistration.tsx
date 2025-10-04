@@ -6,17 +6,18 @@ import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  Weight, 
+import {
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Weight,
   Bike as BikeIcon,
   Plus,
   Trash2,
   Save,
-  UserPlus
+  UserPlus,
+  MapPin
 } from 'lucide-react';
 
 interface CyclistRegistrationProps {
@@ -38,6 +39,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     password: '',
     confirmPassword: '',
     phone: '',
+    city: '',
+    country: '',
     age: '',
     weight: '',
     isAdmin: false,
@@ -196,6 +199,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
         alias: formData.alias.trim() || undefined,
         email: formData.email.trim(),
         phone: formData.phone.trim(),
+        city: formData.city.trim() || undefined,
+        country: formData.country.trim() || undefined,
         password: formData.password.trim(),
         age: formData.age ? parseInt(formData.age) : undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
@@ -622,6 +627,34 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
                 placeholder={t.phonePlaceholder}
               />
               {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                <MapPin className="h-4 w-4 inline mr-1" />
+                Ciudad
+              </label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="Tu ciudad"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                <MapPin className="h-4 w-4 inline mr-1" />
+                País
+              </label>
+              <input
+                type="text"
+                value={formData.country}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                placeholder="Tu país"
+              />
             </div>
 
             <div>
