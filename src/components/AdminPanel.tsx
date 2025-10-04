@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save, Upload, Database, RefreshCw } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, RefreshCw } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
 import { getAllPassesFromDB, createPassInDB, updatePassInDB, deletePassFromDB, syncPassesToDB, importPassesFromCSV } from '../utils/passesService';
