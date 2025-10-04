@@ -561,7 +561,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 <Mail className="h-4 w-4 inline mr-1" />
-                {t.email} <span className="text-red-500">*</span>
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
