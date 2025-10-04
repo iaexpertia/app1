@@ -1168,10 +1168,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
           }}
         >
           <div
-            className="bg-white rounded-xl max-w-md w-full"
+            className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 border-b flex items-center justify-between">
+            <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingCyclist ? 'Editar Ciclista' : 'Nuevo Ciclista'}
               </h3>
@@ -1344,7 +1344,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               </div>
             </div>
             
-            <div className="p-6 border-t flex justify-end space-x-3">
+            <div className="p-6 border-t flex justify-end space-x-3 sticky bottom-0 bg-white">
               <button
                 onClick={() => {
                   setShowCyclistModal(false);
