@@ -240,6 +240,7 @@ function App() {
           <CyclistRegistration
             t={t}
             onRegistrationSuccess={handleRegistrationSuccess}
+            onTabChange={setActiveTab}
           />
         )}
         

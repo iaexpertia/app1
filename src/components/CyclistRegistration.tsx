@@ -23,11 +23,13 @@ import {
 interface CyclistRegistrationProps {
   t: Translation;
   onRegistrationSuccess: () => void;
+  onTabChange?: (tab: string) => void;
 }
 
-export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({ 
-  t, 
-  onRegistrationSuccess 
+export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
+  t,
+  onRegistrationSuccess,
+  onTabChange
 }) => {
   const [cyclists] = useState(() => loadCyclists());
   const hasRegisteredCyclists = cyclists.length > 0;
@@ -144,9 +146,13 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   const handleLogin = async (email: string, password: string) => {
     // Authenticate user with stored credentials
     const success = loginUser(email.trim(), password);
-    
+
     if (success) {
+      setShowLogin(false);
       onRegistrationSuccess();
+      if (onTabChange) {
+        onTabChange('passes');
+      }
       return true;
     }
     return false;
