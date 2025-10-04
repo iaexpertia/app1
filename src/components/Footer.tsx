@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="relative w-10 h-10">
+              <div className="relative w-24 h-24">
                 <svg viewBox="0 0 100 100" className="w-full h-full">
                   <path
                     d="M10 85 L30 45 L50 20 L70 45 L90 85 Z"
