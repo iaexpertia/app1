@@ -14,6 +14,7 @@ import { CollaboratorsView } from './components/CollaboratorsView';
 import { ConqueredPassesView } from './components/ConqueredPassesView';
 import { BrandsView } from './components/BrandsView';
 import { NewsView } from './components/NewsView';
+import { PassFinderView } from './components/PassFinderView';
 import { Footer } from './components/Footer';
 import { LegalModal } from './components/LegalModals';
 import { mountainPasses } from './data/mountainPasses';
@@ -30,7 +31,7 @@ import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, loadCyclists, addCyclist, setCurrentUser } from './utils/cyclistStorage';
 import { Cyclist } from './types';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
 
 function App() {
   const { language, t, changeLanguage } = useLanguage();
@@ -188,6 +189,17 @@ function App() {
       <main>
         {activeTab === 'passes' && (
           <PassesList
+            passes={passes}
+            conqueredPassIds={conqueredPassIds}
+            onToggleConquest={handleToggleConquest}
+            onViewDetails={handleViewDetails}
+            onAddPhotos={handleAddPhotos}
+            t={t}
+          />
+        )}
+
+        {activeTab === 'finder' && (
+          <PassFinderView
             passes={passes}
             conqueredPassIds={conqueredPassIds}
             onToggleConquest={handleToggleConquest}

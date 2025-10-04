@@ -153,6 +153,15 @@ export interface Translation {
   
   // Collaborators
   collaboratorsDescription: string;
+
+  // Pass Finder
+  passFinderTitle: string;
+  passFinderDescription: string;
+  searchPass: string;
+  selectRegion: string;
+  selectDifficulty: string;
+  latestPasses: string;
+  searchResults: string;
 }
 
 export const translations: Record<string, Translation> = {
@@ -307,7 +316,16 @@ export const translations: Record<string, Translation> = {
     mySelectedPasses: 'Mis Puertos Seleccionados',
     
     // Collaborators
-    collaboratorsDescription: 'Descubre nuestros colaboradores y patrocinadores que apoyan la comunidad ciclista'
+    collaboratorsDescription: 'Descubre nuestros colaboradores y patrocinadores que apoyan la comunidad ciclista',
+
+    // Pass Finder
+    passFinderTitle: 'Buscador de Puertos',
+    passFinderDescription: 'Busca y filtra puertos por región y dificultad',
+    searchPass: 'Buscar puerto...',
+    selectRegion: 'Seleccionar región',
+    selectDifficulty: 'Seleccionar dificultad',
+    latestPasses: 'Últimos Puertos Añadidos',
+    searchResults: 'Resultados de Búsqueda'
   },
   
   en: {
@@ -458,7 +476,18 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Remove from My Passes',
     alreadyInMyPasses: 'Already in My Passes',
     availablePasses: 'Available Passes',
-    mySelectedPasses: 'My Selected Passes'
+    mySelectedPasses: 'My Selected Passes',
+    collaborators: 'Collaborators',
+    collaboratorsDescription: 'Discover our collaborators and sponsors supporting the cycling community',
+
+    // Pass Finder
+    passFinderTitle: 'Pass Finder',
+    passFinderDescription: 'Search and filter passes by region and difficulty',
+    searchPass: 'Search pass...',
+    selectRegion: 'Select region',
+    selectDifficulty: 'Select difficulty',
+    latestPasses: 'Latest Passes Added',
+    searchResults: 'Search Results'
   },
   
   fr: {
@@ -609,7 +638,18 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Retirer de Mes Cols',
     alreadyInMyPasses: 'Déjà dans Mes Cols',
     availablePasses: 'Cols Disponibles',
-    mySelectedPasses: 'Mes Cols Sélectionnés'
+    mySelectedPasses: 'Mes Cols Sélectionnés',
+    collaborators: 'Collaborateurs',
+    collaboratorsDescription: 'Découvrez nos collaborateurs et sponsors qui soutiennent la communauté cycliste',
+
+    // Pass Finder
+    passFinderTitle: 'Recherche de Cols',
+    passFinderDescription: 'Rechercher et filtrer les cols par région et difficulté',
+    searchPass: 'Rechercher un col...',
+    selectRegion: 'Sélectionner une région',
+    selectDifficulty: 'Sélectionner une difficulté',
+    latestPasses: 'Derniers Cols Ajoutés',
+    searchResults: 'Résultats de Recherche'
   },
   
   it: {
@@ -760,7 +800,18 @@ export const translations: Record<string, Translation> = {
     removeFromMyPasses: 'Rimuovi dai Miei Passi',
     alreadyInMyPasses: 'Già nei Miei Passi',
     availablePasses: 'Passi Disponibili',
-    mySelectedPasses: 'I Miei Passi Selezionati'
+    mySelectedPasses: 'I Miei Passi Selezionati',
+    collaborators: 'Collaboratori',
+    collaboratorsDescription: 'Scopri i nostri collaboratori e sponsor che supportano la comunità ciclistica',
+
+    // Pass Finder
+    passFinderTitle: 'Ricerca Passi',
+    passFinderDescription: 'Cerca e filtra i passi per regione e difficoltà',
+    searchPass: 'Cerca passo...',
+    selectRegion: 'Seleziona regione',
+    selectDifficulty: 'Seleziona difficoltà',
+    latestPasses: 'Ultimi Passi Aggiunti',
+    searchResults: 'Risultati di Ricerca'
   }
 };
 

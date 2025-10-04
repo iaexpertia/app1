@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck } from 'lucide-react';
+import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
 import { getCurrentUser, loadCyclists } from '../utils/cyclistStorage';
 
 interface HeaderProps {
-  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news';
-  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news') => void;
+  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
+  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder') => void;
   conqueredCount: number;
   totalCount: number;
   t: Translation;
@@ -39,13 +39,14 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news') => {
+  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
 
   const navigationItems = [
     { key: 'passes', icon: Mountain, label: t.passes, tooltip: 'Explora todos los puertos de montaña disponibles' },
+    { key: 'finder', icon: Search, label: 'Buscador', tooltip: 'Busca puertos por región y dificultad' },
     { key: 'conquered', icon: Trophy, label: 'Conquistados', tooltip: 'Ve tus puertos conquistados con fotos y notas' },
     { key: 'map', icon: Map, label: t.map, tooltip: 'Mapa interactivo con ubicaciones de puertos' },
     { key: 'stats', icon: Award, label: t.stats, tooltip: 'Estadísticas de tu progreso y conquistas' },
