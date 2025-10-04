@@ -80,3 +80,98 @@ export const updateCyclist = (cyclist: Cyclist): void => {
 
 // Alias for getCyclists (for compatibility)
 export const getCyclists = loadCyclists;
+
+// Password recovery token management
+interface RecoveryToken {
+  email: string;
+  token: string;
+  expiresAt: number;
+}
+
+const RECOVERY_TOKENS_KEY = 'password-recovery-tokens';
+
+const generateToken = (): string => {
+  return Math.random().toString(36).substring(2, 15) +
+         Math.random().toString(36).substring(2, 15) +
+         Math.random().toString(36).substring(2, 15);
+};
+
+export const createPasswordRecoveryToken = (email: string): string => {
+  const cyclists = loadCyclists();
+  const cyclist = cyclists.find(c => c.email.toLowerCase() === email.toLowerCase());
+
+  if (!cyclist) {
+    throw new Error('Email no registrado');
+  }
+
+  const token = generateToken();
+  const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+
+  const tokens: RecoveryToken[] = JSON.parse(
+    localStorage.getItem(RECOVERY_TOKENS_KEY) || '[]'
+  );
+
+  // Remove old tokens for this email
+  const filteredTokens = tokens.filter(t => t.email.toLowerCase() !== email.toLowerCase());
+
+  // Add new token
+  filteredTokens.push({ email: cyclist.email, token, expiresAt });
+
+  localStorage.setItem(RECOVERY_TOKENS_KEY, JSON.stringify(filteredTokens));
+
+  return token;
+};
+
+export const validateRecoveryToken = (token: string): string | null => {
+  const tokens: RecoveryToken[] = JSON.parse(
+    localStorage.getItem(RECOVERY_TOKENS_KEY) || '[]'
+  );
+
+  const recoveryToken = tokens.find(t => t.token === token);
+
+  if (!recoveryToken) {
+    return null;
+  }
+
+  if (Date.now() > recoveryToken.expiresAt) {
+    // Token expired, remove it
+    const filteredTokens = tokens.filter(t => t.token !== token);
+    localStorage.setItem(RECOVERY_TOKENS_KEY, JSON.stringify(filteredTokens));
+    return null;
+  }
+
+  return recoveryToken.email;
+};
+
+export const resetPassword = (token: string, newPassword: string): boolean => {
+  const email = validateRecoveryToken(token);
+
+  if (!email) {
+    return false;
+  }
+
+  const cyclists = loadCyclists();
+  const cyclist = cyclists.find(c => c.email.toLowerCase() === email.toLowerCase());
+
+  if (!cyclist) {
+    return false;
+  }
+
+  // Update password
+  cyclist.password = newPassword;
+  updateCyclist(cyclist);
+
+  // Remove used token
+  const tokens: RecoveryToken[] = JSON.parse(
+    localStorage.getItem(RECOVERY_TOKENS_KEY) || '[]'
+  );
+  const filteredTokens = tokens.filter(t => t.token !== token);
+  localStorage.setItem(RECOVERY_TOKENS_KEY, JSON.stringify(filteredTokens));
+
+  return true;
+};
+
+export const getCyclistByEmail = (email: string): Cyclist | null => {
+  const cyclists = loadCyclists();
+  return cyclists.find(c => c.email.toLowerCase() === email.toLowerCase()) || null;
+};

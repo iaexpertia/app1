@@ -15,6 +15,7 @@ import { ConqueredPassesView } from './components/ConqueredPassesView';
 import { BrandsView } from './components/BrandsView';
 import { NewsView } from './components/NewsView';
 import { PassFinderView } from './components/PassFinderView';
+import { PasswordReset } from './components/PasswordReset';
 import { Footer } from './components/Footer';
 import { LegalModal } from './components/LegalModals';
 import { mountainPasses } from './data/mountainPasses';
@@ -34,6 +35,10 @@ import { Cyclist } from './types';
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
 
 function App() {
+  // Check if we're on the password reset page
+  const isPasswordResetPage = window.location.pathname === '/reset-password' ||
+                               window.location.search.includes('token=');
+
   const { language, t, changeLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<ActiveTab>('passes');
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
@@ -44,6 +49,11 @@ function App() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
+
+  // If we're on password reset page, render only that component
+  if (isPasswordResetPage) {
+    return <PasswordReset />;
+  }
 
   const handleLogout = () => {
     // Clear current user session
@@ -237,8 +247,6 @@ function App() {
           <AdminPanel
             passes={passes}
             onUpdatePass={handleUpdatePass}
-            onAddPass={handleAddPass}
-            onRemovePass={handleRemovePass}
             t={t}
           />
         )}

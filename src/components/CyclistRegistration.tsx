@@ -157,29 +157,34 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       setErrors({ ...errors, recoveryEmail: 'El email es obligatorio' });
       return;
     }
-    
+
     // Clear recovery email error when starting recovery
     const newErrors = { ...errors };
     delete newErrors.recoveryEmail;
     setErrors(newErrors);
-    
+
     setRecoveryStatus('sending');
-    
-    // Simulate sending recovery email
+
+    // Send recovery email
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setRecoveryStatus('sent');
-      setTimeout(() => {
-        setShowPasswordRecovery(false);
-        setRecoveryStatus('idle');
-        setRecoveryEmail('');
-        // Clear errors when closing modal
-        const clearedErrors = { ...errors };
-        delete clearedErrors.recoveryEmail;
-        setErrors(clearedErrors);
-      }, 3000);
+      const success = await sendPasswordRecoveryEmail(recoveryEmail.trim());
+      if (success) {
+        setRecoveryStatus('sent');
+        setTimeout(() => {
+          setShowPasswordRecovery(false);
+          setRecoveryStatus('idle');
+          setRecoveryEmail('');
+          // Clear errors when closing modal
+          const clearedErrors = { ...errors };
+          delete clearedErrors.recoveryEmail;
+          setErrors(clearedErrors);
+        }, 3000);
+      } else {
+        setRecoveryStatus('failed');
+      }
     } catch (error) {
       setRecoveryStatus('failed');
+      setErrors({ ...errors, recoveryEmail: 'Email no registrado en el sistema' });
     }
   };
 
@@ -380,6 +385,19 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             {loginErrors.general && (
               <p className="text-red-500 text-sm">{loginErrors.general}</p>
             )}
+
+            <div className="text-center mb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogin(false);
+                  setShowPasswordRecovery(true);
+                }}
+                className="text-sm text-orange-600 hover:text-orange-700 underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
 
             <div className="flex space-x-3">
               <button

@@ -651,6 +651,14 @@ export const generateRecoveryToken = (): string => {
 // Send password recovery email
 export const sendPasswordRecoveryEmail = async (email: string): Promise<boolean> => {
   try {
+    // Check if email exists in the system
+    const cyclists = JSON.parse(localStorage.getItem('mountain-pass-cyclists') || '[]');
+    const cyclistExists = cyclists.some((c: any) => c.email.toLowerCase() === email.toLowerCase());
+
+    if (!cyclistExists) {
+      throw new Error('Email no registrado');
+    }
+
     // Generate recovery token
     const recoveryToken = generateRecoveryToken();
     
