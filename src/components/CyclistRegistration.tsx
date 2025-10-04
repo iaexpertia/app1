@@ -183,7 +183,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   };
 
   const handleLogin = async (email: string, password: string) => {
-    const success = await loginUser(email.trim(), password);
+    // Authenticate user with stored credentials
+    const success = loginUser(email.trim(), password);
 
     if (success) {
       setShowLogin(false);
@@ -263,8 +264,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       };
 
       // Add cyclist to storage
-      await addCyclist(newCyclist);
-      setCurrentUser(newCyclist.id);
+      addCyclist(newCyclist);
+      setCurrentUser(newCyclist);
 
       // Try to send registration email
       setEmailStatus('sending');
