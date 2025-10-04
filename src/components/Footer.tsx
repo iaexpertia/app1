@@ -21,14 +21,16 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
                 <svg viewBox="0 0 100 100" className="w-full h-full">
                   <path
                     d="M10 85 L30 45 L50 20 L70 45 L90 85 Z"
-                    fill="#f97316"
-                    opacity="0.9"
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth="3"
+                    strokeLinejoin="round"
                   />
-                  <circle cx="35" cy="65" r="8" fill="none" stroke="white" strokeWidth="2.5"/>
-                  <circle cx="65" cy="65" r="8" fill="none" stroke="white" strokeWidth="2.5"/>
+                  <circle cx="35" cy="65" r="8" fill="none" stroke="#f97316" strokeWidth="2.5"/>
+                  <circle cx="65" cy="65" r="8" fill="none" stroke="#f97316" strokeWidth="2.5"/>
                   <path
                     d="M35 65 L50 45 L65 65 M50 45 L50 50 M48 50 L52 50"
-                    stroke="white"
+                    stroke="#f97316"
                     strokeWidth="2.5"
                     fill="none"
                     strokeLinecap="round"
@@ -36,7 +38,7 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
                   />
                   <path
                     d="M35 65 L65 65"
-                    stroke="white"
+                    stroke="#f97316"
                     strokeWidth="2"
                     fill="none"
                   />
