@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace } from '../types';
-import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
+import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { 
   loadCyclists, 
@@ -185,6 +185,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const handleExportNews = () => {
     exportNews(news);
+  };
+
+  const handleExportRaces = () => {
+    exportRaces(races);
   };
 
   // Cyclist handlers
@@ -1042,6 +1046,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 >
                   <Trophy className="w-4 h-4" />
                   Nueva Carrera
+                </button>
+                <button
+                  onClick={handleExportRaces}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar CSV
                 </button>
               </div>
             </div>

@@ -227,3 +227,62 @@ export const exportMountainPasses = (passes: any[]): void => {
 
 // Alias for backward compatibility
 export const exportPasses = exportMountainPasses;
+
+// Export cycling races data
+export const exportRaces = (races: any[]): void => {
+  const headers = [
+    'ID',
+    'Nombre',
+    'Fecha',
+    'Hora Inicio',
+    'Ciudad',
+    'Región',
+    'País',
+    'Latitud',
+    'Longitud',
+    'Tipo',
+    'Categoría',
+    'Distancia (km)',
+    'Desnivel (m)',
+    'Máx. Participantes',
+    'Precio (€)',
+    'Organizador',
+    'Email Contacto',
+    'Teléfono Contacto',
+    'URL Inscripción',
+    'URL Cartel',
+    'Descripción',
+    'Destacada',
+    'Activa'
+  ];
+
+  const data = races.map(race => ({
+    'ID': race.id,
+    'Nombre': race.name,
+    'Fecha': race.date,
+    'Hora Inicio': race.startTime || '',
+    'Ciudad': race.location?.city || '',
+    'Región': race.location?.region || '',
+    'País': race.location?.country || '',
+    'Latitud': race.location?.coordinates?.lat || '',
+    'Longitud': race.location?.coordinates?.lng || '',
+    'Tipo': race.type,
+    'Categoría': race.category,
+    'Distancia (km)': race.distance,
+    'Desnivel (m)': race.elevation,
+    'Máx. Participantes': race.maxParticipants || '',
+    'Precio (€)': race.price || '',
+    'Organizador': race.organizer || '',
+    'Email Contacto': race.contactEmail || '',
+    'Teléfono Contacto': race.contactPhone || '',
+    'URL Inscripción': race.registrationUrl || '',
+    'URL Cartel': race.posterUrl,
+    'Descripción': race.description,
+    'Destacada': race.featured ? 'Sí' : 'No',
+    'Activa': race.isActive ? 'Sí' : 'No'
+  }));
+
+  const csvContent = convertToCSV(data, headers);
+  const filename = `carreras_ciclismo_${new Date().toISOString().split('T')[0]}.csv`;
+  downloadCSV(csvContent, filename);
+};
