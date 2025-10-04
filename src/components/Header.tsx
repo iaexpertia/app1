@@ -82,64 +82,23 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo and Title */}
           <div className="flex items-center space-x-3">
             <div className="relative w-[80px] h-[80px] sm:w-[100px] sm:h-[100px]">
-              <svg viewBox="0 0 120 120" className="w-full h-full">
-                <defs>
-                  <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#f97316', stopOpacity: 1 }} />
-                    <stop offset="100%" style={{ stopColor: '#ea580c', stopOpacity: 1 }} />
-                  </linearGradient>
-                </defs>
-
-                <circle cx="35" cy="80" r="10" fill="none" stroke="#1e293b" strokeWidth="3"/>
-                <circle cx="35" cy="80" r="6" fill="none" stroke="#1e293b" strokeWidth="2"/>
-                <circle cx="85" cy="80" r="10" fill="none" stroke="#1e293b" strokeWidth="3"/>
-                <circle cx="85" cy="80" r="6" fill="none" stroke="#1e293b" strokeWidth="2"/>
-
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <circle cx="35" cy="65" r="8" fill="none" stroke="#f97316" strokeWidth="2.5"/>
+                <circle cx="65" cy="65" r="8" fill="none" stroke="#f97316" strokeWidth="2.5"/>
                 <path
-                  d="M35 80 L60 80"
-                  stroke="#1e293b"
-                  strokeWidth="3"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-
-                <path
-                  d="M45 80 L55 55 L60 80"
-                  stroke="#1e293b"
-                  strokeWidth="3"
+                  d="M35 65 L50 45 L65 65 M50 45 L50 50 M48 50 L52 50"
+                  stroke="#f97316"
+                  strokeWidth="2.5"
                   fill="none"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-
                 <path
-                  d="M55 55 L55 45 M52 45 L58 45"
-                  stroke="#1e293b"
-                  strokeWidth="3"
+                  d="M35 65 L65 65"
+                  stroke="#f97316"
+                  strokeWidth="2"
                   fill="none"
-                  strokeLinecap="round"
                 />
-
-                <path
-                  d="M60 80 L85 80"
-                  stroke="#1e293b"
-                  strokeWidth="3"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-
-                <path
-                  d="M30 90 L50 35 L70 60 L90 20"
-                  stroke="url(#mountainGradient)"
-                  strokeWidth="4"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-
-                <circle cx="50" cy="35" r="4" fill="#f97316"/>
-                <circle cx="70" cy="60" r="4" fill="#f97316"/>
-                <circle cx="90" cy="20" r="4" fill="#f97316"/>
               </svg>
             </div>
             <div>
