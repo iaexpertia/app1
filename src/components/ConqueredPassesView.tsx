@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { MountainPass, ConquestData } from '../types';
+import { MountainPass, ConquestData, Cyclist } from '../types';
 import { Translation } from '../i18n/translations';
-import { 
-  Award, 
-  Calendar, 
-  Camera, 
-  FileText, 
-  Mountain, 
-  TrendingUp, 
+import { StravaConnect } from './StravaConnect';
+import { Activity } from 'lucide-react';
+import {
+  Award,
+  Calendar,
+  Camera,
+  FileText,
+  Mountain,
+  TrendingUp,
   MapPin,
   ChevronRight,
   ChevronLeft,
@@ -24,6 +26,9 @@ interface ConqueredPassesViewProps {
   onUpdateConquest: (conquest: ConquestData) => void;
   onAddPhotos?: (passId: string) => void;
   t: Translation;
+  currentCyclist?: Cyclist;
+  allPasses: MountainPass[];
+  onSyncComplete: () => void;
 }
 
 export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
@@ -31,7 +36,10 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
   conquests,
   onUpdateConquest,
   onAddPhotos,
-  t
+  t,
+  currentCyclist,
+  allPasses,
+  onSyncComplete
 }) => {
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
@@ -95,32 +103,42 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
     return (
       <div className="min-h-screen bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-12">
-          <Award className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-xl text-slate-600 mb-2">No has conquistado ningún puerto todavía</p>
-          <p className="text-slate-500">¡Empieza a conquistar puertos para verlos aquí!</p>
+          <div className="text-center py-12">
+            <Award className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+            <p className="text-xl text-slate-600 mb-2">No has conquistado ningún puerto todavía</p>
+            <p className="text-slate-500">¡Empieza a conquistar puertos para verlos aquí!</p>
+          </div>
         </div>
       </div>
-        </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex items-center mb-4">
-          <Award className="h-8 w-8 text-orange-500 mr-3" />
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">Puertos Conquistados</h2>
-            <p className="text-slate-600">
-              Has conquistado {conqueredPasses.length} puerto{conqueredPasses.length !== 1 ? 's' : ''}
-            </p>
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <Award className="h-8 w-8 text-orange-500 mr-3" />
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">Puertos Conquistados</h2>
+              <p className="text-slate-600">
+                Has conquistado {conqueredPasses.length} puerto{conqueredPasses.length !== 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className="space-y-6">
+          {currentCyclist && (
+            <div className="mt-6">
+              <StravaConnect
+                cyclist={currentCyclist}
+                passes={allPasses}
+                onSyncComplete={onSyncComplete}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6">
         {conqueredPasses.map(pass => {
           const conquest = getConquestData(pass.id);
           const photos = conquest?.photos || [];
@@ -143,8 +161,13 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
                         {pass.difficulty}
                       </span>
                     </div>
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3 flex gap-2">
                       <Award className="h-6 w-6 text-yellow-500 bg-white rounded-full p-1" />
+                      {conquest?.syncedFromStrava && (
+                        <div className="bg-orange-500 text-white rounded-full p-1" title="Sincronizado desde Strava">
+                          <Activity className="h-4 w-4" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -163,6 +186,17 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
                           <Calendar className="h-4 w-4 mr-1" />
                           <span>Conquistado el {formatDate(conquest.dateCompleted)}</span>
                         </div>
+                      )}
+                      {conquest?.stravaActivityUrl && (
+                        <a
+                          href={conquest.stravaActivityUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-orange-500 text-sm mt-1 hover:text-orange-600"
+                        >
+                          <Activity className="h-4 w-4 mr-1" />
+                          <span>Ver en Strava</span>
+                        </a>
                       )}
                     </div>
                   </div>
@@ -377,7 +411,7 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
           </div>
         </div>
       )}
-    </div>
+      </div>
     </div>
   );
 };

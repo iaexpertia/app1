@@ -29,7 +29,7 @@ import {
   updateConquest
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
-import { isCurrentUserAdmin, loadCyclists, addCyclist, setCurrentUser } from './utils/cyclistStorage';
+import { isCurrentUserAdmin, loadCyclists, addCyclist, setCurrentUser, getCurrentUser } from './utils/cyclistStorage';
 import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
@@ -49,6 +49,7 @@ function App() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
+  const [currentCyclist, setCurrentCyclist] = useState<Cyclist | null>(null);
 
   // If we're on password reset page, render only that component
   if (isPasswordResetPage) {
@@ -60,6 +61,7 @@ function App() {
     localStorage.removeItem('currentUserId');
     // Reset admin status immediately
     setIsAdmin(false);
+    setCurrentCyclist(null);
     
     // Optionally redirect to passes tab
     setActiveTab('passes');
@@ -73,10 +75,14 @@ function App() {
     const loadedConquests = loadConquests();
     setConquests(loadedConquests);
     setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
-    
+
     // Verificar si el usuario actual es admin al cargar
     const currentUserIsAdmin = isCurrentUserAdmin();
     setIsAdmin(currentUserIsAdmin);
+
+    // Cargar el ciclista actual
+    const cyclist = getCurrentUser();
+    setCurrentCyclist(cyclist);
     
     // Si no hay ciclistas registrados, crear un admin por defecto
     const cyclists = loadCyclists();
@@ -138,6 +144,18 @@ function App() {
     // Actualizar estado de admin después del registro/login
     const currentUserIsAdmin = isCurrentUserAdmin();
     setIsAdmin(currentUserIsAdmin);
+    const cyclist = getCurrentUser();
+    setCurrentCyclist(cyclist);
+  };
+
+  const handleSyncComplete = () => {
+    // Reload conquests after Strava sync
+    const loadedConquests = loadConquests();
+    setConquests(loadedConquests);
+    setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
+    // Reload current cyclist to get updated tokens
+    const cyclist = getCurrentUser();
+    setCurrentCyclist(cyclist);
   };
 
   const handleUpdatePass = (updatedPass: MountainPass) => {
@@ -277,6 +295,9 @@ function App() {
             onUpdateConquest={handleUpdateConquest}
             onAddPhotos={handleAddPhotos}
             t={t}
+            currentCyclist={currentCyclist || undefined}
+            allPasses={passes}
+            onSyncComplete={handleSyncComplete}
           />
         )}
         

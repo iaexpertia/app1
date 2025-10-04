@@ -30,6 +30,9 @@ export interface ConquestData {
   timeCompleted?: string;
   personalNotes?: string;
   photos?: string[];
+  stravaActivityId?: string;
+  stravaActivityUrl?: string;
+  syncedFromStrava?: boolean;
 }
 
 export interface UserStats {
@@ -54,6 +57,27 @@ export interface Cyclist {
   bikes: Bike[];
   registrationDate: string;
   isAdmin?: boolean;
+  stravaConnected?: boolean;
+  stravaAthleteId?: string;
+  stravaAccessToken?: string;
+  stravaRefreshToken?: string;
+  stravaTokenExpiry?: number;
+}
+
+export interface StravaActivity {
+  id: number;
+  name: string;
+  distance: number;
+  moving_time: number;
+  elapsed_time: number;
+  total_elevation_gain: number;
+  type: string;
+  start_date: string;
+  start_latlng?: [number, number];
+  end_latlng?: [number, number];
+  map?: {
+    summary_polyline?: string;
+  };
 }
 
 export interface Bike {
