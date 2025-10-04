@@ -33,6 +33,7 @@ import {
   updateNews,
   saveNews
 } from '../utils/newsStorage';
+import { sendRegistrationEmail } from '../utils/emailService';
 import {
   loadRaces,
   addRace,
@@ -79,7 +80,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
-    name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', isAdmin: false
+    name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', password: '', isAdmin: false
   });
   
   const [passForm, setPassForm] = useState({
@@ -192,7 +193,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   };
 
   // Cyclist handlers
-  const handleCreateCyclist = () => {
+  const handleCreateCyclist = async () => {
     const newCyclist: Cyclist = {
       id: Date.now().toString(),
       name: cyclistForm.name,
@@ -203,6 +204,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       country: cyclistForm.country || undefined,
       age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
       weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
+      password: cyclistForm.password,
       bikes: [],
       registrationDate: new Date().toISOString().split('T')[0],
       isAdmin: cyclistForm.isAdmin
@@ -210,6 +212,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
     addCyclist(newCyclist);
     setCyclists(loadCyclists());
+
+    // Send registration email
+    try {
+      await sendRegistrationEmail(newCyclist);
+    } catch (error) {
+      console.error('Error sending registration email:', error);
+    }
+
     setShowCyclistModal(false);
     resetCyclistForm();
   };
@@ -225,6 +235,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       country: cyclist.country || '',
       age: cyclist.age?.toString() || '',
       weight: cyclist.weight?.toString() || '',
+      password: cyclist.password || '',
       isAdmin: cyclist.isAdmin || false
     });
     setShowCyclistModal(true);
@@ -243,6 +254,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       country: cyclistForm.country || undefined,
       age: cyclistForm.age ? parseInt(cyclistForm.age) : undefined,
       weight: cyclistForm.weight ? parseFloat(cyclistForm.weight) : undefined,
+      password: cyclistForm.password || editingCyclist.password,
       isAdmin: cyclistForm.isAdmin
     };
 
@@ -262,7 +274,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const resetCyclistForm = () => {
     setCyclistForm({
-      name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', isAdmin: false
+      name: '', alias: '', email: '', phone: '', city: '', country: '', age: '', weight: '', password: '', isAdmin: false
     });
   };
 
@@ -1174,6 +1186,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contraseña {!editingCyclist && '*'}
+                </label>
+                <input
+                  type="password"
+                  value={cyclistForm.password}
+                  onChange={(e) => setCyclistForm({...cyclistForm, password: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder={editingCyclist ? "Dejar vacío para mantener la actual" : "Mínimo 6 caracteres"}
+                  required={!editingCyclist}
+                />
+                {!editingCyclist && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Se enviará un email al ciclista con sus credenciales de acceso
+                  </p>
+                )}
               </div>
 
               <div>
