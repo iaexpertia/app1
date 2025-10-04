@@ -3,22 +3,7 @@ import { MountainPass, ConquestData, Cyclist } from '../types';
 import { Translation } from '../i18n/translations';
 import { StravaConnect } from './StravaConnect';
 import { Activity } from 'lucide-react';
-import {
-  Award,
-  Calendar,
-  Camera,
-  FileText,
-  Mountain,
-  TrendingUp,
-  MapPin,
-  ChevronRight,
-  ChevronLeft,
-  Eye,
-  Edit,
-  Save,
-  X,
-  Plus
-} from 'lucide-react';
+import { Award, Calendar, Camera, FileText, Mountain, TrendingUp, MapPin, ChevronRight, ChevronLeft, Eye, CreditCard as Edit, Save, X, Plus } from 'lucide-react';
 
 interface ConqueredPassesViewProps {
   conqueredPasses: MountainPass[];
