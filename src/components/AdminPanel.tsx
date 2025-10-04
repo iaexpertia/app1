@@ -67,7 +67,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<string[]>([]);
-  const [importType, setImportType] = useState<'csv' | 'excel'>('excel');
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
@@ -112,26 +111,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
     const isCsv = file.type === 'text/csv' || file.name.endsWith('.csv');
 
-    if (isExcel || isCsv) {
+    if (isCsv) {
       setImportFile(file);
-      setImportType(isExcel ? 'excel' : 'csv');
 
-      if (isCsv) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target?.result as string;
-          const lines = text.split('\n').slice(0, 6);
-          setImportPreview(lines);
-        };
-        reader.readAsText(file);
-      } else {
-        setImportPreview([]);
-      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').slice(0, 6);
+        setImportPreview(lines);
+      };
+      reader.readAsText(file);
     } else {
-      alert('Por favor selecciona un archivo CSV o Excel (.xlsx)');
+      alert('Por favor selecciona un archivo CSV');
     }
   };
 
@@ -139,42 +132,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     if (!importFile) return;
 
     try {
-      let newPasses: MountainPass[] = [];
-
-      if (importType === 'excel') {
-        newPasses = await importPassesFromExcel(importFile);
-      } else {
-        const text = await importFile.text();
-        const lines = text.split('\n').filter(line => line.trim());
-        const headers = lines[0].split(',');
-
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',');
-          if (values.length >= headers.length) {
-            const pass: MountainPass = {
-              id: values[0] || `imported-${Date.now()}-${i}`,
-              name: values[1] || '',
-              country: values[2] || '',
-              region: values[3] || '',
-              maxAltitude: parseInt(values[4]) || 0,
-              elevationGain: parseInt(values[5]) || 0,
-              averageGradient: parseFloat(values[6]) || 0,
-              maxGradient: parseFloat(values[7]) || 0,
-              distance: parseFloat(values[8]) || 0,
-              difficulty: values[9] as any || 'Cuarta',
-              coordinates: {
-                lat: parseFloat(values[10]) || 0,
-                lng: parseFloat(values[11]) || 0
-              },
-              description: values[12] || '',
-              imageUrl: values[13] || '',
-              category: values[14] || 'Otros',
-              famousWinners: []
-            };
-            newPasses.push(pass);
-          }
-        }
-      }
+      const newPasses = await importPassesFromExcel(importFile);
 
       newPasses.forEach(pass => {
         onUpdatePass(pass);
@@ -635,21 +593,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
                   <FileSpreadsheet className="w-4 h-4" />
-                  Plantilla Excel
+                  Plantilla CSV
                 </button>
                 <button
                   onClick={() => setShowImportModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
                   <Upload className="w-4 h-4" />
-                  Importar
+                  Importar CSV
                 </button>
                 <button
                   onClick={() => exportPassesToExcel(passes)}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                 >
                   <Download className="h-4 w-4" />
-                  <span>Exportar Excel</span>
+                  <span>Exportar CSV</span>
                 </button>
               </div>
             </div>
@@ -1524,14 +1482,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
                   <FileSpreadsheet className="w-5 h-5" />
-                  Formatos admitidos
+                  Formato CSV
                 </h4>
                 <p className="text-blue-700 text-sm mb-3">
-                  Puedes importar archivos en formato Excel (.xlsx) o CSV (.csv)
+                  Importa archivos en formato CSV con las siguientes columnas:
                 </p>
                 <div className="bg-white rounded border p-3 text-xs space-y-2">
                   <div className="text-blue-600">
-                    <strong>Columnas requeridas:</strong>
+                    <strong>Columnas requeridas (en orden):</strong>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-blue-700">
                     <div>• <strong>ID:</strong> Identificador único</div>
@@ -1544,40 +1502,40 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     <div>• <strong>Pendiente Máxima (%):</strong> Pendiente máxima</div>
                     <div>• <strong>Distancia (km):</strong> Distancia</div>
                     <div>• <strong>Dificultad:</strong> Cuarta/Tercera/Segunda/Primera/Especial</div>
+                    <div>• <strong>Categoría:</strong> Categoría</div>
                     <div>• <strong>Latitud:</strong> Coordenada latitud</div>
                     <div>• <strong>Longitud:</strong> Coordenada longitud</div>
                     <div>• <strong>Descripción:</strong> Descripción del puerto</div>
-                    <div>• <strong>Categoría:</strong> Categoría</div>
                     <div>• <strong>URL Imagen:</strong> URL de la imagen</div>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm text-blue-700">
                   <FileSpreadsheet className="w-4 h-4" />
-                  <span>Descarga la plantilla de Excel para ver el formato correcto</span>
+                  <span>Descarga la plantilla CSV para ver el formato correcto</span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Seleccionar archivo (Excel o CSV)
+                  Seleccionar archivo CSV
                 </label>
                 <input
                   type="file"
-                  accept=".xlsx,.xls,.csv"
+                  accept=".csv"
                   onChange={handleFileSelect}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 {importFile && (
                   <div className="mt-2 text-sm text-green-600 flex items-center gap-2">
                     <Database className="w-4 h-4" />
-                    Archivo seleccionado: {importFile.name} ({importType.toUpperCase()})
+                    Archivo seleccionado: {importFile.name}
                   </div>
                 )}
               </div>
 
               {importPreview.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-slate-800 mb-3">Vista previa del archivo CSV:</h4>
+                  <h4 className="font-semibold text-slate-800 mb-3">Vista previa del archivo:</h4>
                   <div className="bg-slate-50 rounded-lg p-4 overflow-x-auto">
                     <pre className="text-xs text-slate-700 whitespace-pre-wrap">
                       {importPreview.join('\n')}
@@ -1596,6 +1554,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <li>• Los puertos nuevos serán añadidos a la base de datos</li>
                   <li>• Verifica que el formato del archivo sea correcto antes de importar</li>
                   <li>• Se recomienda hacer una exportación antes de importar como respaldo</li>
+                  <li>• El archivo debe estar en formato UTF-8</li>
                 </ul>
               </div>
             </div>

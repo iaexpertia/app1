@@ -1,51 +1,71 @@
-import * as XLSX from 'xlsx';
 import { MountainPass } from '../types';
 
+const escapeCSVValue = (value: any): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  const stringValue = String(value);
+
+  if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+
+  return stringValue;
+};
+
 export const exportPassesToExcel = (passes: MountainPass[]): void => {
-  const data = passes.map(pass => ({
-    'ID': pass.id,
-    'Nombre': pass.name,
-    'País': pass.country,
-    'Región': pass.region,
-    'Altitud Máxima (m)': pass.maxAltitude,
-    'Desnivel (m)': pass.elevationGain,
-    'Pendiente Media (%)': pass.averageGradient,
-    'Pendiente Máxima (%)': pass.maxGradient,
-    'Distancia (km)': pass.distance,
-    'Dificultad': pass.difficulty,
-    'Categoría': pass.category,
-    'Latitud': pass.coordinates?.lat || '',
-    'Longitud': pass.coordinates?.lng || '',
-    'Descripción': pass.description,
-    'URL Imagen': pass.imageUrl
-  }));
-
-  const worksheet = XLSX.utils.json_to_sheet(data);
-
-  const columnWidths = [
-    { wch: 20 },
-    { wch: 30 },
-    { wch: 15 },
-    { wch: 20 },
-    { wch: 18 },
-    { wch: 15 },
-    { wch: 18 },
-    { wch: 18 },
-    { wch: 15 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 50 },
-    { wch: 50 }
+  const headers = [
+    'ID',
+    'Nombre',
+    'País',
+    'Región',
+    'Altitud Máxima (m)',
+    'Desnivel (m)',
+    'Pendiente Media (%)',
+    'Pendiente Máxima (%)',
+    'Distancia (km)',
+    'Dificultad',
+    'Categoría',
+    'Latitud',
+    'Longitud',
+    'Descripción',
+    'URL Imagen'
   ];
-  worksheet['!cols'] = columnWidths;
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Puertos de Montaña');
+  const rows = passes.map(pass => [
+    pass.id,
+    pass.name,
+    pass.country,
+    pass.region,
+    pass.maxAltitude,
+    pass.elevationGain,
+    pass.averageGradient,
+    pass.maxGradient,
+    pass.distance,
+    pass.difficulty,
+    pass.category,
+    pass.coordinates?.lat || '',
+    pass.coordinates?.lng || '',
+    pass.description,
+    pass.imageUrl
+  ]);
 
-  const filename = `puertos_montana_${new Date().toISOString().split('T')[0]}.xlsx`;
-  XLSX.writeFile(workbook, filename);
+  const csvContent = [
+    headers.map(escapeCSVValue).join(','),
+    ...rows.map(row => row.map(escapeCSVValue).join(','))
+  ].join('\n');
+
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', `puertos_montana_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 export const importPassesFromExcel = (file: File): Promise<MountainPass[]> => {
@@ -54,49 +74,58 @@ export const importPassesFromExcel = (file: File): Promise<MountainPass[]> => {
 
     reader.onload = (e) => {
       try {
-        const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const text = e.target?.result as string;
+        const lines = text.split('\n').filter(line => line.trim());
 
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        if (lines.length < 2) {
+          reject(new Error('El archivo está vacío o no tiene datos'));
+          return;
+        }
 
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const passes: MountainPass[] = [];
 
-        const passes: MountainPass[] = jsonData.map((row: any) => {
-          const id = row['ID'] || row['id'] || `imported-${Date.now()}-${Math.random()}`;
-          const name = row['Nombre'] || row['name'] || '';
-          const country = row['País'] || row['country'] || '';
-          const region = row['Región'] || row['region'] || '';
-          const maxAltitude = parseInt(row['Altitud Máxima (m)'] || row['maxAltitude'] || '0');
-          const elevationGain = parseInt(row['Desnivel (m)'] || row['elevationGain'] || '0');
-          const averageGradient = parseFloat(row['Pendiente Media (%)'] || row['averageGradient'] || '0');
-          const maxGradient = parseFloat(row['Pendiente Máxima (%)'] || row['maxGradient'] || '0');
-          const distance = parseFloat(row['Distancia (km)'] || row['distance'] || '0');
-          const difficulty = row['Dificultad'] || row['difficulty'] || 'Cuarta';
-          const category = row['Categoría'] || row['category'] || 'Otros';
-          const lat = parseFloat(row['Latitud'] || row['lat'] || '0');
-          const lng = parseFloat(row['Longitud'] || row['lng'] || '0');
-          const description = row['Descripción'] || row['description'] || '';
-          const imageUrl = row['URL Imagen'] || row['imageUrl'] || '';
+        for (let i = 1; i < lines.length; i++) {
+          const values: string[] = [];
+          let current = '';
+          let inQuotes = false;
 
-          return {
-            id,
-            name,
-            country,
-            region,
-            maxAltitude,
-            elevationGain,
-            averageGradient,
-            maxGradient,
-            distance,
-            difficulty: difficulty as any,
-            category,
-            coordinates: { lat, lng },
-            description,
-            imageUrl,
-            famousWinners: []
-          };
-        });
+          for (let char of lines[i]) {
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(current.trim().replace(/^"|"$/g, ''));
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          values.push(current.trim().replace(/^"|"$/g, ''));
+
+          if (values.length >= 15) {
+            const pass: MountainPass = {
+              id: values[0] || `imported-${Date.now()}-${i}`,
+              name: values[1] || '',
+              country: values[2] || '',
+              region: values[3] || '',
+              maxAltitude: parseInt(values[4]) || 0,
+              elevationGain: parseInt(values[5]) || 0,
+              averageGradient: parseFloat(values[6]) || 0,
+              maxGradient: parseFloat(values[7]) || 0,
+              distance: parseFloat(values[8]) || 0,
+              difficulty: (values[9] || 'Cuarta') as any,
+              category: values[10] || 'Otros',
+              coordinates: {
+                lat: parseFloat(values[11]) || 0,
+                lng: parseFloat(values[12]) || 0
+              },
+              description: values[13] || '',
+              imageUrl: values[14] || '',
+              famousWinners: []
+            };
+            passes.push(pass);
+          }
+        }
 
         resolve(passes);
       } catch (error) {
@@ -108,54 +137,60 @@ export const importPassesFromExcel = (file: File): Promise<MountainPass[]> => {
       reject(error);
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsText(file);
   });
 };
 
 export const downloadExcelTemplate = (): void => {
-  const templateData = [
-    {
-      'ID': 'ejemplo-1',
-      'Nombre': 'Puerto de Ejemplo',
-      'País': 'España',
-      'Región': 'Ejemplo',
-      'Altitud Máxima (m)': 1500,
-      'Desnivel (m)': 800,
-      'Pendiente Media (%)': 7.5,
-      'Pendiente Máxima (%)': 12,
-      'Distancia (km)': 15,
-      'Dificultad': 'Segunda',
-      'Categoría': 'Otros',
-      'Latitud': 40.0,
-      'Longitud': -3.0,
-      'Descripción': 'Descripción de ejemplo del puerto',
-      'URL Imagen': 'https://ejemplo.com/imagen.jpg'
-    }
+  const headers = [
+    'ID',
+    'Nombre',
+    'País',
+    'Región',
+    'Altitud Máxima (m)',
+    'Desnivel (m)',
+    'Pendiente Media (%)',
+    'Pendiente Máxima (%)',
+    'Distancia (km)',
+    'Dificultad',
+    'Categoría',
+    'Latitud',
+    'Longitud',
+    'Descripción',
+    'URL Imagen'
   ];
 
-  const worksheet = XLSX.utils.json_to_sheet(templateData);
-
-  const columnWidths = [
-    { wch: 20 },
-    { wch: 30 },
-    { wch: 15 },
-    { wch: 20 },
-    { wch: 18 },
-    { wch: 15 },
-    { wch: 18 },
-    { wch: 18 },
-    { wch: 15 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 50 },
-    { wch: 50 }
+  const exampleRow = [
+    'ejemplo-1',
+    'Puerto de Ejemplo',
+    'España',
+    'Ejemplo',
+    '1500',
+    '800',
+    '7.5',
+    '12',
+    '15',
+    'Segunda',
+    'Otros',
+    '40.0',
+    '-3.0',
+    'Descripción de ejemplo del puerto',
+    'https://ejemplo.com/imagen.jpg'
   ];
-  worksheet['!cols'] = columnWidths;
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Puertos de Montaña');
+  const csvContent = [
+    headers.map(escapeCSVValue).join(','),
+    exampleRow.map(escapeCSVValue).join(',')
+  ].join('\n');
 
-  XLSX.writeFile(workbook, 'plantilla_puertos_montana.xlsx');
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'plantilla_puertos_montana.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
