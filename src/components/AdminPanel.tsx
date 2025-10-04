@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save, Upload, Database } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, Edit, Trash2, X, Save, Upload, Database, RefreshCw } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews } from '../utils/excelExport';
+import { getAllPassesFromDB, createPassInDB, updatePassInDB, deletePassFromDB, syncPassesToDB, importPassesFromCSV } from '../utils/passesService';
 import { 
   loadCyclists, 
   addCyclist, 
@@ -36,10 +37,12 @@ import {
 interface AdminPanelProps {
   passes: MountainPass[];
   onUpdatePass: (pass: MountainPass) => void;
+  onAddPass?: (pass: MountainPass) => void;
+  onRemovePass?: (passId: string) => void;
   t: (key: string) => string;
 }
 
-export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t }) => {
+export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, onAddPass, onRemovePass, t }) => {
   const [activeTab, setActiveTab] = useState('cyclists');
   
   // Data states
@@ -66,6 +69,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<string[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string>('');
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
@@ -75,7 +80,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [passForm, setPassForm] = useState({
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-    description: '', imageUrl: '', category: 'Otros'
+    description: '', imageUrl: '', category: 'Otros', coordinatesLat: 0, coordinatesLng: 0
   });
   
   const [brandForm, setBrandForm] = useState({
@@ -127,50 +132,140 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
     try {
       const text = await importFile.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',');
-      
-      const newPasses: MountainPass[] = [];
-      
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',');
-        if (values.length >= headers.length) {
-          const pass: MountainPass = {
-            id: values[0] || `imported-${Date.now()}-${i}`,
-            name: values[1] || '',
-            country: values[2] || '',
-            region: values[3] || '',
-            maxAltitude: parseInt(values[4]) || 0,
-            elevationGain: parseInt(values[5]) || 0,
-            averageGradient: parseFloat(values[6]) || 0,
-            maxGradient: parseFloat(values[7]) || 0,
-            distance: parseFloat(values[8]) || 0,
-            difficulty: values[9] as any || 'Cuarta',
-            coordinates: {
-              lat: parseFloat(values[10]) || 0,
-              lng: parseFloat(values[11]) || 0
-            },
-            description: values[12] || '',
-            imageUrl: values[13] || '',
-            category: values[14] || 'Otros'
-          };
-          newPasses.push(pass);
-        }
+      const { passes: newPasses, errors } = await importPassesFromCSV(text);
+
+      if (errors.length > 0) {
+        console.error('Errores durante la importación:', errors);
       }
+
+      // Sincronizar con la base de datos
+      setIsSyncing(true);
+      const result = await syncPassesToDB(newPasses);
+      setIsSyncing(false);
 
       // Update passes through parent component
       newPasses.forEach(pass => {
-        onUpdatePass(pass);
+        if (onAddPass) {
+          onAddPass(pass);
+        }
       });
 
-      alert(`Se han importado ${newPasses.length} puertos correctamente.`);
+      alert(`Se han importado ${result.success} puertos correctamente a la base de datos. Errores: ${result.errors}`);
       setShowImportModal(false);
       setImportFile(null);
       setImportPreview([]);
     } catch (error) {
       console.error('Error importing CSV:', error);
       alert('Error al importar el archivo CSV. Verifica el formato.');
+      setIsSyncing(false);
     }
+  };
+
+  const handleSyncToDatabase = async () => {
+    if (confirm('¿Deseas sincronizar todos los puertos actuales con la base de datos?')) {
+      setIsSyncing(true);
+      setSyncMessage('Sincronizando...');
+
+      const result = await syncPassesToDB(passes);
+
+      setIsSyncing(false);
+      setSyncMessage(`Sincronizados: ${result.success}, Errores: ${result.errors}`);
+
+      setTimeout(() => setSyncMessage(''), 5000);
+    }
+  };
+
+  const handleCreatePass = async () => {
+    const newPass: MountainPass = {
+      id: `pass-${Date.now()}`,
+      name: passForm.name,
+      country: passForm.country,
+      region: passForm.region,
+      maxAltitude: passForm.maxAltitude,
+      elevationGain: passForm.elevationGain,
+      averageGradient: passForm.averageGradient,
+      maxGradient: passForm.maxGradient,
+      distance: passForm.distance,
+      difficulty: passForm.difficulty as MountainPass['difficulty'],
+      coordinates: {
+        lat: passForm.coordinatesLat,
+        lng: passForm.coordinatesLng,
+      },
+      description: passForm.description,
+      imageUrl: passForm.imageUrl,
+      category: passForm.category,
+      famousWinners: [],
+    };
+
+    // Crear en la base de datos
+    const createdPass = await createPassInDB(newPass);
+
+    if (createdPass && onAddPass) {
+      onAddPass(createdPass);
+      alert('Puerto creado exitosamente en la base de datos');
+      setShowPassModal(false);
+      resetPassForm();
+    } else {
+      alert('Error al crear el puerto en la base de datos');
+    }
+  };
+
+  const handleUpdatePassDB = async () => {
+    if (!editingPass) return;
+
+    const updatedPass: MountainPass = {
+      ...editingPass,
+      name: passForm.name,
+      country: passForm.country,
+      region: passForm.region,
+      maxAltitude: passForm.maxAltitude,
+      elevationGain: passForm.elevationGain,
+      averageGradient: passForm.averageGradient,
+      maxGradient: passForm.maxGradient,
+      distance: passForm.distance,
+      difficulty: passForm.difficulty as MountainPass['difficulty'],
+      coordinates: {
+        lat: passForm.coordinatesLat,
+        lng: passForm.coordinatesLng,
+      },
+      description: passForm.description,
+      imageUrl: passForm.imageUrl,
+      category: passForm.category,
+    };
+
+    // Actualizar en la base de datos
+    const updated = await updatePassInDB(updatedPass);
+
+    if (updated) {
+      onUpdatePass(updated);
+      alert('Puerto actualizado exitosamente en la base de datos');
+      setShowPassModal(false);
+      setEditingPass(null);
+      resetPassForm();
+    } else {
+      alert('Error al actualizar el puerto en la base de datos');
+    }
+  };
+
+  const handleDeletePass = async (passId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este puerto de la base de datos?')) {
+      const deleted = await deletePassFromDB(passId);
+
+      if (deleted && onRemovePass) {
+        onRemovePass(passId);
+        alert('Puerto eliminado exitosamente de la base de datos');
+      } else {
+        alert('Error al eliminar el puerto de la base de datos');
+      }
+    }
+  };
+
+  const resetPassForm = () => {
+    setPassForm({
+      name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
+      averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
+      description: '', imageUrl: '', category: 'Otros', coordinatesLat: 0, coordinatesLng: 0
+    });
   };
 
   // Export handlers
@@ -611,8 +706,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         {activeTab === 'passes' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
+                {syncMessage && (
+                  <p className="text-sm text-green-600 mt-1">{syncMessage}</p>
+                )}
+              </div>
               <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setEditingPass(null);
+                    resetPassForm();
+                    setShowPassModal(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Nuevo Puerto
+                </button>
+                <button
+                  onClick={handleSyncToDatabase}
+                  disabled={isSyncing}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  Sincronizar BD
+                </button>
                 <button
                   onClick={() => setShowImportModal(true)}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -669,13 +788,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                               difficulty: pass.difficulty,
                               description: pass.description,
                               imageUrl: pass.imageUrl,
-                              category: pass.category
+                              category: pass.category,
+                              coordinatesLat: pass.coordinates.lat,
+                              coordinatesLng: pass.coordinates.lng
                             });
                             setShowPassModal(true);
                           }}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
                         >
                           <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePass(pass.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>
@@ -1469,6 +1596,214 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               >
                 <Save className="w-4 h-4" />
                 {editingNews ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pass Modal */}
+      {showPassModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingPass ? 'Editar Puerto' : 'Nuevo Puerto'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowPassModal(false);
+                  setEditingPass(null);
+                  resetPassForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                  <input
+                    type="text"
+                    value={passForm.name}
+                    onChange={(e) => setPassForm({...passForm, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">País *</label>
+                  <input
+                    type="text"
+                    value={passForm.country}
+                    onChange={(e) => setPassForm({...passForm, country: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Región *</label>
+                  <input
+                    type="text"
+                    value={passForm.region}
+                    onChange={(e) => setPassForm({...passForm, region: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                  <input
+                    type="text"
+                    value={passForm.category}
+                    onChange={(e) => setPassForm({...passForm, category: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Altitud (m)</label>
+                  <input
+                    type="number"
+                    value={passForm.maxAltitude}
+                    onChange={(e) => setPassForm({...passForm, maxAltitude: parseInt(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Desnivel (m)</label>
+                  <input
+                    type="number"
+                    value={passForm.elevationGain}
+                    onChange={(e) => setPassForm({...passForm, elevationGain: parseInt(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Distancia (km)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={passForm.distance}
+                    onChange={(e) => setPassForm({...passForm, distance: parseFloat(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pendiente Media (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={passForm.averageGradient}
+                    onChange={(e) => setPassForm({...passForm, averageGradient: parseFloat(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pendiente Máx (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={passForm.maxGradient}
+                    onChange={(e) => setPassForm({...passForm, maxGradient: parseFloat(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dificultad</label>
+                  <select
+                    value={passForm.difficulty}
+                    onChange={(e) => setPassForm({...passForm, difficulty: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Cuarta">Cuarta</option>
+                    <option value="Tercera">Tercera</option>
+                    <option value="Segunda">Segunda</option>
+                    <option value="Primera">Primera</option>
+                    <option value="Especial">Especial</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    value={passForm.coordinatesLat}
+                    onChange={(e) => setPassForm({...passForm, coordinatesLat: parseFloat(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    value={passForm.coordinatesLng}
+                    onChange={(e) => setPassForm({...passForm, coordinatesLng: parseFloat(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                <textarea
+                  value={passForm.description}
+                  onChange={(e) => setPassForm({...passForm, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen</label>
+                <input
+                  type="url"
+                  value={passForm.imageUrl}
+                  onChange={(e) => setPassForm({...passForm, imageUrl: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowPassModal(false);
+                  setEditingPass(null);
+                  resetPassForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingPass ? handleUpdatePassDB : handleCreatePass}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingPass ? 'Actualizar' : 'Crear'}
               </button>
             </div>
           </div>

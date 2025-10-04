@@ -237,6 +237,8 @@ function App() {
           <AdminPanel
             passes={passes}
             onUpdatePass={handleUpdatePass}
+            onAddPass={handleAddPass}
+            onRemovePass={handleRemovePass}
             t={t}
           />
         )}
