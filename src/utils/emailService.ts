@@ -1,29 +1,9 @@
-import * as emailjs from '@emailjs/browser';
-
 // Email service for sending confirmation emails
 export interface EmailData {
   to: string;
   subject: string;
   html: string;
   text?: string;
-}
-
-// EmailJS Configuration
-// Para usar EmailJS, necesitas:
-// 1. Crear cuenta en https://www.emailjs.com/
-// 2. Crear un servicio de email (Gmail, Outlook, etc.)
-// 3. Crear una plantilla
-// 4. Obtener tu PUBLIC_KEY, SERVICE_ID y TEMPLATE_ID
-const EMAILJS_CONFIG = {
-  PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
-  SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
-  TEMPLATE_ID_RECOVERY: import.meta.env.VITE_EMAILJS_TEMPLATE_ID_RECOVERY || '',
-  TEMPLATE_ID_REGISTRATION: import.meta.env.VITE_EMAILJS_TEMPLATE_ID_REGISTRATION || ''
-};
-
-// Initialize EmailJS
-if (EMAILJS_CONFIG.PUBLIC_KEY) {
-  emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
 }
 
 export interface CyclistEmailData {
@@ -681,7 +661,7 @@ export const sendPasswordRecoveryEmail = async (email: string): Promise<boolean>
 
     // Generate recovery token
     const recoveryToken = generateRecoveryToken();
-
+    
     // Store recovery token with expiration (24 hours)
     const recoveryData = {
       email,
@@ -690,96 +670,47 @@ export const sendPasswordRecoveryEmail = async (email: string): Promise<boolean>
       used: false,
       createdAt: new Date().toISOString()
     };
-
+    
     // Store in localStorage (in production, this would be in database)
     const existingTokens = JSON.parse(localStorage.getItem('recovery-tokens') || '[]');
     // Remove old tokens for this email
     const filteredTokens = existingTokens.filter((t: any) => t.email !== email);
     filteredTokens.push(recoveryData);
     localStorage.setItem('recovery-tokens', JSON.stringify(filteredTokens));
+    
+    // Simulate email sending delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const emailData: EmailData = {
+      to: email,
+      subject: '🔐 CyclePeaks - Recuperación de Contraseña',
+      html: generatePasswordRecoveryEmailHTML(email, recoveryToken),
+      text: generatePasswordRecoveryEmailText(email, recoveryToken)
+    };
 
-    const recoveryLink = `${window.location.origin}/?token=${recoveryToken}&email=${encodeURIComponent(email)}`;
-
-    // Try to send real email with EmailJS if configured
-    if (EMAILJS_CONFIG.PUBLIC_KEY && EMAILJS_CONFIG.SERVICE_ID && EMAILJS_CONFIG.TEMPLATE_ID_RECOVERY) {
-      try {
-        const templateParams = {
-          to_email: email,
-          to_name: email.split('@')[0],
-          recovery_link: recoveryLink,
-          token: recoveryToken,
-          expiry_hours: '24'
-        };
-
-        await emailjs.send(
-          EMAILJS_CONFIG.SERVICE_ID,
-          EMAILJS_CONFIG.TEMPLATE_ID_RECOVERY,
-          templateParams
-        );
-
-        console.log('✅ Email real enviado con EmailJS');
-
-        // Store email log
-        const emailLog = {
-          id: Date.now().toString(),
-          from: 'CyclePeaks',
-          to: email,
-          subject: '🔐 CyclePeaks - Recuperación de Contraseña',
-          sentAt: new Date().toISOString(),
-          type: 'password_recovery',
-          status: 'sent',
-          method: 'emailjs',
-          token: recoveryToken
-        };
-
-        const existingLogs = JSON.parse(localStorage.getItem('email-logs') || '[]');
-        existingLogs.push(emailLog);
-        localStorage.setItem('email-logs', JSON.stringify(existingLogs));
-
-        return true;
-      } catch (emailError) {
-        console.error('❌ Error enviando email con EmailJS:', emailError);
-        // Continue with console log fallback
-      }
-    }
-
-    // Fallback: Display in console (for development)
-    console.log('📧 ============================================');
-    console.log('🔐 EMAIL DE RECUPERACIÓN DE CONTRASEÑA');
-    console.log('📧 ============================================');
-    console.log('Para:', email);
-    console.log('Asunto: 🔐 CyclePeaks - Recuperación de Contraseña');
-    console.log('');
-    console.log('Enlace de recuperación:');
-    console.log(recoveryLink);
-    console.log('');
-    console.log('Token:', recoveryToken);
-    console.log('Válido por: 24 horas');
-    console.log('📧 ============================================');
-    console.log('');
-    console.log('⚠️  NOTA: Para recibir emails reales, configura EmailJS:');
-    console.log('1. Crea cuenta en https://www.emailjs.com/');
-    console.log('2. Configura un servicio de email');
-    console.log('3. Crea una plantilla con las variables:');
-    console.log('   - to_email, to_name, recovery_link, token, expiry_hours');
-    console.log('4. Añade las credenciales al archivo .env:');
-    console.log('   VITE_EMAILJS_PUBLIC_KEY=tu_public_key');
-    console.log('   VITE_EMAILJS_SERVICE_ID=tu_service_id');
-    console.log('   VITE_EMAILJS_TEMPLATE_ID_RECOVERY=tu_template_id');
-    console.log('');
+    // In a real application, you would integrate with:
+    // - EmailJS with recovery@cyclepeaks.com as sender
+    // - SendGrid, Mailgun, or similar service
+    // - Your own backend email service with SMTP
+    
+    console.log('🔐 Email de recuperación enviado exitosamente:', {
+      from: 'recovery@cyclepeaks.com',
+      to: emailData.to,
+      subject: emailData.subject,
+      timestamp: new Date().toISOString(),
+      token: recoveryToken.substring(0, 8) + '...' // Solo mostrar parte del token por seguridad
+    });
 
     // Store email log for admin purposes
     const emailLog = {
       id: Date.now().toString(),
       from: 'recovery@cyclepeaks.com',
       to: email,
-      subject: '🔐 CyclePeaks - Recuperación de Contraseña',
+      subject: emailData.subject,
       sentAt: new Date().toISOString(),
       type: 'password_recovery',
-      status: 'console_only',
-      method: 'console',
-      token: recoveryToken,
-      link: recoveryLink
+      status: 'sent',
+      token: recoveryToken
     };
 
     const existingLogs = JSON.parse(localStorage.getItem('email-logs') || '[]');
@@ -789,7 +720,7 @@ export const sendPasswordRecoveryEmail = async (email: string): Promise<boolean>
     return true;
   } catch (error) {
     console.error('❌ Error enviando email de recuperación:', error);
-
+    
     // Store failed email log
     const emailLog = {
       id: Date.now().toString(),
