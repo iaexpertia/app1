@@ -241,6 +241,7 @@ function App() {
             t={t}
             onRegistrationSuccess={handleRegistrationSuccess}
             onTabChange={setActiveTab}
+            isAdmin={isAdmin}
           />
         )}
         

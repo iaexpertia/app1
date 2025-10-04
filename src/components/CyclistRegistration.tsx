@@ -5,6 +5,7 @@ import { addCyclist } from '../utils/cyclistStorage';
 import { setCurrentUser } from '../utils/cyclistStorage';
 import { loginUser } from '../utils/cyclistStorage';
 import { loadCyclists } from '../utils/cyclistStorage';
+import { isCurrentUserAdmin } from '../utils/cyclistStorage';
 import { sendRegistrationEmail, sendPasswordRecoveryEmail } from '../utils/emailService';
 import {
   User,
@@ -24,12 +25,14 @@ interface CyclistRegistrationProps {
   t: Translation;
   onRegistrationSuccess: () => void;
   onTabChange?: (tab: string) => void;
+  isAdmin?: boolean;
 }
 
 export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   t,
   onRegistrationSuccess,
-  onTabChange
+  onTabChange,
+  isAdmin = false
 }) => {
   const [cyclists] = useState(() => loadCyclists());
   const hasRegisteredCyclists = cyclists.length > 0;
@@ -715,27 +718,29 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             </div>
           </div>
 
-          {/* Admin Checkbox Section */}
-          <div className="border-t pt-6">
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isAdmin}
-                  onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
-                  className="w-5 h-5 text-orange-600 border-orange-300 rounded focus:ring-orange-500"
-                />
-                <div className="flex-1">
-                  <span className="text-sm font-medium text-orange-900">
-                    Registrar como Administrador
-                  </span>
-                  <p className="text-xs text-orange-700 mt-1">
-                    Los administradores tienen acceso completo para gestionar puertos, ciclistas, marcas, colaboradores y noticias.
-                  </p>
-                </div>
-              </label>
+          {/* Admin Checkbox Section - Only visible to current admins */}
+          {isAdmin && (
+            <div className="border-t pt-6">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isAdmin}
+                    onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
+                    className="w-5 h-5 text-orange-600 border-orange-300 rounded focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <span className="text-sm font-medium text-orange-900">
+                      Registrar como Administrador
+                    </span>
+                    <p className="text-xs text-orange-700 mt-1">
+                      Los administradores tienen acceso completo para gestionar puertos, ciclistas, marcas, colaboradores y noticias.
+                    </p>
+                  </div>
+                </label>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Captcha Section */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
