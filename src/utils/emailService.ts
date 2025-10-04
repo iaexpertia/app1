@@ -1,4 +1,4 @@
-import emailjs from '@emailjs/browser';
+import * as emailjs from '@emailjs/browser';
 
 // Email service for sending confirmation emails
 export interface EmailData {
