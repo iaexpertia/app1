@@ -18,6 +18,7 @@ import { PassFinderView } from './components/PassFinderView';
 import { PasswordReset } from './components/PasswordReset';
 import { Footer } from './components/Footer';
 import { LegalModal } from './components/LegalModals';
+import { CookieBanner } from './components/CookieBanner';
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
@@ -338,6 +339,11 @@ function App() {
         isOpen={showLegalModal !== null}
         onClose={() => setShowLegalModal(null)}
         type={showLegalModal || 'privacy'}
+      />
+
+      <CookieBanner
+        onOpenPrivacy={() => setShowLegalModal('privacy')}
+        onOpenLegal={() => setShowLegalModal('legal')}
       />
     </div>
   );
