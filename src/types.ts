@@ -105,3 +105,33 @@ export interface NewsArticle {
   featured: boolean;
   externalUrl?: string;
 }
+
+export interface CyclingRace {
+  id: string;
+  name: string;
+  date: string;
+  location: {
+    city: string;
+    region: string;
+    country: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  distance: number;
+  elevation: number;
+  type: 'Carretera' | 'MTB' | 'Gravel' | 'Ciclocross' | 'Contrarreloj' | 'Otro';
+  category: 'Profesional' | 'Amateur' | 'Gran Fondo' | 'Marcha' | 'Otro';
+  description: string;
+  posterUrl: string;
+  registrationUrl?: string;
+  startTime?: string;
+  maxParticipants?: number;
+  price?: number;
+  organizer?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  featured: boolean;
+  isActive: boolean;
+}
