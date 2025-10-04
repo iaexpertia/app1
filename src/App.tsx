@@ -20,12 +20,14 @@ import { Footer } from './components/Footer';
 import { LegalModal } from './components/LegalModals';
 import { CookieBanner } from './components/CookieBanner';
 import { mountainPasses } from './data/mountainPasses';
-import {
-  loadConquests,
-  addConquest,
+import { 
+  loadConquests, 
+  addConquest, 
+  removeConquest, 
+  isPassConquered,
   updateConquestPhotos,
   getConquestByPassId,
-  syncConquestsFromSupabase
+  updateConquest
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, loadCyclists, addCyclist, setCurrentUser, getCurrentUser } from './utils/cyclistStorage';
@@ -71,68 +73,51 @@ function App() {
   };
 
   useEffect(() => {
-    const initializeApp = async () => {
-      const cyclist = getCurrentUser();
-      setCurrentCyclist(cyclist);
+    const loadedConquests = loadConquests();
+    setConquests(loadedConquests);
+    setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
 
-      if (cyclist) {
-        await syncConquestsFromSupabase();
-      }
+    // Verificar si el usuario actual es admin al cargar
+    const currentUserIsAdmin = isCurrentUserAdmin();
+    setIsAdmin(currentUserIsAdmin);
 
-      const loadedConquests = loadConquests();
-      setConquests(loadedConquests);
-      setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
-
-      const currentUserIsAdmin = isCurrentUserAdmin();
-      setIsAdmin(currentUserIsAdmin);
-
-      const cyclists = loadCyclists();
-      if (cyclists.length === 0) {
-        const defaultAdmin: Cyclist = {
-          id: 'admin-default',
-          name: 'Administrador',
-          alias: 'Admin',
-          email: 'admin@puertosconquistados.com',
-          password: 'admin123',
-          phone: '+34 000 000 000',
-          bikes: [],
-          registrationDate: new Date().toISOString().split('T')[0],
-          isAdmin: true
-        };
-        await addCyclist(defaultAdmin);
-        setCurrentUser(defaultAdmin.id);
-      }
-    };
-
-    initializeApp();
+    // Cargar el ciclista actual
+    const cyclist = getCurrentUser();
+    setCurrentCyclist(cyclist);
+    
+    // Si no hay ciclistas registrados, crear un admin por defecto
+    const cyclists = loadCyclists();
+    if (cyclists.length === 0) {
+      const defaultAdmin: Cyclist = {
+        id: 'admin-default',
+        name: 'Administrador',
+        alias: 'Admin',
+        email: 'admin@puertosconquistados.com',
+        phone: '+34 000 000 000',
+        bikes: [],
+        registrationDate: new Date().toISOString().split('T')[0],
+        isAdmin: true
+      };
+      addCyclist(defaultAdmin);
+      setCurrentUser(defaultAdmin.id);
+    }
   }, []);
 
-  const handleToggleConquest = async (passId: string) => {
-    const isConquered = conqueredPassIds.has(passId);
-
-    if (isConquered) {
-      try {
-        const { removeConquest } = await import('./utils/storage');
-        await removeConquest(passId);
-        const updatedConquests = conquests.filter(c => c.passId !== passId);
-        setConquests(updatedConquests);
-        setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
-      } catch (err) {
-        console.error('Error removing conquest:', err);
-      }
+  const handleToggleConquest = (passId: string) => {
+    if (isPassConquered(passId)) {
+      removeConquest(passId);
+      const updatedConquests = conquests.filter(c => c.passId !== passId);
+      setConquests(updatedConquests);
+      setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
     } else {
       const newConquest: ConquestData = {
         passId,
         dateCompleted: new Date().toISOString().split('T')[0]
       };
-      try {
-        await addConquest(newConquest);
-        const updatedConquests = [...conquests.filter(c => c.passId !== passId), newConquest];
-        setConquests(updatedConquests);
-        setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
-      } catch (err) {
-        console.error('Error adding conquest:', err);
-      }
+      addConquest(newConquest);
+      const updatedConquests = [...conquests.filter(c => c.passId !== passId), newConquest];
+      setConquests(updatedConquests);
+      setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
     }
   };
 
@@ -147,15 +132,11 @@ function App() {
     }
   };
 
-  const handleSavePhotos = async (passId: string, photos: string[]) => {
-    try {
-      await updateConquestPhotos(passId, photos);
-      const updatedConquests = loadConquests();
-      setConquests(updatedConquests);
-      setPhotosPass(null);
-    } catch (err) {
-      console.error('Error saving photos:', err);
-    }
+  const handleSavePhotos = (passId: string, photos: string[]) => {
+    updateConquestPhotos(passId, photos);
+    const updatedConquests = loadConquests();
+    setConquests(updatedConquests);
+    setPhotosPass(null);
   };
 
   const handleRegistrationSuccess = () => {
@@ -191,27 +172,19 @@ function App() {
     }
   };
 
-  const handleRemovePass = async (passId: string) => {
+  const handleRemovePass = (passId: string) => {
     setPasses(passes.filter(p => p.id !== passId));
-    try {
-      const { removeConquest } = await import('./utils/storage');
-      await removeConquest(passId);
-      const updatedConquests = conquests.filter(c => c.passId !== passId);
-      setConquests(updatedConquests);
-      setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
-    } catch (err) {
-      console.error('Error removing pass:', err);
-    }
+    // Also remove any conquest data for this pass
+    removeConquest(passId);
+    const updatedConquests = conquests.filter(c => c.passId !== passId);
+    setConquests(updatedConquests);
+    setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
   };
 
-  const handleUpdateConquest = async (conquest: ConquestData) => {
-    try {
-      await addConquest(conquest);
-      const updatedConquests = loadConquests();
-      setConquests(updatedConquests);
-    } catch (err) {
-      console.error('Error updating conquest:', err);
-    }
+  const handleUpdateConquest = (conquest: ConquestData) => {
+    updateConquest(conquest);
+    const updatedConquests = loadConquests();
+    setConquests(updatedConquests);
   };
 
   const userStats = calculateUserStats(passes, conquests);
