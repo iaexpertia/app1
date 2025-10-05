@@ -694,6 +694,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         setEditingSocialLink(null);
         resetSocialForm();
         alert('Red social actualizada exitosamente');
+        window.dispatchEvent(new Event('socialLinksUpdated'));
       }
     } else {
       const success = await saveSocialLink(socialForm);
@@ -703,6 +704,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         setShowSocialModal(false);
         resetSocialForm();
         alert('Red social agregada exitosamente');
+        window.dispatchEvent(new Event('socialLinksUpdated'));
       }
     }
   };
@@ -724,6 +726,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         const links = await loadSocialLinks();
         setSocialLinks(links);
         alert('Red social eliminada exitosamente');
+        window.dispatchEvent(new Event('socialLinksUpdated'));
       }
     }
   };

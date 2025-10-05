@@ -18,7 +18,29 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
       const links = await loadSocialLinks();
       setSocialLinks(links.filter(link => link.is_active));
     };
+
     fetchSocialLinks();
+
+    const handleSocialLinksUpdate = () => {
+      fetchSocialLinks();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchSocialLinks();
+      }
+    };
+
+    window.addEventListener('socialLinksUpdated', handleSocialLinksUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    const interval = setInterval(fetchSocialLinks, 10000);
+
+    return () => {
+      window.removeEventListener('socialLinksUpdated', handleSocialLinksUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const getSocialIcon = (platform: string) => {
@@ -149,34 +171,29 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
             <p className="text-slate-400 text-sm">
               © {currentYear} CyclePeaks. Todos los derechos reservados.
             </p>
-            <div className="flex items-center space-x-6">
-              {socialLinks.length > 0 ? (
-                <div className="flex items-center space-x-4">
-                  {socialLinks.map((link) => {
-                    const Icon = getSocialIcon(link.platform);
-                    return (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-400 hover:text-orange-400 transition-colors"
-                        aria-label={link.platform}
-                        title={link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </a>
-                    );
-                  })}
+            <div className="flex flex-col md:flex-row items-center gap-4 md:space-x-6">
+              {socialLinks.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-500 text-xs">Síguenos:</span>
+                  <div className="flex items-center gap-3">
+                    {socialLinks.map((link) => {
+                      const Icon = getSocialIcon(link.platform);
+                      return (
+                        <a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-slate-400 hover:text-orange-400 transition-all duration-200 hover:scale-110"
+                          aria-label={link.platform}
+                          title={link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                <a
-                  href="#"
-                  className="text-slate-400 hover:text-orange-400 transition-colors"
-                  aria-label="Sitio web"
-                >
-                  <Globe className="h-5 w-5" />
-                </a>
               )}
               <span className="text-slate-500 text-xs">
                 Hecho con ❤️ para ciclistas
