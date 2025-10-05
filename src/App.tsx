@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { MountainPass, ConquestData } from './types';
 import { useLanguage } from './hooks/useLanguage';
 import { Header } from './components/Header';
 import { PassesList } from './components/PassesList';
 import { PassModal } from './components/PassModal';
-import { InteractiveMap } from './components/InteractiveMap';
-import { PhotosModal } from './components/PhotosModal';
-import { StatsView } from './components/StatsView';
-import { CyclistRegistration } from './components/CyclistRegistration';
-import { AdminPanel } from './components/AdminPanel';
-import { DatabaseView } from './components/DatabaseView';
-import { CollaboratorsView } from './components/CollaboratorsView';
-import { ConqueredPassesView } from './components/ConqueredPassesView';
-import { BrandsView } from './components/BrandsView';
-import { NewsView } from './components/NewsView';
-import { PassFinderView } from './components/PassFinderView';
-import { PasswordReset } from './components/PasswordReset';
 import { Footer } from './components/Footer';
-import { LegalModal } from './components/LegalModals';
 import { CookieBanner } from './components/CookieBanner';
+
+const InteractiveMap = lazy(() => import('./components/InteractiveMap').then(m => ({ default: m.InteractiveMap })));
+const PhotosModal = lazy(() => import('./components/PhotosModal').then(m => ({ default: m.PhotosModal })));
+const StatsView = lazy(() => import('./components/StatsView').then(m => ({ default: m.StatsView })));
+const CyclistRegistration = lazy(() => import('./components/CyclistRegistration').then(m => ({ default: m.CyclistRegistration })));
+const AdminPanel = lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const DatabaseView = lazy(() => import('./components/DatabaseView').then(m => ({ default: m.DatabaseView })));
+const CollaboratorsView = lazy(() => import('./components/CollaboratorsView').then(m => ({ default: m.CollaboratorsView })));
+const ConqueredPassesView = lazy(() => import('./components/ConqueredPassesView').then(m => ({ default: m.ConqueredPassesView })));
+const BrandsView = lazy(() => import('./components/BrandsView').then(m => ({ default: m.BrandsView })));
+const NewsView = lazy(() => import('./components/NewsView').then(m => ({ default: m.NewsView })));
+const PassFinderView = lazy(() => import('./components/PassFinderView').then(m => ({ default: m.PassFinderView })));
+const PasswordReset = lazy(() => import('./components/PasswordReset').then(m => ({ default: m.PasswordReset })));
+const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
 import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
@@ -216,129 +217,143 @@ function App() {
       )}
       
       <main>
-        {activeTab === 'passes' && (
-          <PassesList
-            passes={passes}
-            conqueredPassIds={conqueredPassIds}
-            onToggleConquest={handleToggleConquest}
-            onViewDetails={handleViewDetails}
-            onAddPhotos={handleAddPhotos}
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          </div>
+        }>
+          {activeTab === 'passes' && (
+            <PassesList
+              passes={passes}
+              conqueredPassIds={conqueredPassIds}
+              onToggleConquest={handleToggleConquest}
+              onViewDetails={handleViewDetails}
+              onAddPhotos={handleAddPhotos}
+              t={t}
+            />
+          )}
+
+          {activeTab === 'finder' && (
+            <PassFinderView
+              passes={passes}
+              conqueredPassIds={conqueredPassIds}
+              onToggleConquest={handleToggleConquest}
+              onViewDetails={handleViewDetails}
+              onAddPhotos={handleAddPhotos}
+              t={t}
+            />
+          )}
+
+          {activeTab === 'map' && (
+            <InteractiveMap
+              passes={passes}
+              conqueredPassIds={conqueredPassIds}
+              onPassClick={handleViewDetails}
+              t={t}
+            />
+          )}
+
+          {activeTab === 'stats' && (
+            <StatsView
+              stats={userStats}
+              conqueredPasses={conqueredPasses}
+              t={t}
+            />
+          )}
+
+          {activeTab === 'register' && (
+            <CyclistRegistration
+              t={t}
+              onRegistrationSuccess={handleRegistrationSuccess}
+              onTabChange={setActiveTab}
+              isAdmin={isAdmin}
+            />
+          )}
+
+          {activeTab === 'admin' && isAdmin && (
+            <AdminPanel
+              passes={passes}
+              onUpdatePass={handleUpdatePass}
+              t={t}
+            />
+          )}
+
+
+          {activeTab === 'database' && (
+            <DatabaseView
+              allPasses={mountainPasses}
+              userPasses={passes}
+              onAddPass={handleAddPass}
+              onRemovePass={handleRemovePass}
+              t={t}
+            />
+          )}
+
+          {activeTab === 'collaborators' && (
+            <CollaboratorsView
+              t={t}
+            />
+          )}
+
+          {activeTab === 'conquered' && (
+            <ConqueredPassesView
+              conqueredPasses={conqueredPasses}
+              conquests={conquests}
+              onUpdateConquest={handleUpdateConquest}
+              onAddPhotos={handleAddPhotos}
+              t={t}
+              currentCyclist={currentCyclist || undefined}
+              allPasses={passes}
+              onSyncComplete={handleSyncComplete}
+            />
+          )}
+
+          {activeTab === 'brands' && (
+            <BrandsView
+              t={t}
+            />
+          )}
+
+          {activeTab === 'news' && (
+            <NewsView
+              t={t}
+            />
+          )}
+        </Suspense>
+      </main>
+      
+      <Suspense fallback={null}>
+        {selectedPass && (
+          <PassModal
+            pass={selectedPass}
+            onClose={() => setSelectedPass(null)}
             t={t}
           />
         )}
 
-        {activeTab === 'finder' && (
-          <PassFinderView
-            passes={passes}
-            conqueredPassIds={conqueredPassIds}
-            onToggleConquest={handleToggleConquest}
-            onViewDetails={handleViewDetails}
-            onAddPhotos={handleAddPhotos}
+        {photosPass && (
+          <PhotosModal
+            pass={photosPass}
+            conquest={photosPass ? getConquestByPassId(photosPass.id) : null}
+            onClose={() => setPhotosPass(null)}
+            onSavePhotos={handleSavePhotos}
             t={t}
           />
         )}
-        
-        {activeTab === 'map' && (
-          <InteractiveMap
-            passes={passes}
-            conqueredPassIds={conqueredPassIds}
-            onPassClick={handleViewDetails}
-            t={t}
+
+        {showLegalModal && (
+          <LegalModal
+            isOpen={showLegalModal !== null}
+            onClose={() => setShowLegalModal(null)}
+            type={showLegalModal || 'privacy'}
           />
         )}
-        
-        {activeTab === 'stats' && (
-          <StatsView
-            stats={userStats}
-            conqueredPasses={conqueredPasses}
-            t={t}
-          />
-        )}
-        
-        {activeTab === 'register' && (
-          <CyclistRegistration
-            t={t}
-            onRegistrationSuccess={handleRegistrationSuccess}
-            onTabChange={setActiveTab}
-            isAdmin={isAdmin}
-          />
-        )}
-        
-        {activeTab === 'admin' && isAdmin && (
-          <AdminPanel
-            passes={passes}
-            onUpdatePass={handleUpdatePass}
-            t={t}
-          />
-        )}
-        
-        
-        {activeTab === 'database' && (
-          <DatabaseView
-            allPasses={mountainPasses}
-            userPasses={passes}
-            onAddPass={handleAddPass}
-            onRemovePass={handleRemovePass}
-            t={t}
-          />
-        )}
-        
-        {activeTab === 'collaborators' && (
-          <CollaboratorsView
-            t={t}
-          />
-        )}
-        
-        {activeTab === 'conquered' && (
-          <ConqueredPassesView
-            conqueredPasses={conqueredPasses}
-            conquests={conquests}
-            onUpdateConquest={handleUpdateConquest}
-            onAddPhotos={handleAddPhotos}
-            t={t}
-            currentCyclist={currentCyclist || undefined}
-            allPasses={passes}
-            onSyncComplete={handleSyncComplete}
-          />
-        )}
-        
-        {activeTab === 'brands' && (
-          <BrandsView
-            t={t}
-          />
-        )}
-        
-        {activeTab === 'news' && (
-          <NewsView
-            t={t}
-          />
-        )}
-      </main>
-      
-      <PassModal
-        pass={selectedPass}
-        onClose={() => setSelectedPass(null)}
-        t={t}
-      />
-      
-      <PhotosModal
-        pass={photosPass}
-        conquest={photosPass ? getConquestByPassId(photosPass.id) : null}
-        onClose={() => setPhotosPass(null)}
-        onSavePhotos={handleSavePhotos}
-        t={t}
-      />
-      
+      </Suspense>
+
       <Footer
         onShowPrivacy={() => setShowLegalModal('privacy')}
         onShowLegal={() => setShowLegalModal('legal')}
         onShowCookies={() => setShowLegalModal('cookies')}
-      />
-      
-      <LegalModal
-        isOpen={showLegalModal !== null}
-        onClose={() => setShowLegalModal(null)}
-        type={showLegalModal || 'privacy'}
       />
 
       <CookieBanner
