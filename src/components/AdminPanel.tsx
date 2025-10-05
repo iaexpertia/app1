@@ -693,6 +693,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         setShowSocialModal(false);
         setEditingSocialLink(null);
         resetSocialForm();
+        alert('Red social actualizada exitosamente');
       }
     } else {
       const success = await saveSocialLink(socialForm);
@@ -701,6 +702,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         setSocialLinks(links);
         setShowSocialModal(false);
         resetSocialForm();
+        alert('Red social agregada exitosamente');
       }
     }
   };
@@ -721,6 +723,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       if (success) {
         const links = await loadSocialLinks();
         setSocialLinks(links);
+        alert('Red social eliminada exitosamente');
       }
     }
   };
@@ -1248,6 +1251,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                                       link.platform === 'facebook' ? Facebook :
                                       link.platform === 'youtube' ? Youtube :
                                       link.platform === 'linkedin' ? Linkedin :
+                                      link.platform === 'tiktok' ? Share2 :
                                       Share2;
                 return (
                   <div key={link.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">

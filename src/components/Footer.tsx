@@ -1,5 +1,7 @@
-import React from 'react';
-import { Mountain, Mail, Globe, Shield, FileText, Cookie } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Mountain, Mail, Globe, Shield, FileText, Cookie, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
+import { loadSocialLinks } from '../utils/socialLinksStorage';
+import type { SocialLink } from '../types';
 
 interface FooterProps {
   onShowPrivacy: () => void;
@@ -9,6 +11,26 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onShowCookies }) => {
   const currentYear = new Date().getFullYear();
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      const links = await loadSocialLinks();
+      setSocialLinks(links.filter(link => link.is_active));
+    };
+    fetchSocialLinks();
+  }, []);
+
+  const getSocialIcon = (platform: string) => {
+    switch (platform) {
+      case 'instagram': return Instagram;
+      case 'facebook': return Facebook;
+      case 'youtube': return Youtube;
+      case 'linkedin': return Linkedin;
+      case 'tiktok': return Globe;
+      default: return Globe;
+    }
+  };
 
   return (
     <footer className="bg-slate-800 text-white mt-16">
@@ -128,13 +150,34 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
               © {currentYear} CyclePeaks. Todos los derechos reservados.
             </p>
             <div className="flex items-center space-x-6">
-              <a 
-                href="#" 
-                className="text-slate-400 hover:text-orange-400 transition-colors"
-                aria-label="Sitio web"
-              >
-                <Globe className="h-5 w-5" />
-              </a>
+              {socialLinks.length > 0 ? (
+                <div className="flex items-center space-x-4">
+                  {socialLinks.map((link) => {
+                    const Icon = getSocialIcon(link.platform);
+                    return (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-slate-400 hover:text-orange-400 transition-colors"
+                        aria-label={link.platform}
+                        title={link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </a>
+                    );
+                  })}
+                </div>
+              ) : (
+                <a
+                  href="#"
+                  className="text-slate-400 hover:text-orange-400 transition-colors"
+                  aria-label="Sitio web"
+                >
+                  <Globe className="h-5 w-5" />
+                </a>
+              )}
               <span className="text-slate-500 text-xs">
                 Hecho con ❤️ para ciclistas
               </span>
