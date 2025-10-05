@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User } from 'lucide-react';
-import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace } from '../types';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
+import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { 
@@ -40,6 +40,12 @@ import {
   removeRace,
   updateRace
 } from '../utils/racesStorage';
+import {
+  loadSocialLinks,
+  saveSocialLink,
+  updateSocialLink,
+  removeSocialLink
+} from '../utils/socialLinksStorage';
 
 interface AdminPanelProps {
   passes: MountainPass[];
@@ -56,6 +62,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [races, setRaces] = useState<CyclingRace[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   
   // Modal states
   const [showCyclistModal, setShowCyclistModal] = useState(false);
@@ -64,6 +71,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
   const [showRaceModal, setShowRaceModal] = useState(false);
+  const [showSocialModal, setShowSocialModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   
   // Edit states
@@ -73,6 +81,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
   const [editingRace, setEditingRace] = useState<CyclingRace | null>(null);
+  const [editingSocialLink, setEditingSocialLink] = useState<SocialLink | null>(null);
 
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -113,17 +122,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     contactPhone: '', featured: false
   });
 
+  const [socialForm, setSocialForm] = useState({
+    platform: 'instagram',
+    url: '',
+    is_active: true
+  });
+
   // Load data on component mount
   useEffect(() => {
     loadAllData();
   }, []);
 
-  const loadAllData = () => {
+  const loadAllData = async () => {
     setCyclists(loadCyclists());
     setBrands(loadBrands());
     setCollaborators(loadCollaborators());
     setNews(loadNews());
     setRaces(loadRaces());
+    const links = await loadSocialLinks();
+    setSocialLinks(links);
   };
 
   // Import handlers
@@ -662,6 +679,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     });
   };
 
+  const handleSaveSocialLink = async () => {
+    if (!socialForm.platform || !socialForm.url) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    if (editingSocialLink) {
+      const success = await updateSocialLink(editingSocialLink.id, socialForm);
+      if (success) {
+        const links = await loadSocialLinks();
+        setSocialLinks(links);
+        setShowSocialModal(false);
+        setEditingSocialLink(null);
+        resetSocialForm();
+      }
+    } else {
+      const success = await saveSocialLink(socialForm);
+      if (success) {
+        const links = await loadSocialLinks();
+        setSocialLinks(links);
+        setShowSocialModal(false);
+        resetSocialForm();
+      }
+    }
+  };
+
+  const handleEditSocialLink = (link: SocialLink) => {
+    setEditingSocialLink(link);
+    setSocialForm({
+      platform: link.platform,
+      url: link.url,
+      is_active: link.is_active
+    });
+    setShowSocialModal(true);
+  };
+
+  const handleDeleteSocialLink = async (linkId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este enlace?')) {
+      const success = await removeSocialLink(linkId);
+      if (success) {
+        const links = await loadSocialLinks();
+        setSocialLinks(links);
+      }
+    }
+  };
+
+  const resetSocialForm = () => {
+    setSocialForm({
+      platform: 'instagram',
+      url: '',
+      is_active: true
+    });
+  };
+
   const tabs = [
     { id: 'cyclists', label: 'Gestionar Ciclistas', icon: Users },
     { id: 'passes', label: 'Gestionar Puertos', icon: Mountain },
@@ -669,6 +740,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     { id: 'collaborators', label: 'Gestionar Colaboradores', icon: UserCheck },
     { id: 'news', label: 'Gestionar Noticias', icon: Newspaper },
     { id: 'races', label: 'Gestionar Carreras', icon: Trophy },
+    { id: 'social', label: 'Redes Sociales', icon: Share2 },
   ];
 
   return (
@@ -1153,6 +1225,78 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'social' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Redes Sociales</h2>
+              <button
+                onClick={() => setShowSocialModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Agregar Red Social
+              </button>
+            </div>
+
+            {/* Social Links Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {socialLinks.map((link) => {
+                const PlatformIcon = link.platform === 'instagram' ? Instagram :
+                                      link.platform === 'facebook' ? Facebook :
+                                      link.platform === 'youtube' ? Youtube :
+                                      link.platform === 'linkedin' ? Linkedin :
+                                      Share2;
+                return (
+                  <div key={link.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <PlatformIcon className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 capitalize">{link.platform}</h3>
+                          <span className={`text-xs px-2 py-1 rounded-full ${link.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {link.is_active ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditSocialLink(link)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSocialLink(link.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 hover:text-blue-600 break-all"
+                    >
+                      {link.url}
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+
+            {socialLinks.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <Share2 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500">No hay enlaces de redes sociales configurados</p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -2268,6 +2412,105 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               >
                 <Save className="w-4 h-4" />
                 {editingRace ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Social Media Modal */}
+      {showSocialModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setShowSocialModal(false);
+            setEditingSocialLink(null);
+            resetSocialForm();
+          }}
+        >
+          <div
+            className="bg-white rounded-xl max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingSocialLink ? 'Editar Red Social' : 'Agregar Red Social'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowSocialModal(false);
+                  setEditingSocialLink(null);
+                  resetSocialForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Plataforma *</label>
+                <select
+                  value={socialForm.platform}
+                  onChange={(e) => setSocialForm({...socialForm, platform: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  disabled={!!editingSocialLink}
+                >
+                  <option value="instagram">Instagram</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="tiktok">TikTok</option>
+                </select>
+                {editingSocialLink && (
+                  <p className="text-xs text-gray-500 mt-1">La plataforma no se puede modificar</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+                <input
+                  type="url"
+                  value={socialForm.url}
+                  onChange={(e) => setSocialForm({...socialForm, url: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://instagram.com/tu_perfil"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={socialForm.is_active}
+                  onChange={(e) => setSocialForm({...socialForm, is_active: e.target.checked})}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
+                  Mostrar en el sitio web
+                </label>
+              </div>
+            </div>
+
+            <div className="p-6 border-t flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowSocialModal(false);
+                  setEditingSocialLink(null);
+                  resetSocialForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveSocialLink}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingSocialLink ? 'Actualizar' : 'Guardar'}
               </button>
             </div>
           </div>

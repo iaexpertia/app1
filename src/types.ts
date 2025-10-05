@@ -162,3 +162,12 @@ export interface CyclingRace {
   featured: boolean;
   isActive: boolean;
 }
+
+export interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
