@@ -4,14 +4,15 @@ import { Translation } from '../i18n/translations';
 import { loadCollaborators, loadCategories, addCategory, removeCategory } from '../utils/collaboratorStorage';
 import { defaultCollaborators } from '../data/defaultCollaborators';
 import { exportCollaborators } from '../utils/excelExport';
-import { 
-  Store, 
-  Hotel, 
-  UtensilsCrossed, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
+import { CollaboratorsMap } from './CollaboratorsMap';
+import {
+  Store,
+  Hotel,
+  UtensilsCrossed,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
   Star,
   Users,
   ExternalLink,
@@ -19,7 +20,8 @@ import {
   ChevronRight,
   Search,
   Filter,
-  Download
+  Download,
+  Map
 } from 'lucide-react';
 
 interface CollaboratorsViewProps {
@@ -34,6 +36,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
   const [featuredSlideIndex, setFeaturedSlideIndex] = useState(0);
+  const [showMap, setShowMap] = useState(true);
 
   useEffect(() => {
     const loadedCollaborators = loadCollaborators();
@@ -236,11 +239,35 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
               </button>
             ))}
           </div>
+
+          {/* Toggle Map/List View */}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setShowMap(!showMap)}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              <Map className="h-4 w-4" />
+              {showMap ? 'Ver Lista' : 'Ver Mapa'}
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* Map View */}
+      {showMap && (
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center mb-4">
+              <MapPin className="h-6 w-6 text-orange-500 mr-3" />
+              <h3 className="text-xl font-semibold text-slate-800">Ubicaciones de Colaboradores</h3>
+            </div>
+            <CollaboratorsMap collaborators={filteredCollaborators} />
+          </div>
+        </div>
+      )}
+
       {/* Featured Collaborators Slide */}
-      {featuredCollaborators.length > 0 && (
+      {!showMap && featuredCollaborators.length > 0 && (
         <div className="mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
@@ -378,7 +405,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
       )}
 
       {/* Regular Collaborators */}
-      {regularCollaborators.length > 0 && (
+      {!showMap && regularCollaborators.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-slate-800 mb-6">
             Nuestros Colaboradores
@@ -473,7 +500,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
         </div>
       )}
 
-      {filteredCollaborators.length === 0 && (
+      {!showMap && filteredCollaborators.length === 0 && (
         <div className="text-center py-12">
           <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <p className="text-xl text-slate-600 mb-2">No hay colaboradores disponibles</p>
