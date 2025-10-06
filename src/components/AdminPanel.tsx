@@ -87,6 +87,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<string[]>([]);
+  const [validationKey, setValidationKey] = useState(0);
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
@@ -132,6 +133,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   // Load data on component mount
   useEffect(() => {
     loadAllData();
+
+    const handlePassesUpdated = () => {
+      setValidationKey(prev => prev + 1);
+    };
+
+    window.addEventListener('passesUpdated', handlePassesUpdated);
+
+    return () => {
+      window.removeEventListener('passesUpdated', handlePassesUpdated);
+    };
   }, []);
 
   const loadAllData = async () => {
@@ -949,7 +960,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         )}
 
         {activeTab === 'validate' && (
-          <PassValidation />
+          <PassValidation key={validationKey} />
         )}
 
         {activeTab === 'brands' && (
