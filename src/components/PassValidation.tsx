@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, Eye } from 'lucide-react';
+import { Check, X, Eye, Mountain, TrendingUp, Flag, MapPin } from 'lucide-react';
 import { MountainPass } from '../types';
 import { getPendingPassesFromDB, validatePassInDB, deletePassFromDB } from '../utils/passesService';
 import { getCurrentUser } from '../utils/cyclistStorage';
@@ -9,6 +9,23 @@ export const PassValidation: React.FC = () => {
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
   const [validationNotes, setValidationNotes] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const difficultyColors: Record<string, string> = {
+    'Cuarta': 'bg-green-100 text-green-800',
+    'Tercera': 'bg-blue-100 text-blue-800',
+    'Segunda': 'bg-yellow-100 text-yellow-800',
+    'Primera': 'bg-orange-100 text-orange-800',
+    'Especial': 'bg-red-100 text-red-800'
+  };
+
+  const categoryColors: Record<string, string> = {
+    'Alpes': 'bg-blue-100 text-blue-800 border-blue-300',
+    'Pirineos': 'bg-purple-100 text-purple-800 border-purple-300',
+    'Dolomitas': 'bg-pink-100 text-pink-800 border-pink-300',
+    'Andes': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    'Otros': 'bg-gray-100 text-gray-800 border-gray-300',
+    'Provenza': 'bg-yellow-100 text-yellow-800 border-yellow-300'
+  };
 
   useEffect(() => {
     loadPendingPasses();
@@ -77,65 +94,102 @@ export const PassValidation: React.FC = () => {
           <p className="text-gray-500">No hay puertos pendientes de validación</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">País / Región</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Altitud</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dificultad</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {pendingPasses.map((pass) => (
-                <tr key={pass.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {pass.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {pass.country} / {pass.region}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {pass.maxAltitude}m
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                      {pass.difficulty}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSelectedPass(pass)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="Ver detalles"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleValidate(pass.id)}
-                        className="text-green-600 hover:text-green-900"
-                        title="Validar"
-                        disabled={loading}
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleReject(pass.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Rechazar"
-                        disabled={loading}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {pendingPasses.map((pass) => (
+            <div key={pass.id} className="bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl overflow-hidden border-2 border-yellow-400">
+              <div className="relative h-48">
+                <img
+                  src={pass.imageUrl}
+                  alt={pass.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 right-3 flex space-x-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryColors[pass.category] || categoryColors.Otros}`}>
+                    {pass.category}
+                  </span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[pass.difficulty]}`}>
+                    {pass.difficulty}
+                  </span>
+                </div>
+                <div className="absolute top-3 left-3">
+                  <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                    PENDIENTE
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-1">{pass.name}</h3>
+                    <div className="flex items-center text-slate-600 text-sm">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{pass.region}, {pass.country}</span>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Mountain className="h-4 w-4 text-orange-500" />
+                    <div>
+                      <p className="text-xs text-slate-500">Altitud</p>
+                      <p className="text-sm font-semibold">{pass.maxAltitude}m</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className="h-4 w-4 text-orange-500" />
+                    <div>
+                      <p className="text-xs text-slate-500">Desnivel</p>
+                      <p className="text-sm font-semibold">+{pass.elevationGain}m</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Flag className="h-4 w-4 text-orange-500" />
+                    <div>
+                      <p className="text-xs text-slate-500">Distancia</p>
+                      <p className="text-sm font-semibold">{pass.distance}km</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className="h-4 w-4 text-orange-500" />
+                    <div>
+                      <p className="text-xs text-slate-500">Gradiente</p>
+                      <p className="text-sm font-semibold">{pass.averageGradient}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedPass(pass)}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>Ver</span>
+                  </button>
+                  <button
+                    onClick={() => handleValidate(pass.id)}
+                    disabled={loading}
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 disabled:opacity-50"
+                  >
+                    <Check className="h-4 w-4" />
+                    <span>Validar</span>
+                  </button>
+                  <button
+                    onClick={() => handleReject(pass.id)}
+                    disabled={loading}
+                    className="bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center disabled:opacity-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
