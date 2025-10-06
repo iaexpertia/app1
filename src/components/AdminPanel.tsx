@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
@@ -1254,7 +1254,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                                       link.platform === 'facebook' ? Facebook :
                                       link.platform === 'youtube' ? Youtube :
                                       link.platform === 'linkedin' ? Linkedin :
-                                      link.platform === 'tiktok' ? Share2 :
+                                      link.platform === 'twitter' || link.platform === 'x' ? Twitter :
+                                      link.platform === 'github' ? Github :
+                                      link.platform === 'twitch' ? Twitch :
+                                      link.platform === 'tiktok' ? Globe :
+                                      link.platform === 'whatsapp' ? MessageCircle :
+                                      link.platform === 'telegram' ? Send :
+                                      link.platform === 'discord' ? MessageCircle :
+                                      link.platform === 'pinterest' ? Globe :
+                                      link.platform === 'snapchat' ? Globe :
+                                      link.platform === 'reddit' ? Globe :
                                       Share2;
                 return (
                   <div key={link.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -2468,7 +2477,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   <option value="facebook">Facebook</option>
                   <option value="youtube">YouTube</option>
                   <option value="linkedin">LinkedIn</option>
+                  <option value="twitter">Twitter</option>
+                  <option value="x">X (Twitter)</option>
                   <option value="tiktok">TikTok</option>
+                  <option value="github">GitHub</option>
+                  <option value="twitch">Twitch</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="discord">Discord</option>
+                  <option value="pinterest">Pinterest</option>
+                  <option value="snapchat">Snapchat</option>
+                  <option value="reddit">Reddit</option>
                 </select>
                 {editingSocialLink && (
                   <p className="text-xs text-gray-500 mt-1">La plataforma no se puede modificar</p>

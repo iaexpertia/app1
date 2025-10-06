@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Mountain, Mail, Globe, Shield, FileText, Cookie, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react';
+import { Mountain, Mail, Globe, Shield, FileText, Cookie, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send } from 'lucide-react';
 import { loadSocialLinks } from '../utils/socialLinksStorage';
 import type { SocialLink } from '../types';
 
@@ -49,7 +49,17 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
       case 'facebook': return Facebook;
       case 'youtube': return Youtube;
       case 'linkedin': return Linkedin;
+      case 'twitter': return Twitter;
+      case 'x': return Twitter;
+      case 'github': return Github;
+      case 'twitch': return Twitch;
       case 'tiktok': return Globe;
+      case 'whatsapp': return MessageCircle;
+      case 'telegram': return Send;
+      case 'discord': return MessageCircle;
+      case 'pinterest': return Globe;
+      case 'snapchat': return Globe;
+      case 'reddit': return Globe;
       default: return Globe;
     }
   };

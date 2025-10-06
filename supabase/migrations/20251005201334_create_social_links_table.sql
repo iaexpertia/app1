@@ -4,7 +4,7 @@
   1. New Tables
     - `social_links`
       - `id` (uuid, primary key)
-      - `platform` (text) - Social media platform name (instagram, facebook, youtube, linkedin, tiktok)
+      - `platform` (text) - Social media platform name (instagram, facebook, youtube, linkedin, twitter, x, tiktok, github, twitch, whatsapp, telegram, discord, pinterest, snapchat, reddit)
       - `url` (text) - Complete URL to the social media profile
       - `is_active` (boolean) - Whether the link should be displayed
       - `created_at` (timestamptz)
