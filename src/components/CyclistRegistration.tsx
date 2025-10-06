@@ -36,8 +36,17 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
   onTabChange,
   isAdmin = false
 }) => {
-  const [cyclists] = useState(() => loadCyclists());
-  const hasRegisteredCyclists = cyclists.length > 0;
+  const [cyclists, setCyclists] = useState<Cyclist[]>([]);
+  const [hasRegisteredCyclists, setHasRegisteredCyclists] = useState(false);
+
+  useEffect(() => {
+    const fetchCyclists = async () => {
+      const loadedCyclists = await loadCyclists();
+      setCyclists(loadedCyclists);
+      setHasRegisteredCyclists(loadedCyclists.length > 0);
+    };
+    fetchCyclists();
+  }, []);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -184,7 +193,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
   const handleLogin = async (email: string, password: string) => {
     // Authenticate user with stored credentials
-    const success = loginUser(email.trim(), password);
+    const success = await loginUser(email.trim(), password);
 
     if (success) {
       setShowLogin(false);
@@ -264,8 +273,8 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
       };
 
       // Add cyclist to storage
-      addCyclist(newCyclist);
-      setCurrentUser(newCyclist);
+      await addCyclist(newCyclist);
+      setCurrentUser(newCyclist.id);
 
       // Try to send registration email
       setEmailStatus('sending');

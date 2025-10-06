@@ -1,4 +1,5 @@
 import { Cyclist } from '../types';
+import { supabase } from './supabaseClient';
 
 const CYCLISTS_STORAGE_KEY = 'mountain-pass-cyclists';
 
@@ -6,30 +7,57 @@ export const saveCyclists = (cyclists: Cyclist[]): void => {
   localStorage.setItem(CYCLISTS_STORAGE_KEY, JSON.stringify(cyclists));
 };
 
-export const loadCyclists = (): Cyclist[] => {
-  const stored = localStorage.getItem(CYCLISTS_STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
+export const loadCyclists = async (): Promise<Cyclist[]> => {
+  const { data, error } = await supabase
+    .from('cyclists')
+    .select('*')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error loading cyclists:', error);
+    return [];
+  }
+
+  return (data || []).map(cyclist => ({
+    id: cyclist.id,
+    email: cyclist.email,
+    password: cyclist.password,
+    name: cyclist.name,
+    isAdmin: cyclist.is_admin
+  }));
 };
 
-export const getCurrentUser = (): Cyclist | null => {
+export const getCurrentUser = async (): Promise<Cyclist | null> => {
   const currentUserId = localStorage.getItem('currentUserId');
   if (!currentUserId) return null;
-  
-  const cyclists = loadCyclists();
+
+  const cyclists = await loadCyclists();
   return cyclists.find(c => c.id === currentUserId) || null;
 };
 
-export const authenticateUser = (email: string, password: string): Cyclist | null => {
-  const cyclists = loadCyclists();
-  const cyclist = cyclists.find(c => 
-    c.email.toLowerCase() === email.toLowerCase() && 
-    c.password === password
-  );
-  return cyclist || null;
+export const authenticateUser = async (email: string, password: string): Promise<Cyclist | null> => {
+  const { data, error } = await supabase
+    .from('cyclists')
+    .select('*')
+    .ilike('email', email)
+    .eq('password', password)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    email: data.email,
+    password: data.password,
+    name: data.name,
+    isAdmin: data.is_admin
+  };
 };
 
-export const loginUser = (email: string, password: string): boolean => {
-  const cyclist = authenticateUser(email, password);
+export const loginUser = async (email: string, password: string): Promise<boolean> => {
+  const cyclist = await authenticateUser(email, password);
   if (cyclist) {
     setCurrentUser(cyclist.id);
     return true;
@@ -40,42 +68,64 @@ export const setCurrentUser = (cyclistId: string): void => {
   localStorage.setItem('currentUserId', cyclistId);
 };
 
-export const isCurrentUserAdmin = (): boolean => {
-  const currentUser = getCurrentUser();
-  // Solo permitir acceso admin si hay usuario actual Y es admin
+export const isCurrentUserAdmin = async (): Promise<boolean> => {
+  const currentUser = await getCurrentUser();
   if (!currentUser) {
     return false;
   }
   return currentUser?.isAdmin || false;
 };
 
-export const addCyclist = (cyclist: Cyclist): void => {
-  const cyclists = loadCyclists();
-  const existingIndex = cyclists.findIndex(c => c.id === cyclist.id);
-  
-  if (existingIndex >= 0) {
-    cyclists[existingIndex] = cyclist;
-  } else {
-    cyclists.push(cyclist);
+export const addCyclist = async (cyclist: Cyclist): Promise<boolean> => {
+  const { error } = await supabase
+    .from('cyclists')
+    .insert({
+      email: cyclist.email,
+      password: cyclist.password,
+      name: cyclist.name,
+      is_admin: cyclist.isAdmin || false
+    });
+
+  if (error) {
+    console.error('Error adding cyclist:', error);
+    return false;
   }
-  
-  saveCyclists(cyclists);
+
+  return true;
 };
 
-export const removeCyclist = (cyclistId: string): void => {
-  const cyclists = loadCyclists();
-  const filteredCyclists = cyclists.filter(c => c.id !== cyclistId);
-  saveCyclists(filteredCyclists);
+export const removeCyclist = async (cyclistId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('cyclists')
+    .delete()
+    .eq('id', cyclistId);
+
+  if (error) {
+    console.error('Error removing cyclist:', error);
+    return false;
+  }
+
+  return true;
 };
 
-export const updateCyclist = (cyclist: Cyclist): void => {
-  const cyclists = loadCyclists();
-  const index = cyclists.findIndex(c => c.id === cyclist.id);
-  
-  if (index >= 0) {
-    cyclists[index] = cyclist;
-    saveCyclists(cyclists);
+export const updateCyclist = async (cyclist: Cyclist): Promise<boolean> => {
+  const { error } = await supabase
+    .from('cyclists')
+    .update({
+      email: cyclist.email,
+      password: cyclist.password,
+      name: cyclist.name,
+      is_admin: cyclist.isAdmin,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', cyclist.id);
+
+  if (error) {
+    console.error('Error updating cyclist:', error);
+    return false;
   }
+
+  return true;
 };
 
 // Alias for getCyclists (for compatibility)
@@ -96,8 +146,8 @@ const generateToken = (): string => {
          Math.random().toString(36).substring(2, 15);
 };
 
-export const createPasswordRecoveryToken = (email: string): string => {
-  const cyclists = loadCyclists();
+export const createPasswordRecoveryToken = async (email: string): Promise<string> => {
+  const cyclists = await loadCyclists();
   const cyclist = cyclists.find(c => c.email.toLowerCase() === email.toLowerCase());
 
   if (!cyclist) {
@@ -143,14 +193,14 @@ export const validateRecoveryToken = (token: string): string | null => {
   return recoveryToken.email;
 };
 
-export const resetPassword = (token: string, newPassword: string): boolean => {
+export const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
   const email = validateRecoveryToken(token);
 
   if (!email) {
     return false;
   }
 
-  const cyclists = loadCyclists();
+  const cyclists = await loadCyclists();
   const cyclist = cyclists.find(c => c.email.toLowerCase() === email.toLowerCase());
 
   if (!cyclist) {
@@ -159,7 +209,7 @@ export const resetPassword = (token: string, newPassword: string): boolean => {
 
   // Update password
   cyclist.password = newPassword;
-  updateCyclist(cyclist);
+  await updateCyclist(cyclist);
 
   // Remove used token
   const tokens: RecoveryToken[] = JSON.parse(
@@ -171,7 +221,26 @@ export const resetPassword = (token: string, newPassword: string): boolean => {
   return true;
 };
 
-export const getCyclistByEmail = (email: string): Cyclist | null => {
-  const cyclists = loadCyclists();
+export const getCyclistByEmail = async (email: string): Promise<Cyclist | null> => {
+  const cyclists = await loadCyclists();
   return cyclists.find(c => c.email.toLowerCase() === email.toLowerCase()) || null;
+};
+
+export const ensureAdminExists = async (): Promise<void> => {
+  const { data } = await supabase
+    .from('cyclists')
+    .select('*')
+    .ilike('email', 'webvalles@gmail.com')
+    .maybeSingle();
+
+  if (!data) {
+    await supabase
+      .from('cyclists')
+      .insert({
+        email: 'webvalles@gmail.com',
+        password: 'JundioX1979',
+        name: 'Administrador',
+        is_admin: true
+      });
+  }
 };

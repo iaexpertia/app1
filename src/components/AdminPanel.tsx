@@ -134,7 +134,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   }, []);
 
   const loadAllData = async () => {
-    setCyclists(loadCyclists());
+    const loadedCyclists = await loadCyclists();
+    setCyclists(loadedCyclists);
     setBrands(loadBrands());
     setCollaborators(loadCollaborators());
     setNews(loadNews());
@@ -256,8 +257,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       isAdmin: cyclistForm.isAdmin
     };
 
-    addCyclist(newCyclist);
-    setCyclists(loadCyclists());
+    await addCyclist(newCyclist);
+    const loadedCyclists = await loadCyclists();
+    setCyclists(loadedCyclists);
 
     // Send registration email
     try {
@@ -289,7 +291,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     setShowCyclistModal(true);
   };
 
-  const handleUpdateCyclist = () => {
+  const handleUpdateCyclist = async () => {
     if (!editingCyclist) return;
 
     const updatedCyclist: Cyclist = {
@@ -307,17 +309,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       isAdmin: cyclistForm.isAdmin
     };
 
-    updateCyclist(updatedCyclist);
-    setCyclists(loadCyclists());
+    await updateCyclist(updatedCyclist);
+    const loadedCyclists = await loadCyclists();
+    setCyclists(loadedCyclists);
     setShowCyclistModal(false);
     setEditingCyclist(null);
     resetCyclistForm();
   };
 
-  const handleDeleteCyclist = (cyclistId: string) => {
+  const handleDeleteCyclist = async (cyclistId: string) => {
     if (confirm('¿Estás seguro de que quieres eliminar este ciclista?')) {
-      removeCyclist(cyclistId);
-      setCyclists(loadCyclists());
+      await removeCyclist(cyclistId);
+      const loadedCyclists = await loadCyclists();
+      setCyclists(loadedCyclists);
     }
   };
 

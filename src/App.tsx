@@ -31,7 +31,7 @@ import {
   updateConquest
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
-import { isCurrentUserAdmin, loadCyclists, addCyclist, setCurrentUser, getCurrentUser } from './utils/cyclistStorage';
+import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser } from './utils/cyclistStorage';
 import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
@@ -74,34 +74,24 @@ function App() {
   };
 
   useEffect(() => {
-    const loadedConquests = loadConquests();
-    setConquests(loadedConquests);
-    setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
+    const initializeApp = async () => {
+      const loadedConquests = loadConquests();
+      setConquests(loadedConquests);
+      setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
 
-    // Verificar si el usuario actual es admin al cargar
-    const currentUserIsAdmin = isCurrentUserAdmin();
-    setIsAdmin(currentUserIsAdmin);
+      // Ensure admin user exists in database
+      await ensureAdminExists();
 
-    // Cargar el ciclista actual
-    const cyclist = getCurrentUser();
-    setCurrentCyclist(cyclist);
-    
-    // Si no hay ciclistas registrados, crear un admin por defecto
-    const cyclists = loadCyclists();
-    if (cyclists.length === 0) {
-      const defaultAdmin: Cyclist = {
-        id: 'admin-default',
-        name: 'Administrador',
-        alias: 'Admin',
-        email: 'admin@puertosconquistados.com',
-        phone: '+34 000 000 000',
-        bikes: [],
-        registrationDate: new Date().toISOString().split('T')[0],
-        isAdmin: true
-      };
-      addCyclist(defaultAdmin);
-      setCurrentUser(defaultAdmin.id);
-    }
+      // Verificar si el usuario actual es admin al cargar
+      const currentUserIsAdmin = await isCurrentUserAdmin();
+      setIsAdmin(currentUserIsAdmin);
+
+      // Cargar el ciclista actual
+      const cyclist = await getCurrentUser();
+      setCurrentCyclist(cyclist);
+    };
+
+    initializeApp();
   }, []);
 
   const handleToggleConquest = (passId: string) => {
@@ -140,23 +130,23 @@ function App() {
     setPhotosPass(null);
   };
 
-  const handleRegistrationSuccess = () => {
+  const handleRegistrationSuccess = async () => {
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 3000);
     // Actualizar estado de admin después del registro/login
-    const currentUserIsAdmin = isCurrentUserAdmin();
+    const currentUserIsAdmin = await isCurrentUserAdmin();
     setIsAdmin(currentUserIsAdmin);
-    const cyclist = getCurrentUser();
+    const cyclist = await getCurrentUser();
     setCurrentCyclist(cyclist);
   };
 
-  const handleSyncComplete = () => {
+  const handleSyncComplete = async () => {
     // Reload conquests after Strava sync
     const loadedConquests = loadConquests();
     setConquests(loadedConquests);
     setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
     // Reload current cyclist to get updated tokens
-    const cyclist = getCurrentUser();
+    const cyclist = await getCurrentUser();
     setCurrentCyclist(cyclist);
   };
 
