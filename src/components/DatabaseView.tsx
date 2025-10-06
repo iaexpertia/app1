@@ -124,16 +124,16 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   };
 
   const handleAddNewPass = async () => {
-    if (!newPass.name || !newPass.country || !newPass.region) {
-      alert('Por favor completa al menos el nombre, país y región');
+    if (!newPass.name) {
+      alert('Por favor completa al menos el nombre del puerto');
       return;
     }
 
     const passToAdd: MountainPass = {
       id: `custom-${Date.now()}`,
       name: newPass.name!,
-      country: newPass.country!,
-      region: newPass.region!,
+      country: newPass.country || 'Sin especificar',
+      region: newPass.region || 'Sin especificar',
       maxAltitude: newPass.maxAltitude || 0,
       elevationGain: newPass.elevationGain || 0,
       averageGradient: newPass.averageGradient || 0,
