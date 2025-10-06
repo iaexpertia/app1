@@ -18,6 +18,10 @@ interface DBMountainPass {
   image_url: string;
   category: string;
   famous_winners: any;
+  is_validated: boolean;
+  submitted_by: string | null;
+  validated_by: string | null;
+  validation_notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -66,11 +70,16 @@ function mountainPassToDB(pass: MountainPass): Omit<DBMountainPass, 'created_at'
   };
 }
 
-export async function getAllPassesFromDB(): Promise<MountainPass[]> {
-  const { data, error } = await supabase
+export async function getAllPassesFromDB(includeUnvalidated = false): Promise<MountainPass[]> {
+  let query = supabase
     .from('mountain_passes')
-    .select('*')
-    .order('name');
+    .select('*');
+
+  if (!includeUnvalidated) {
+    query = query.eq('is_validated', true);
+  }
+
+  const { data, error } = await query.order('name');
 
   if (error) {
     console.error('Error fetching passes:', error);
@@ -80,8 +89,44 @@ export async function getAllPassesFromDB(): Promise<MountainPass[]> {
   return data.map(dbToMountainPass);
 }
 
-export async function createPassInDB(pass: MountainPass): Promise<MountainPass | null> {
-  const dbPass = mountainPassToDB(pass);
+export async function checkDuplicatePass(name: string, country: string, region: string): Promise<MountainPass | null> {
+  const { data, error } = await supabase
+    .from('mountain_passes')
+    .select('*')
+    .ilike('name', name)
+    .ilike('country', country)
+    .ilike('region', region)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking duplicate:', error);
+    return null;
+  }
+
+  return data ? dbToMountainPass(data) : null;
+}
+
+export async function createPassInDB(
+  pass: MountainPass,
+  submittedBy?: string
+): Promise<{ success: boolean; message: string; pass?: MountainPass }> {
+  // Check for duplicates
+  const duplicate = await checkDuplicatePass(pass.name, pass.country, pass.region);
+
+  if (duplicate) {
+    return {
+      success: false,
+      message: 'Este puerto ya existe en la base de datos'
+    };
+  }
+
+  const dbPass = {
+    ...mountainPassToDB(pass),
+    is_validated: false,
+    submitted_by: submittedBy || null,
+    validated_by: null,
+    validation_notes: null
+  };
 
   const { data, error } = await supabase
     .from('mountain_passes')
@@ -91,10 +136,17 @@ export async function createPassInDB(pass: MountainPass): Promise<MountainPass |
 
   if (error) {
     console.error('Error creating pass:', error);
-    return null;
+    return {
+      success: false,
+      message: 'Error al crear el puerto'
+    };
   }
 
-  return dbToMountainPass(data);
+  return {
+    success: true,
+    message: 'Puerto enviado correctamente. Será validado por un administrador.',
+    pass: dbToMountainPass(data)
+  };
 }
 
 export async function updatePassInDB(pass: MountainPass): Promise<MountainPass | null> {
@@ -113,6 +165,44 @@ export async function updatePassInDB(pass: MountainPass): Promise<MountainPass |
   }
 
   return dbToMountainPass(data);
+}
+
+export async function validatePassInDB(
+  passId: string,
+  validatedBy: string,
+  notes?: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('mountain_passes')
+    .update({
+      is_validated: true,
+      validated_by: validatedBy,
+      validation_notes: notes || null,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', passId);
+
+  if (error) {
+    console.error('Error validating pass:', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function getPendingPassesFromDB(): Promise<MountainPass[]> {
+  const { data, error } = await supabase
+    .from('mountain_passes')
+    .select('*')
+    .eq('is_validated', false)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching pending passes:', error);
+    return [];
+  }
+
+  return data.map(dbToMountainPass);
 }
 
 export async function deletePassFromDB(passId: string): Promise<boolean> {
