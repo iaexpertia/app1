@@ -76,7 +76,7 @@ export async function getAllPassesFromDB(includeUnvalidated = false): Promise<Mo
     .select('*');
 
   if (!includeUnvalidated) {
-    query = query.eq('is_validated', true);
+    query = query.eq('estado_validacion', 'Validado');
   }
 
   const { data, error } = await query.order('name');
@@ -96,7 +96,7 @@ export async function checkDuplicatePass(name: string, onlyValidated: boolean = 
     .ilike('name', name);
 
   if (onlyValidated) {
-    query = query.eq('is_validated', true);
+    query = query.eq('estado_validacion', 'Validado');
   }
 
   const { data, error } = await query.maybeSingle();
@@ -191,9 +191,9 @@ export async function validatePassInDB(
   // Check for duplicates with the same name (case insensitive)
   const { data: duplicates, error: duplicateError } = await supabase
     .from('mountain_passes')
-    .select('id, name, is_validated')
+    .select('id, name, estado_validacion')
     .ilike('name', passToValidate.name)
-    .eq('is_validated', true);
+    .eq('estado_validacion', 'Validado');
 
   if (duplicateError) {
     console.error('Error checking duplicates:', duplicateError);
@@ -231,7 +231,7 @@ export async function getPendingPassesFromDB(): Promise<MountainPass[]> {
   const { data, error } = await supabase
     .from('mountain_passes')
     .select('*')
-    .eq('is_validated', false)
+    .eq('estado_validacion', 'Pendiente')
     .order('created_at', { ascending: false });
 
   if (error) {
