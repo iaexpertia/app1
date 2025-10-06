@@ -66,6 +66,12 @@ export const loginUser = async (email: string, password: string): Promise<boolea
 };
 export const setCurrentUser = (cyclistId: string): void => {
   localStorage.setItem('currentUserId', cyclistId);
+  window.dispatchEvent(new Event('userChanged'));
+};
+
+export const logoutUser = (): void => {
+  localStorage.removeItem('currentUserId');
+  window.dispatchEvent(new Event('userChanged'));
 };
 
 export const isCurrentUserAdmin = async (): Promise<boolean> => {

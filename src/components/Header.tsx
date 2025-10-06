@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
@@ -16,10 +16,10 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  activeTab, 
-  onTabChange, 
-  conqueredCount, 
+export const Header: React.FC<HeaderProps> = ({
+  activeTab,
+  onTabChange,
+  conqueredCount,
   totalCount,
   t,
   language,
@@ -29,11 +29,38 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const currentUser = getCurrentUser();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [hasRegisteredCyclists, setHasRegisteredCyclists] = useState(false);
+
   const isLoggedIn = currentUser !== null;
   const isCurrentUserAdmin = currentUser?.isAdmin || false;
-  const cyclists = loadCyclists();
-  const hasRegisteredCyclists = cyclists.length > 0;
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+
+      const cyclists = await loadCyclists();
+      setHasRegisteredCyclists(cyclists.length > 0);
+    };
+
+    loadUserData();
+
+    const handleUserChange = () => {
+      loadUserData();
+    };
+
+    window.addEventListener('userChanged', handleUserChange);
+    window.addEventListener('storage', handleUserChange);
+
+    const interval = setInterval(loadUserData, 3000);
+
+    return () => {
+      window.removeEventListener('userChanged', handleUserChange);
+      window.removeEventListener('storage', handleUserChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

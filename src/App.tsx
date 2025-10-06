@@ -31,7 +31,7 @@ import {
   updateConquest
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
-import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser } from './utils/cyclistStorage';
+import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
 import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
@@ -60,15 +60,15 @@ function App() {
 
   const handleLogout = () => {
     // Clear current user session
-    localStorage.removeItem('currentUserId');
+    logoutUser();
     // Reset admin status immediately
     setIsAdmin(false);
     setCurrentCyclist(null);
-    
-    // Optionally redirect to passes tab
-    setActiveTab('passes');
-    
-    // Show a brief message
+
+    // Redirect to register tab
+    setActiveTab('register');
+
+    // Show a brief logout message
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 2000);
   };
@@ -92,6 +92,16 @@ function App() {
     };
 
     initializeApp();
+
+    const handleUserChange = () => {
+      initializeApp();
+    };
+
+    window.addEventListener('userChanged', handleUserChange);
+
+    return () => {
+      window.removeEventListener('userChanged', handleUserChange);
+    };
   }, []);
 
   const handleToggleConquest = (passId: string) => {
