@@ -126,6 +126,7 @@ export async function createPassInDB(
   const dbPass = {
     ...mountainPassToDB(pass),
     is_validated: false,
+    estado_validacion: 'Pendiente',
     submitted_by: submittedBy || null,
     validated_by: null,
     validation_notes: null
@@ -211,6 +212,7 @@ export async function validatePassInDB(
     .from('mountain_passes')
     .update({
       is_validated: true,
+      estado_validacion: 'Validado',
       validated_by: validatedBy,
       validation_notes: notes || null,
       updated_at: new Date().toISOString()
