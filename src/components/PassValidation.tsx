@@ -49,10 +49,12 @@ export const PassValidation: React.FC = () => {
     const result = await validatePassInDB(passId, user.email, validationNotes);
 
     if (result.success) {
+      // Remove the validated pass from the local state immediately
+      setPendingPasses(prev => prev.filter(p => p.id !== passId));
+
       alert('Puerto validado correctamente');
       setValidationNotes('');
       setSelectedPass(null);
-      await loadPendingPasses();
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
       alert(result.message || 'Error al validar el puerto');
@@ -70,9 +72,11 @@ export const PassValidation: React.FC = () => {
     const success = await deletePassFromDB(passId);
 
     if (success) {
+      // Remove the rejected pass from the local state immediately
+      setPendingPasses(prev => prev.filter(p => p.id !== passId));
+
       alert('Puerto rechazado y eliminado');
       setSelectedPass(null);
-      await loadPendingPasses();
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
       alert('Error al rechazar el puerto');
