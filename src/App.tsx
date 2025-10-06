@@ -33,6 +33,7 @@ import {
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
 import { Cyclist } from './types';
+import { getAllPassesFromDB } from './utils/passesService';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
 
@@ -73,6 +74,15 @@ function App() {
     setTimeout(() => setShowSuccessMessage(false), 2000);
   };
 
+  const loadPassesFromDB = async () => {
+    const dbPasses = await getAllPassesFromDB(false);
+    if (dbPasses.length > 0) {
+      setPasses(dbPasses);
+    } else {
+      setPasses(mountainPasses);
+    }
+  };
+
   useEffect(() => {
     const initializeApp = async () => {
       const loadedConquests = loadConquests();
@@ -89,6 +99,9 @@ function App() {
       // Cargar el ciclista actual
       const cyclist = await getCurrentUser();
       setCurrentCyclist(cyclist);
+
+      // Cargar puertos desde la base de datos
+      await loadPassesFromDB();
     };
 
     initializeApp();
@@ -97,10 +110,16 @@ function App() {
       initializeApp();
     };
 
+    const handlePassesUpdated = () => {
+      loadPassesFromDB();
+    };
+
     window.addEventListener('userChanged', handleUserChange);
+    window.addEventListener('passesUpdated', handlePassesUpdated);
 
     return () => {
       window.removeEventListener('userChanged', handleUserChange);
+      window.removeEventListener('passesUpdated', handlePassesUpdated);
     };
   }, []);
 
