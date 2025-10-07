@@ -19,7 +19,6 @@ interface DBMountainPass {
   category: string;
   famous_winners: any;
   is_validated: boolean;
-  is_active: boolean;
   submitted_by: string | null;
   validated_by: string | null;
   validation_notes: string | null;
@@ -47,45 +46,37 @@ function dbToMountainPass(dbPass: DBMountainPass): MountainPass {
     imageUrl: dbPass.image_url,
     category: dbPass.category,
     famousWinners: dbPass.famous_winners || [],
-    isActive: dbPass.is_active,
   };
 }
 
-function mountainPassToDB(pass: Partial<MountainPass>): Partial<Omit<DBMountainPass, 'created_at' | 'updated_at'>> {
-  const result: Partial<Omit<DBMountainPass, 'created_at' | 'updated_at'>> = {};
-
-  if (pass.id !== undefined) result.id = pass.id;
-  if (pass.name !== undefined) result.name = pass.name;
-  if (pass.country !== undefined) result.country = pass.country;
-  if (pass.region !== undefined) result.region = pass.region;
-  if (pass.maxAltitude !== undefined) result.max_altitude = pass.maxAltitude;
-  if (pass.elevationGain !== undefined) result.elevation_gain = pass.elevationGain;
-  if (pass.averageGradient !== undefined) result.average_gradient = pass.averageGradient;
-  if (pass.maxGradient !== undefined) result.max_gradient = pass.maxGradient;
-  if (pass.distance !== undefined) result.distance = pass.distance;
-  if (pass.difficulty !== undefined) result.difficulty = pass.difficulty;
-  if (pass.coordinates?.lat !== undefined) result.coordinates_lat = pass.coordinates.lat;
-  if (pass.coordinates?.lng !== undefined) result.coordinates_lng = pass.coordinates.lng;
-  if (pass.description !== undefined) result.description = pass.description;
-  if (pass.imageUrl !== undefined) result.image_url = pass.imageUrl;
-  if (pass.category !== undefined) result.category = pass.category;
-  if (pass.famousWinners !== undefined) result.famous_winners = pass.famousWinners;
-  if (pass.isActive !== undefined) result.is_active = pass.isActive;
-
-  return result;
+function mountainPassToDB(pass: MountainPass): Omit<DBMountainPass, 'created_at' | 'updated_at'> {
+  return {
+    id: pass.id,
+    name: pass.name,
+    country: pass.country,
+    region: pass.region,
+    max_altitude: pass.maxAltitude,
+    elevation_gain: pass.elevationGain,
+    average_gradient: pass.averageGradient,
+    max_gradient: pass.maxGradient,
+    distance: pass.distance,
+    difficulty: pass.difficulty,
+    coordinates_lat: pass.coordinates.lat,
+    coordinates_lng: pass.coordinates.lng,
+    description: pass.description,
+    image_url: pass.imageUrl,
+    category: pass.category,
+    famous_winners: pass.famousWinners || [],
+  };
 }
 
-export async function getAllPassesFromDB(includeUnvalidated = false, includeInactive = false): Promise<MountainPass[]> {
+export async function getAllPassesFromDB(includeUnvalidated = false): Promise<MountainPass[]> {
   let query = supabase
     .from('mountain_passes')
     .select('*');
 
   if (!includeUnvalidated) {
-    query = query.eq('estado_validacion', 'Validado');
-  }
-
-  if (!includeInactive) {
-    query = query.eq('is_active', true);
+    query = query.eq('is_validated', true);
   }
 
   const { data, error } = await query.order('name');
@@ -105,7 +96,7 @@ export async function checkDuplicatePass(name: string, onlyValidated: boolean = 
     .ilike('name', name);
 
   if (onlyValidated) {
-    query = query.eq('estado_validacion', 'Validado');
+    query = query.eq('is_validated', true);
   }
 
   const { data, error } = await query.maybeSingle();
@@ -135,7 +126,6 @@ export async function createPassInDB(
   const dbPass = {
     ...mountainPassToDB(pass),
     is_validated: false,
-    estado_validacion: 'Pendiente',
     submitted_by: submittedBy || null,
     validated_by: null,
     validation_notes: null
@@ -200,9 +190,9 @@ export async function validatePassInDB(
   // Check for duplicates with the same name (case insensitive)
   const { data: duplicates, error: duplicateError } = await supabase
     .from('mountain_passes')
-    .select('id, name, estado_validacion')
+    .select('id, name, is_validated')
     .ilike('name', passToValidate.name)
-    .eq('estado_validacion', 'Validado');
+    .eq('is_validated', true);
 
   if (duplicateError) {
     console.error('Error checking duplicates:', duplicateError);
@@ -221,7 +211,6 @@ export async function validatePassInDB(
     .from('mountain_passes')
     .update({
       is_validated: true,
-      estado_validacion: 'Validado',
       validated_by: validatedBy,
       validation_notes: notes || null,
       updated_at: new Date().toISOString()
@@ -240,7 +229,7 @@ export async function getPendingPassesFromDB(): Promise<MountainPass[]> {
   const { data, error } = await supabase
     .from('mountain_passes')
     .select('*')
-    .eq('estado_validacion', 'Pendiente')
+    .eq('is_validated', false)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -259,23 +248,6 @@ export async function deletePassFromDB(passId: string): Promise<boolean> {
 
   if (error) {
     console.error('Error deleting pass:', error);
-    return false;
-  }
-
-  return true;
-}
-
-export async function togglePassActiveStatus(passId: string, isActive: boolean): Promise<boolean> {
-  const { error } = await supabase
-    .from('mountain_passes')
-    .update({
-      is_active: isActive,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', passId);
-
-  if (error) {
-    console.error('Error toggling pass active status:', error);
     return false;
   }
 

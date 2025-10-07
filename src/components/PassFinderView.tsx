@@ -3,7 +3,6 @@ import { Search, MapPin, TrendingUp } from 'lucide-react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { PassCard } from './PassCard';
-import { AuthRequiredBanner } from './AuthRequiredBanner';
 
 interface PassFinderViewProps {
   passes: MountainPass[];
@@ -12,8 +11,6 @@ interface PassFinderViewProps {
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos: (passId: string) => void;
   t: Translation;
-  isAuthenticated?: boolean;
-  onRegisterClick?: () => void;
 }
 
 export const PassFinderView: React.FC<PassFinderViewProps> = ({
@@ -22,17 +19,8 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
   onToggleConquest,
   onViewDetails,
   onAddPhotos,
-  t,
-  isAuthenticated = false,
-  onRegisterClick = () => {}
+  t
 }) => {
-  const handleActionClick = (action: () => void) => {
-    if (!isAuthenticated) {
-      onRegisterClick();
-      return;
-    }
-    action();
-  };
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
@@ -79,14 +67,6 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Auth Banner */}
-      {!isAuthenticated && (
-        <AuthRequiredBanner
-          onRegisterClick={onRegisterClick}
-          message="Regístrate para marcar puertos como conquistados y acceder a todas las funcionalidades"
-        />
-      )}
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">{t.passFinderTitle}</h1>
         <p className="text-slate-600">{t.passFinderDescription}</p>
@@ -191,7 +171,7 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
                   key={pass.id}
                   pass={pass}
                   isConquered={conqueredPassIds.has(pass.id)}
-                  onToggleConquest={(passId) => handleActionClick(() => onToggleConquest(passId))}
+                  onToggleConquest={onToggleConquest}
                   onViewDetails={onViewDetails}
                   onAddPhotos={onAddPhotos}
                   t={t}
@@ -216,7 +196,7 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
                 key={pass.id}
                 pass={pass}
                 isConquered={conqueredPassIds.has(pass.id)}
-                onToggleConquest={(passId) => handleActionClick(() => onToggleConquest(passId))}
+                onToggleConquest={onToggleConquest}
                 onViewDetails={onViewDetails}
                 onAddPhotos={onAddPhotos}
                 t={t}
