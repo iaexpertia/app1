@@ -35,7 +35,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
-  const [filterRegion, setFilterRegion] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newPass, setNewPass] = useState<Partial<MountainPass>>({
@@ -51,11 +51,12 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     coordinates: { lat: 0, lng: 0 },
     description: '',
     famousWinners: [],
-    imageUrl: ''
+    imageUrl: '',
+    category: 'Otros'
   });
 
   const userPassIds = new Set(userPasses.map(p => p.id));
-  const availableRegions = [...new Set(allPasses.map(pass => pass.region))].sort();
+  const availableCategories = [...new Set(allPasses.map(pass => pass.category))];
 
   const filteredPasses = allPasses.filter(pass => {
     const matchesSearch = pass.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -63,11 +64,11 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
-    const matchesRegion = filterRegion === 'all' || pass.region === filterRegion;
+    const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
     const isInUserPasses = userPassIds.has(pass.id);
     const matchesAvailability = !showOnlyAvailable || !isInUserPasses;
     
-    return matchesSearch && matchesDifficulty && matchesRegion && matchesAvailability;
+    return matchesSearch && matchesDifficulty && matchesCategory && matchesAvailability;
   });
 
   const getDifficultyText = (difficulty: string) => {
@@ -270,14 +271,14 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             </select>
             
             <select
-              value={filterRegion}
-              onChange={(e) => setFilterRegion(e.target.value)}
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
             >
-              <option value="all">Todas las Regiones</option>
-              {availableRegions.map(region => (
-                <option key={region} value={region}>
-                  {region}
+              <option value="all">{t.allCategories}</option>
+              {availableCategories.map(category => (
+                <option key={category} value={category}>
+                  {category}
                 </option>
               ))}
             </select>
