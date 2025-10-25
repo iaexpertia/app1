@@ -1,106 +1,47 @@
 import { Brand } from '../types';
-import { supabase } from './supabaseClient';
 
-export const saveBrands = async (brands: Brand[]): Promise<void> => {
-  for (const brand of brands) {
-    await supabase
-      .from('brands')
-      .upsert({
-        id: brand.id,
-        name: brand.name,
-        description: brand.description,
-        logo_url: brand.logoUrl,
-        website_url: brand.websiteUrl,
-        category: brand.category,
-        country: brand.country,
-        founded_year: brand.foundedYear,
-        is_featured: brand.isFeatured || false,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'id'
-      });
+const BRANDS_STORAGE_KEY = 'cycling-brands';
+const BRAND_CATEGORIES_STORAGE_KEY = 'brand-categories';
+
+export const saveBrands = (brands: Brand[]): void => {
+  localStorage.setItem(BRANDS_STORAGE_KEY, JSON.stringify(brands));
+};
+
+export const loadBrands = (): Brand[] => {
+  const stored = localStorage.getItem(BRANDS_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const addBrand = (brand: Brand): void => {
+  const brands = loadBrands();
+  const existingIndex = brands.findIndex(b => b.id === brand.id);
+  
+  if (existingIndex >= 0) {
+    brands[existingIndex] = brand;
+  } else {
+    brands.push(brand);
+  }
+  
+  saveBrands(brands);
+};
+
+export const removeBrand = (brandId: string): void => {
+  const brands = loadBrands();
+  const filteredBrands = brands.filter(b => b.id !== brandId);
+  saveBrands(filteredBrands);
+};
+
+export const updateBrand = (brand: Brand): void => {
+  const brands = loadBrands();
+  const index = brands.findIndex(b => b.id === brand.id);
+  
+  if (index >= 0) {
+    brands[index] = brand;
+    saveBrands(brands);
   }
 };
 
-export const loadBrands = async (): Promise<Brand[]> => {
-  const { data, error } = await supabase
-    .from('brands')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error loading brands:', error);
-    return [];
-  }
-
-  return (data || []).map(brand => ({
-    id: brand.id,
-    name: brand.name,
-    description: brand.description,
-    logoUrl: brand.logo_url,
-    websiteUrl: brand.website_url,
-    category: brand.category,
-    country: brand.country,
-    foundedYear: brand.founded_year,
-    isFeatured: brand.is_featured
-  }));
-};
-
-export const addBrand = async (brand: Brand): Promise<void> => {
-  const { error } = await supabase
-    .from('brands')
-    .upsert({
-      id: brand.id,
-      name: brand.name,
-      description: brand.description,
-      logo_url: brand.logoUrl,
-      website_url: brand.websiteUrl,
-      category: brand.category,
-      country: brand.country,
-      founded_year: brand.foundedYear,
-      is_featured: brand.isFeatured || false,
-      updated_at: new Date().toISOString()
-    }, {
-      onConflict: 'id'
-    });
-
-  if (error) {
-    console.error('Error adding brand:', error);
-  }
-};
-
-export const removeBrand = async (brandId: string): Promise<void> => {
-  const { error } = await supabase
-    .from('brands')
-    .delete()
-    .eq('id', brandId);
-
-  if (error) {
-    console.error('Error removing brand:', error);
-  }
-};
-
-export const updateBrand = async (brand: Brand): Promise<void> => {
-  const { error } = await supabase
-    .from('brands')
-    .update({
-      name: brand.name,
-      description: brand.description,
-      logo_url: brand.logoUrl,
-      website_url: brand.websiteUrl,
-      category: brand.category,
-      country: brand.country,
-      founded_year: brand.foundedYear,
-      is_featured: brand.isFeatured || false,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', brand.id);
-
-  if (error) {
-    console.error('Error updating brand:', error);
-  }
-};
-
+// Brand Categories management
 export const getDefaultBrandCategories = (): string[] => {
   return [
     'Bicicletas',
@@ -113,19 +54,27 @@ export const getDefaultBrandCategories = (): string[] => {
 };
 
 export const loadBrandCategories = (): string[] => {
-  return getDefaultBrandCategories();
+  const stored = localStorage.getItem(BRAND_CATEGORIES_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : getDefaultBrandCategories();
 };
 
 export const saveBrandCategories = (categories: string[]): void => {
-  // Categories are now hardcoded, no need to save
+  localStorage.setItem(BRAND_CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
 };
 
 export const addBrandCategory = (category: string): void => {
-  // Categories are now hardcoded
+  const categories = loadBrandCategories();
+  if (!categories.includes(category)) {
+    categories.push(category);
+    saveBrandCategories(categories);
+  }
 };
 
 export const removeBrandCategory = (category: string): void => {
-  // Categories are now hardcoded
+  const categories = loadBrandCategories();
+  const filteredCategories = categories.filter(c => c !== category);
+  saveBrandCategories(filteredCategories);
 };
 
+// Alias for getBrands (for compatibility)
 export const getBrands = loadBrands;

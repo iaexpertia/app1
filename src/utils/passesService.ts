@@ -76,7 +76,7 @@ export async function getAllPassesFromDB(includeUnvalidated = false): Promise<Mo
     .select('*');
 
   if (!includeUnvalidated) {
-    query = query.eq('estado_validacion', 'Validado');
+    query = query.eq('is_validated', true);
   }
 
   const { data, error } = await query.order('name');
@@ -89,17 +89,12 @@ export async function getAllPassesFromDB(includeUnvalidated = false): Promise<Mo
   return data.map(dbToMountainPass);
 }
 
-export async function checkDuplicatePass(name: string, onlyValidated: boolean = false): Promise<MountainPass | null> {
-  let query = supabase
+export async function checkDuplicatePass(name: string): Promise<MountainPass | null> {
+  const { data, error } = await supabase
     .from('mountain_passes')
     .select('*')
-    .ilike('name', name);
-
-  if (onlyValidated) {
-    query = query.eq('estado_validacion', 'Validado');
-  }
-
-  const { data, error } = await query.maybeSingle();
+    .ilike('name', name)
+    .maybeSingle();
 
   if (error) {
     console.error('Error checking duplicate:', error);
@@ -113,20 +108,19 @@ export async function createPassInDB(
   pass: MountainPass,
   submittedBy?: string
 ): Promise<{ success: boolean; message: string; pass?: MountainPass }> {
-  // Check for duplicates only in validated passes
-  const duplicate = await checkDuplicatePass(pass.name, true);
+  // Check for duplicates by name only (case insensitive)
+  const duplicate = await checkDuplicatePass(pass.name);
 
   if (duplicate) {
     return {
       success: false,
-      message: 'Este puerto ya existe validado en la base de datos'
+      message: 'Este puerto ya existe en la base de datos'
     };
   }
 
   const dbPass = {
     ...mountainPassToDB(pass),
     is_validated: false,
-    estado_validacion: 'Pendiente',
     submitted_by: submittedBy || null,
     validated_by: null,
     validation_notes: null
@@ -175,44 +169,11 @@ export async function validatePassInDB(
   passId: string,
   validatedBy: string,
   notes?: string
-): Promise<{ success: boolean; message?: string }> {
-  // Get the pass to validate
-  const { data: passToValidate, error: fetchError } = await supabase
-    .from('mountain_passes')
-    .select('*')
-    .eq('id', passId)
-    .maybeSingle();
-
-  if (fetchError || !passToValidate) {
-    console.error('Error fetching pass to validate:', fetchError);
-    return { success: false, message: 'Puerto no encontrado' };
-  }
-
-  // Check for duplicates with the same name (case insensitive)
-  const { data: duplicates, error: duplicateError } = await supabase
-    .from('mountain_passes')
-    .select('id, name, estado_validacion')
-    .ilike('name', passToValidate.name)
-    .eq('estado_validacion', 'Validado');
-
-  if (duplicateError) {
-    console.error('Error checking duplicates:', duplicateError);
-  }
-
-  // If there's a validated duplicate, reject validation
-  if (duplicates && duplicates.length > 0) {
-    return {
-      success: false,
-      message: `Ya existe un puerto validado con el nombre "${passToValidate.name}"`
-    };
-  }
-
-  // Validate the pass
+): Promise<boolean> {
   const { error } = await supabase
     .from('mountain_passes')
     .update({
       is_validated: true,
-      estado_validacion: 'Validado',
       validated_by: validatedBy,
       validation_notes: notes || null,
       updated_at: new Date().toISOString()
@@ -221,17 +182,17 @@ export async function validatePassInDB(
 
   if (error) {
     console.error('Error validating pass:', error);
-    return { success: false, message: 'Error al validar el puerto' };
+    return false;
   }
 
-  return { success: true };
+  return true;
 }
 
 export async function getPendingPassesFromDB(): Promise<MountainPass[]> {
   const { data, error } = await supabase
     .from('mountain_passes')
     .select('*')
-    .eq('estado_validacion', 'Pendiente')
+    .eq('is_validated', false)
     .order('created_at', { ascending: false });
 
   if (error) {
