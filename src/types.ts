@@ -22,7 +22,6 @@ export interface MountainPass {
   }[];
   imageUrl: string;
   category: string;
-  isActive?: boolean;
 }
 
 export interface ConquestData {
