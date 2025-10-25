@@ -4,48 +4,67 @@ export interface Region {
   id: string;
   name: string;
   country: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export async function getAllRegions(): Promise<Region[]> {
-  const { data, error } = await supabase
-    .from('regions')
-    .select('*')
-    .order('name');
+export const loadRegions = async (): Promise<Region[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('regions')
+      .select('*')
+      .order('name');
 
-  if (error) {
-    console.error('Error fetching regions:', error);
+    if (error) {
+      console.error('Error loading regions:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error loading regions:', error);
     return [];
   }
+};
 
-  return data || [];
-}
+export const addRegion = async (name: string, country: string): Promise<Region | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('regions')
+      .insert([{ name, country }])
+      .select()
+      .maybeSingle();
 
-export async function addRegion(name: string, country: string = 'Sin especificar'): Promise<{ success: boolean; message: string; region?: Region }> {
-  const { data, error } = await supabase
-    .from('regions')
-    .insert({ name, country })
-    .select()
-    .single();
-
-  if (error) {
-    if (error.code === '23505') {
-      return {
-        success: false,
-        message: 'Esta región ya existe'
-      };
+    if (error) {
+      console.error('Error adding region:', error);
+      alert('Error al añadir la región: ' + error.message);
+      return null;
     }
-    console.error('Error adding region:', error);
-    return {
-      success: false,
-      message: 'Error al agregar la región'
-    };
-  }
 
-  return {
-    success: true,
-    message: 'Región agregada correctamente',
-    region: data
-  };
-}
+    return data;
+  } catch (error) {
+    console.error('Error adding region:', error);
+    alert('Error al añadir la región');
+    return null;
+  }
+};
+
+export const getRegionsByCountry = async (country: string): Promise<Region[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('regions')
+      .select('*')
+      .eq('country', country)
+      .order('name');
+
+    if (error) {
+      console.error('Error loading regions by country:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error loading regions by country:', error);
+    return [];
+  }
+};
