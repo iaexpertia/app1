@@ -31,13 +31,6 @@ export const PassValidation: React.FC = () => {
     loadPendingPasses();
   }, []);
 
-  useEffect(() => {
-    // Close modal if selected pass is no longer in pending list
-    if (selectedPass && !pendingPasses.find(p => p.id === selectedPass.id)) {
-      setSelectedPass(null);
-    }
-  }, [pendingPasses, selectedPass]);
-
   const loadPendingPasses = async () => {
     const passes = await getPendingPassesFromDB();
     setPendingPasses(passes);
@@ -56,14 +49,12 @@ export const PassValidation: React.FC = () => {
     const result = await validatePassInDB(passId, user.email, validationNotes);
 
     if (result.success) {
-      // Close modal first
-      setSelectedPass(null);
-      setValidationNotes('');
-
       // Remove the validated pass from the local state immediately
       setPendingPasses(prev => prev.filter(p => p.id !== passId));
 
       alert('Puerto validado correctamente');
+      setValidationNotes('');
+      setSelectedPass(null);
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
       alert(result.message || 'Error al validar el puerto');
@@ -81,13 +72,11 @@ export const PassValidation: React.FC = () => {
     const success = await deletePassFromDB(passId);
 
     if (success) {
-      // Close modal first
-      setSelectedPass(null);
-
       // Remove the rejected pass from the local state immediately
       setPendingPasses(prev => prev.filter(p => p.id !== passId));
 
       alert('Puerto rechazado y eliminado');
+      setSelectedPass(null);
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
       alert('Error al rechazar el puerto');
