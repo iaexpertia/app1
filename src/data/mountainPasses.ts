@@ -19,7 +19,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2022, race: 'Tour de France', winner: 'Tom Pidcock' },
       { year: 2021, race: 'Tour de France', winner: 'Tadej Pogačar' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+    category: 'Alpes'
   },
   {
     id: 'mont-ventoux',
@@ -39,7 +40,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2016, race: 'Tour de France', winner: 'Chris Froome' },
       { year: 2009, race: 'Tour de France', winner: 'Juan Manuel Gárate' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/1578662/pexels-photo-1578662.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/1578662/pexels-photo-1578662.jpeg',
+    category: 'Provenza'
   },
   {
     id: 'col-du-tourmalet',
@@ -59,7 +61,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2022, race: 'Tour de France', winner: 'Jonas Vingegaard' },
       { year: 2021, race: 'Tour de France', winner: 'Wout van Aert' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg',
+    category: 'Pirineos'
   },
   {
     id: 'stelvio-pass',
@@ -79,7 +82,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2017, race: 'Giro d\'Italia', winner: 'Mikel Landa' },
       { year: 2014, race: 'Giro d\'Italia', winner: 'Nairo Quintana' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+    category: 'Dolomitas'
   },
   {
     id: 'angliru',
@@ -99,7 +103,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2019, race: 'Vuelta a España', winner: 'Primož Roglič' },
       { year: 2017, race: 'Vuelta a España', winner: 'Alberto Contador' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/1578662/pexels-photo-1578662.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/1578662/pexels-photo-1578662.jpeg',
+    category: 'Otros'
   },
   {
     id: 'hardknott-pass',
@@ -118,7 +123,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2021, race: 'Tour of Britain', winner: 'Wout van Aert' },
       { year: 2019, race: 'Tour of Britain', winner: 'Mathieu van der Poel' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/1761279/pexels-photo-1761279.jpeg',
+    category: 'Otros'
   },
   {
     id: 'mortirolo',
@@ -138,7 +144,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2016, race: 'Giro d\'Italia', winner: 'Vincenzo Nibali' },
       { year: 1994, race: 'Giro d\'Italia', winner: 'Marco Pantani' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+    category: 'Dolomitas'
   },
   {
     id: 'zoncolan',
@@ -158,7 +165,8 @@ export const mountainPasses: MountainPass[] = [
       { year: 2018, race: 'Giro d\'Italia', winner: 'Chris Froome' },
       { year: 2014, race: 'Giro d\'Italia', winner: 'Michael Rogers' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+    category: 'Dolomitas'
   },
   {
     id: 'veleta',
@@ -177,6 +185,7 @@ export const mountainPasses: MountainPass[] = [
       { year: 2022, race: 'Vuelta a España', winner: 'Richard Carapaz' },
       { year: 2015, race: 'Vuelta a España', winner: 'Mikel Landa' }
     ],
-    imageUrl: 'https://images.pexels.com/photos/1578662/pexels-photo-1578662.jpeg'
+    imageUrl: 'https://images.pexels.com/photos/1578662/pexels-photo-1578662.jpeg',
+    category: 'Otros'
   }
 ]

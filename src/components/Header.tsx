@@ -85,20 +85,30 @@ export const Header: React.FC<HeaderProps> = ({
     ...(isCurrentUserAdmin ? [{ key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }] : [])
   ];
 
+  const handleLoginClick = () => {
+    handleTabChange('register');
+    // Add a small delay to ensure the tab has changed before adding the URL param
+    setTimeout(() => {
+      window.history.pushState({}, '', '?action=login');
+      // Trigger a custom event to notify the registration component
+      window.dispatchEvent(new CustomEvent('openLoginModal'));
+    }, 100);
+  };
+
   const userActions = [
-    { 
-      key: 'cyclist-register', 
-      icon: UserCheck, 
-      label: hasRegisteredCyclists ? 'Registro Ciclista' : 'Primer Registro', 
-      tooltip: hasRegisteredCyclists ? 'Registrar nuevo ciclista' : 'Crear tu primera cuenta', 
-      action: () => handleTabChange('register') 
+    {
+      key: 'cyclist-register',
+      icon: UserCheck,
+      label: hasRegisteredCyclists ? 'Registro Ciclista' : 'Primer Registro',
+      tooltip: hasRegisteredCyclists ? 'Registrar nuevo ciclista' : 'Crear tu primera cuenta',
+      action: () => handleTabChange('register')
     },
-    { 
-      key: isLoggedIn ? 'logout' : 'login', 
-      icon: isLoggedIn ? LogOut : UserCheck, 
-      label: isLoggedIn ? 'Cerrar Sesión' : 'Iniciar Sesión', 
-      tooltip: isLoggedIn ? 'Cerrar sesión actual' : 'Iniciar sesión', 
-      action: isLoggedIn ? onLogout : (hasRegisteredCyclists ? () => handleTabChange('register') : () => handleTabChange('register'))
+    {
+      key: isLoggedIn ? 'logout' : 'login',
+      icon: isLoggedIn ? LogOut : UserCheck,
+      label: isLoggedIn ? 'Cerrar Sesión' : 'Iniciar Sesión',
+      tooltip: isLoggedIn ? 'Cerrar sesión actual' : 'Iniciar sesión',
+      action: isLoggedIn ? onLogout : (hasRegisteredCyclists ? handleLoginClick : () => handleTabChange('register'))
     }
   ];
 
