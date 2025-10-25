@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { exportMountainPasses } from '../utils/excelExport';
+import { createPassInDB } from '../utils/passesService';
+import { getCurrentUser } from '../utils/cyclistStorage';
 import { 
   Database, 
   Plus, 
@@ -121,17 +123,17 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     Provenza: 'bg-yellow-100 text-yellow-800 border-yellow-300'
   };
 
-  const handleAddNewPass = () => {
-    if (!newPass.name || !newPass.country || !newPass.region) {
-      alert('Por favor completa al menos el nombre, país y región');
+  const handleAddNewPass = async () => {
+    if (!newPass.name) {
+      alert('Por favor completa al menos el nombre del puerto');
       return;
     }
 
     const passToAdd: MountainPass = {
       id: `custom-${Date.now()}`,
       name: newPass.name!,
-      country: newPass.country!,
-      region: newPass.region!,
+      country: newPass.country || 'Sin especificar',
+      region: newPass.region || 'Sin especificar',
       maxAltitude: newPass.maxAltitude || 0,
       elevationGain: newPass.elevationGain || 0,
       averageGradient: newPass.averageGradient || 0,
@@ -145,24 +147,31 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       category: newPass.category || 'Otros'
     };
 
-    onAddPass(passToAdd);
-    setShowAddModal(false);
-    setNewPass({
-      name: '',
-      country: '',
-      region: '',
-      maxAltitude: 0,
-      elevationGain: 0,
-      averageGradient: 0,
-      maxGradient: 0,
-      distance: 0,
-      difficulty: 'Cuarta',
-      coordinates: { lat: 0, lng: 0 },
-      description: '',
-      famousWinners: [],
-      imageUrl: '',
-      category: 'Otros'
-    });
+    const user = await getCurrentUser();
+    const result = await createPassInDB(passToAdd, user?.email);
+
+    alert(result.message);
+
+    if (result.success) {
+      onAddPass(passToAdd);
+      setShowAddModal(false);
+      setNewPass({
+        name: '',
+        country: '',
+        region: '',
+        maxAltitude: 0,
+        elevationGain: 0,
+        averageGradient: 0,
+        maxGradient: 0,
+        distance: 0,
+        difficulty: 'Cuarta',
+        coordinates: { lat: 0, lng: 0 },
+        description: '',
+        famousWinners: [],
+        imageUrl: '',
+        category: 'Otros'
+      });
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
