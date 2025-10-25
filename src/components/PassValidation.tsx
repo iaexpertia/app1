@@ -46,16 +46,16 @@ export const PassValidation: React.FC = () => {
       return;
     }
 
-    const result = await validatePassInDB(passId, user.email, validationNotes);
+    const success = await validatePassInDB(passId, user.email, validationNotes);
 
-    if (result.success) {
+    if (success) {
       alert('Puerto validado correctamente');
       setValidationNotes('');
       setSelectedPass(null);
-      await loadPendingPasses();
+      loadPendingPasses();
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
-      alert(result.message || 'Error al validar el puerto');
+      alert('Error al validar el puerto');
     }
 
     setLoading(false);
@@ -72,8 +72,7 @@ export const PassValidation: React.FC = () => {
     if (success) {
       alert('Puerto rechazado y eliminado');
       setSelectedPass(null);
-      await loadPendingPasses();
-      window.dispatchEvent(new Event('passesUpdated'));
+      loadPendingPasses();
     } else {
       alert('Error al rechazar el puerto');
     }

@@ -90,7 +90,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   };
 
   const userPassIds = new Set(userPasses.map(p => p.id));
-  const availableRegions = regions.map(r => r.name).sort();
+  const availableRegions = [...new Set(allPasses.map(pass => pass.region))].sort();
 
   const filteredPasses = allPasses.filter(pass => {
     const matchesSearch = pass.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
