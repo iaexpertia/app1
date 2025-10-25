@@ -1,136 +1,52 @@
 import { Collaborator } from '../types';
-import { supabase } from './supabaseClient';
 
-export const saveCollaborators = async (collaborators: Collaborator[]): Promise<void> => {
-  for (const collaborator of collaborators) {
-    await supabase
-      .from('collaborators')
-      .upsert({
-        id: collaborator.id,
-        name: collaborator.name,
-        description: collaborator.description,
-        logo_url: collaborator.logoUrl,
-        website_url: collaborator.websiteUrl,
-        email: collaborator.email,
-        phone: collaborator.phone,
-        address: collaborator.address,
-        city: collaborator.city,
-        country: collaborator.country,
-        category: collaborator.category,
-        latitude: collaborator.coordinates?.lat,
-        longitude: collaborator.coordinates?.lng,
-        is_featured: collaborator.isFeatured || false,
-        rating: collaborator.rating,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'id'
-      });
+const COLLABORATORS_STORAGE_KEY = 'mountain-pass-collaborators';
+
+export const saveCollaborators = (collaborators: Collaborator[]): void => {
+  localStorage.setItem(COLLABORATORS_STORAGE_KEY, JSON.stringify(collaborators));
+};
+
+export const loadCollaborators = (): Collaborator[] => {
+  const stored = localStorage.getItem(COLLABORATORS_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const addCollaborator = (collaborator: Collaborator): void => {
+  const collaborators = loadCollaborators();
+  const existingIndex = collaborators.findIndex(c => c.id === collaborator.id);
+  
+  if (existingIndex >= 0) {
+    collaborators[existingIndex] = collaborator;
+  } else {
+    collaborators.push(collaborator);
+  }
+  
+  saveCollaborators(collaborators);
+};
+
+export const removeCollaborator = (collaboratorId: string): void => {
+  const collaborators = loadCollaborators();
+  const filteredCollaborators = collaborators.filter(c => c.id !== collaboratorId);
+  saveCollaborators(filteredCollaborators);
+};
+
+export const updateCollaborator = (collaborator: Collaborator): void => {
+  const collaborators = loadCollaborators();
+  const index = collaborators.findIndex(c => c.id === collaborator.id);
+  
+  if (index >= 0) {
+    collaborators[index] = collaborator;
+    saveCollaborators(collaborators);
   }
 };
 
-export const loadCollaborators = async (): Promise<Collaborator[]> => {
-  const { data, error } = await supabase
-    .from('collaborators')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error loading collaborators:', error);
-    return [];
-  }
-
-  return (data || []).map(collaborator => ({
-    id: collaborator.id,
-    name: collaborator.name,
-    description: collaborator.description,
-    logoUrl: collaborator.logo_url,
-    websiteUrl: collaborator.website_url,
-    email: collaborator.email,
-    phone: collaborator.phone,
-    address: collaborator.address,
-    city: collaborator.city,
-    country: collaborator.country,
-    category: collaborator.category,
-    coordinates: collaborator.latitude && collaborator.longitude ? {
-      lat: collaborator.latitude,
-      lng: collaborator.longitude
-    } : undefined,
-    isFeatured: collaborator.is_featured,
-    rating: collaborator.rating
-  }));
-};
-
-export const addCollaborator = async (collaborator: Collaborator): Promise<void> => {
-  const { error } = await supabase
-    .from('collaborators')
-    .upsert({
-      id: collaborator.id,
-      name: collaborator.name,
-      description: collaborator.description,
-      logo_url: collaborator.logoUrl,
-      website_url: collaborator.websiteUrl,
-      email: collaborator.email,
-      phone: collaborator.phone,
-      address: collaborator.address,
-      city: collaborator.city,
-      country: collaborator.country,
-      category: collaborator.category,
-      latitude: collaborator.coordinates?.lat,
-      longitude: collaborator.coordinates?.lng,
-      is_featured: collaborator.isFeatured || false,
-      rating: collaborator.rating,
-      updated_at: new Date().toISOString()
-    }, {
-      onConflict: 'id'
-    });
-
-  if (error) {
-    console.error('Error adding collaborator:', error);
-  }
-};
-
-export const removeCollaborator = async (collaboratorId: string): Promise<void> => {
-  const { error } = await supabase
-    .from('collaborators')
-    .delete()
-    .eq('id', collaboratorId);
-
-  if (error) {
-    console.error('Error removing collaborator:', error);
-  }
-};
-
-export const updateCollaborator = async (collaborator: Collaborator): Promise<void> => {
-  const { error } = await supabase
-    .from('collaborators')
-    .update({
-      name: collaborator.name,
-      description: collaborator.description,
-      logo_url: collaborator.logoUrl,
-      website_url: collaborator.websiteUrl,
-      email: collaborator.email,
-      phone: collaborator.phone,
-      address: collaborator.address,
-      city: collaborator.city,
-      country: collaborator.country,
-      category: collaborator.category,
-      latitude: collaborator.coordinates?.lat,
-      longitude: collaborator.coordinates?.lng,
-      is_featured: collaborator.isFeatured || false,
-      rating: collaborator.rating,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', collaborator.id);
-
-  if (error) {
-    console.error('Error updating collaborator:', error);
-  }
-};
+// Categories management
+const CATEGORIES_STORAGE_KEY = 'collaborator-categories';
 
 export const getDefaultCategories = (): string[] => {
   return [
     'Tienda de Bicicletas',
-    'Hotel',
+    'Hotel', 
     'Restaurante',
     'Guía Turístico',
     'Equipamiento',
@@ -139,19 +55,27 @@ export const getDefaultCategories = (): string[] => {
 };
 
 export const loadCategories = (): string[] => {
-  return getDefaultCategories();
+  const stored = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : getDefaultCategories();
 };
 
 export const saveCategories = (categories: string[]): void => {
-  // Categories are now hardcoded, no need to save
+  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
 };
 
 export const addCategory = (category: string): void => {
-  // Categories are now hardcoded
+  const categories = loadCategories();
+  if (!categories.includes(category)) {
+    categories.push(category);
+    saveCategories(categories);
+  }
 };
 
 export const removeCategory = (category: string): void => {
-  // Categories are now hardcoded
+  const categories = loadCategories();
+  const filteredCategories = categories.filter(c => c !== category);
+  saveCategories(filteredCategories);
 };
 
+// Alias for getCollaborators (for compatibility)
 export const getCollaborators = loadCollaborators;
