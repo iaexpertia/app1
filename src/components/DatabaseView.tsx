@@ -5,13 +5,12 @@ import { exportMountainPasses } from '../utils/excelExport';
 import { createPassInDB } from '../utils/passesService';
 import { getCurrentUser } from '../utils/cyclistStorage';
 import { getAllRegions, addRegion, Region } from '../utils/regionsService';
-import { AuthRequiredBanner } from './AuthRequiredBanner';
-import {
-  Database,
-  Plus,
-  Minus,
-  Check,
-  Search,
+import { 
+  Database, 
+  Plus, 
+  Minus, 
+  Check, 
+  Search, 
   Filter,
   Mountain,
   TrendingUp,
@@ -28,8 +27,6 @@ interface DatabaseViewProps {
   onAddPass: (pass: MountainPass) => void;
   onRemovePass: (passId: string) => void;
   t: Translation;
-  isAuthenticated?: boolean;
-  onRegisterClick?: () => void;
 }
 
 export const DatabaseView: React.FC<DatabaseViewProps> = ({
@@ -37,9 +34,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   userPasses,
   onAddPass,
   onRemovePass,
-  t,
-  isAuthenticated = false,
-  onRegisterClick = () => {}
+  t
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
@@ -254,26 +249,16 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
           </div>
         </div>
         
-        {/* Auth Banner */}
-        {!isAuthenticated && (
-          <AuthRequiredBanner
-            onRegisterClick={onRegisterClick}
-            message="Regístrate para añadir nuevos puertos a la base de datos y acceder a todas las funcionalidades de la aplicación"
-          />
-        )}
-
-        {/* Add New Pass Button - Only for authenticated users */}
-        {isAuthenticated && (
-          <div className="mb-6">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Añadir Nuevo Puerto</span>
-            </button>
-          </div>
-        )}
+        {/* Add New Pass Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+          >
+            <Plus className="h-5 w-5" />
+            <span>Añadir Nuevo Puerto</span>
+          </button>
+        </div>
 
         <div className="bg-white rounded-lg p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
