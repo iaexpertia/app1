@@ -42,7 +42,7 @@ function App() {
                                window.location.search.includes('token=');
 
   const { language, t, changeLanguage } = useLanguage();
-  const [activeTab, setActiveTab] = useState<ActiveTab>('passes');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('finder');
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
   const [photosPass, setPhotosPass] = useState<MountainPass | null>(null);
   const [conquests, setConquests] = useState<ConquestData[]>([]);
@@ -65,8 +65,8 @@ function App() {
     setIsAdmin(false);
     setCurrentCyclist(null);
 
-    // Redirect to register tab
-    setActiveTab('register');
+    // Redirect to finder tab
+    setActiveTab('finder');
 
     // Show a brief logout message
     setShowSuccessMessage(true);
@@ -244,6 +244,8 @@ function App() {
               onViewDetails={handleViewDetails}
               onAddPhotos={handleAddPhotos}
               t={t}
+              isAuthenticated={!!currentCyclist}
+              onRegisterClick={() => setActiveTab('register')}
             />
           )}
 
@@ -255,6 +257,8 @@ function App() {
               onViewDetails={handleViewDetails}
               onAddPhotos={handleAddPhotos}
               t={t}
+              isAuthenticated={!!currentCyclist}
+              onRegisterClick={() => setActiveTab('register')}
             />
           )}
 
@@ -300,6 +304,8 @@ function App() {
               onAddPass={handleAddPass}
               onRemovePass={handleRemovePass}
               t={t}
+              isAuthenticated={!!currentCyclist}
+              onRegisterClick={() => setActiveTab('register')}
             />
           )}
 
