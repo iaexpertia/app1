@@ -20,7 +20,6 @@ const NewsView = lazy(() => import('./components/NewsView').then(m => ({ default
 const PassFinderView = lazy(() => import('./components/PassFinderView').then(m => ({ default: m.PassFinderView })));
 const PasswordReset = lazy(() => import('./components/PasswordReset').then(m => ({ default: m.PasswordReset })));
 const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
-import { mountainPasses } from './data/mountainPasses';
 import { 
   loadConquests, 
   addConquest, 
@@ -33,6 +32,7 @@ import {
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
 import { Cyclist } from './types';
+import { getAllPassesFromDB } from './utils/passesService';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
 
@@ -42,12 +42,12 @@ function App() {
                                window.location.search.includes('token=');
 
   const { language, t, changeLanguage } = useLanguage();
-  const [activeTab, setActiveTab] = useState<ActiveTab>('passes');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('finder');
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
   const [photosPass, setPhotosPass] = useState<MountainPass | null>(null);
   const [conquests, setConquests] = useState<ConquestData[]>([]);
   const [conqueredPassIds, setConqueredPassIds] = useState<Set<string>>(new Set());
-  const [passes, setPasses] = useState<MountainPass[]>(mountainPasses);
+  const [passes, setPasses] = useState<MountainPass[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
@@ -65,12 +65,17 @@ function App() {
     setIsAdmin(false);
     setCurrentCyclist(null);
 
-    // Redirect to register tab
-    setActiveTab('register');
+    // Redirect to finder tab
+    setActiveTab('finder');
 
     // Show a brief logout message
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 2000);
+  };
+
+  const loadPassesFromDB = async () => {
+    const dbPasses = await getAllPassesFromDB(false);
+    setPasses(dbPasses);
   };
 
   useEffect(() => {
@@ -89,6 +94,9 @@ function App() {
       // Cargar el ciclista actual
       const cyclist = await getCurrentUser();
       setCurrentCyclist(cyclist);
+
+      // Cargar puertos desde la base de datos
+      await loadPassesFromDB();
     };
 
     initializeApp();
@@ -97,10 +105,16 @@ function App() {
       initializeApp();
     };
 
+    const handlePassesUpdated = () => {
+      loadPassesFromDB();
+    };
+
     window.addEventListener('userChanged', handleUserChange);
+    window.addEventListener('passesUpdated', handlePassesUpdated);
 
     return () => {
       window.removeEventListener('userChanged', handleUserChange);
+      window.removeEventListener('passesUpdated', handlePassesUpdated);
     };
   }, []);
 
@@ -189,7 +203,7 @@ function App() {
   };
 
   const userStats = calculateUserStats(passes, conquests);
-  const conqueredPasses = mountainPasses.filter(pass => conqueredPassIds.has(pass.id));
+  const conqueredPasses = passes.filter(pass => conqueredPassIds.has(pass.id));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -230,6 +244,8 @@ function App() {
               onViewDetails={handleViewDetails}
               onAddPhotos={handleAddPhotos}
               t={t}
+              isAuthenticated={!!currentCyclist}
+              onRegisterClick={() => setActiveTab('register')}
             />
           )}
 
@@ -241,6 +257,8 @@ function App() {
               onViewDetails={handleViewDetails}
               onAddPhotos={handleAddPhotos}
               t={t}
+              isAuthenticated={!!currentCyclist}
+              onRegisterClick={() => setActiveTab('register')}
             />
           )}
 
@@ -281,11 +299,13 @@ function App() {
 
           {activeTab === 'database' && (
             <DatabaseView
-              allPasses={mountainPasses}
+              allPasses={passes}
               userPasses={passes}
               onAddPass={handleAddPass}
               onRemovePass={handleRemovePass}
               t={t}
+              isAuthenticated={!!currentCyclist}
+              onRegisterClick={() => setActiveTab('register')}
             />
           )}
 

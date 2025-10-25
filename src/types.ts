@@ -100,6 +100,10 @@ export interface Collaborator {
     website?: string;
     address?: string;
   };
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
   images: string[];
   isActive: boolean;
   featured: boolean;
