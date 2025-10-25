@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { exportMountainPasses } from '../utils/excelExport';
 import { createPassInDB } from '../utils/passesService';
 import { getCurrentUser } from '../utils/cyclistStorage';
-import { getAllRegions, addRegion, Region } from '../utils/regionsService';
 import { 
   Database, 
   Plus, 
@@ -41,10 +40,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [showAddRegionModal, setShowAddRegionModal] = useState(false);
-  const [newRegionName, setNewRegionName] = useState('');
-  const [newRegionCountry, setNewRegionCountry] = useState('');
   const [newPass, setNewPass] = useState<Partial<MountainPass>>({
     name: '',
     country: '',
@@ -61,33 +56,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     imageUrl: '',
     category: 'Otros'
   });
-
-  useEffect(() => {
-    loadRegions();
-  }, []);
-
-  const loadRegions = async () => {
-    const loadedRegions = await getAllRegions();
-    setRegions(loadedRegions);
-  };
-
-  const handleAddRegion = async () => {
-    if (!newRegionName.trim()) {
-      alert('Por favor ingresa el nombre de la región');
-      return;
-    }
-
-    const result = await addRegion(newRegionName, newRegionCountry || 'Sin especificar');
-    alert(result.message);
-
-    if (result.success) {
-      await loadRegions();
-      setNewPass({ ...newPass, region: newRegionName });
-      setNewRegionName('');
-      setNewRegionCountry('');
-      setShowAddRegionModal(false);
-    }
-  };
 
   const userPassIds = new Set(userPasses.map(p => p.id));
   const availableCategories = [...new Set(allPasses.map(pass => pass.category))];
@@ -485,30 +453,32 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Región
+                    Región <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={newPass.region || ''}
-                      onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    >
-                      <option value="">Seleccionar región</option>
-                      {regions.map((region) => (
-                        <option key={region.id} value={region.name}>
-                          {region.name} ({region.country})
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddRegionModal(true)}
-                      className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                      title="Añadir nueva región"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    value={newPass.region || ''}
+                    onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="Ej: Alpes"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+                  <select
+                    value={newPass.category || 'Otros'}
+                    onChange={(e) => setNewPass({ ...newPass, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="Alpes">Alpes</option>
+                    <option value="Pirineos">Pirineos</option>
+                    <option value="Dolomitas">Dolomitas</option>
+                    <option value="Andes">Andes</option>
+                    <option value="Provenza">Provenza</option>
+                    <option value="Otros">Otros</option>
+                  </select>
                 </div>
                 
                 <div>
@@ -704,67 +674,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                 >
                   <Save className="h-4 w-4" />
                   <span>Añadir Puerto</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Region Modal */}
-      {showAddRegionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full">
-            <div className="p-6 border-b flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Región</h3>
-              <button
-                onClick={() => setShowAddRegionModal(false)}
-                className="text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Nombre de la Región <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={newRegionName}
-                  onChange={(e) => setNewRegionName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  placeholder="Ej: Picos de Europa"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  País
-                </label>
-                <input
-                  type="text"
-                  value={newRegionCountry}
-                  onChange={(e) => setNewRegionCountry(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  placeholder="Ej: España"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <button
-                  onClick={() => setShowAddRegionModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleAddRegion}
-                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Añadir Región</span>
                 </button>
               </div>
             </div>
