@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, CheckSquare } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
-import { PassValidation } from './PassValidation';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { 
@@ -747,7 +746,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const tabs = [
     { id: 'cyclists', label: 'Gestionar Ciclistas', icon: Users },
     { id: 'passes', label: 'Gestionar Puertos', icon: Mountain },
-    { id: 'validate', label: 'Validar Puertos', icon: CheckSquare },
     { id: 'brands', label: 'Gestionar Marcas', icon: Tag },
     { id: 'collaborators', label: 'Gestionar Colaboradores', icon: UserCheck },
     { id: 'news', label: 'Gestionar Noticias', icon: Newspaper },
@@ -946,10 +944,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               </table>
             </div>
           </div>
-        )}
-
-        {activeTab === 'validate' && (
-          <PassValidation />
         )}
 
         {activeTab === 'brands' && (
