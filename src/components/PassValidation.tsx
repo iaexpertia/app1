@@ -31,17 +31,16 @@ export const PassValidation: React.FC = () => {
     loadPendingPasses();
   }, []);
 
-  const loadPendingPasses = async () => {
-    setLoading(true);
-    try {
-      const passes = await getPendingPassesFromDB();
-      setPendingPasses(passes);
-    } catch (error) {
-      console.error("Error loading pending passes:", error);
-      alert('Error al cargar los puertos pendientes.');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Close modal if selected pass is no longer in pending list
+    if (selectedPass && !pendingPasses.find(p => p.id === selectedPass.id)) {
+      setSelectedPass(null);
     }
+  }, [pendingPasses, selectedPass]);
+
+  const loadPendingPasses = async () => {
+    const passes = await getPendingPassesFromDB();
+    setPendingPasses(passes);
   };
 
   const handleValidate = async (passId: string) => {
@@ -57,13 +56,14 @@ export const PassValidation: React.FC = () => {
     const result = await validatePassInDB(passId, user.email, validationNotes);
 
     if (result.success) {
-      // 🔑 CORRECCIÓN CLAVE: Filtra el estado para eliminar el puerto de la vista
+      // Close modal first
+      setSelectedPass(null);
+      setValidationNotes('');
+
+      // Remove the validated pass from the local state immediately
       setPendingPasses(prev => prev.filter(p => p.id !== passId));
 
       alert('Puerto validado correctamente');
-      // Limpia y cierra el modal si estaba abierto
-      setValidationNotes('');
-      setSelectedPass(null);
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
       alert(result.message || 'Error al validar el puerto');
@@ -81,13 +81,13 @@ export const PassValidation: React.FC = () => {
     const success = await deletePassFromDB(passId);
 
     if (success) {
-      // 🔑 CORRECCIÓN CLAVE: Filtra el estado para eliminar el puerto de la vista
+      // Close modal first
+      setSelectedPass(null);
+
+      // Remove the rejected pass from the local state immediately
       setPendingPasses(prev => prev.filter(p => p.id !== passId));
 
       alert('Puerto rechazado y eliminado');
-      // Limpia y cierra el modal si estaba abierto
-      setValidationNotes(''); // <-- AÑADIDO: Limpia las notas de validación también al rechazar
-      setSelectedPass(null);
       window.dispatchEvent(new Event('passesUpdated'));
     } else {
       alert('Error al rechazar el puerto');
@@ -118,7 +118,7 @@ export const PassValidation: React.FC = () => {
       }
     }
 
-    // 🔑 CORRECCIÓN CLAVE: Establece la lista vacía para que desaparezcan todos
+    // Clear all from local state
     setPendingPasses([]);
     setSelectedPass(null);
     window.dispatchEvent(new Event('passesUpdated'));
@@ -153,12 +153,10 @@ export const PassValidation: React.FC = () => {
         )}
       </div>
 
-      {pendingPasses.length === 0 && !loading ? (
+      {pendingPasses.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500">No hay puertos pendientes de validación</p>
         </div>
-      ) : loading && pendingPasses.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">Cargando puertos...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pendingPasses.map((pass) => (
@@ -259,7 +257,6 @@ export const PassValidation: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Detalle/Validación */}
       {selectedPass && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -267,7 +264,7 @@ export const PassValidation: React.FC = () => {
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">{selectedPass.name}</h3>
                 <button
-                  onClick={() => { setSelectedPass(null); setValidationNotes(''); }} // Cierra y limpia notas
+                  onClick={() => setSelectedPass(null)}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <X className="w-6 h-6" />
