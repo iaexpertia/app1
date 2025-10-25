@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, Eye, Mountain, TrendingUp, Flag, MapPin, Trash2 } from 'lucide-react';
+import { Check, X, Eye, Mountain, TrendingUp, Flag, MapPin } from 'lucide-react';
 import { MountainPass } from '../types';
 import { getPendingPassesFromDB, validatePassInDB, deletePassFromDB } from '../utils/passesService';
 import { getCurrentUser } from '../utils/cyclistStorage';
@@ -85,61 +85,13 @@ export const PassValidation: React.FC = () => {
     setLoading(false);
   };
 
-  const handleClearAll = async () => {
-    if (pendingPasses.length === 0) {
-      return;
-    }
-
-    if (!confirm(`¿Estás seguro de que quieres eliminar los ${pendingPasses.length} puerto(s) pendiente(s)? Esta acción no se puede deshacer.`)) {
-      return;
-    }
-
-    setLoading(true);
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const pass of pendingPasses) {
-      const success = await deletePassFromDB(pass.id);
-      if (success) {
-        successCount++;
-      } else {
-        errorCount++;
-      }
-    }
-
-    // Clear all from local state
-    setPendingPasses([]);
-    setSelectedPass(null);
-    window.dispatchEvent(new Event('passesUpdated'));
-
-    if (errorCount > 0) {
-      alert(`${successCount} puerto(s) eliminado(s) correctamente. ${errorCount} error(es).`);
-    } else {
-      alert(`${successCount} puerto(s) eliminado(s) correctamente.`);
-    }
-
-    setLoading(false);
-  };
-
   return (
     <div>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Puertos Pendientes de Validación</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            {pendingPasses.length} puerto(s) esperando aprobación
-          </p>
-        </div>
-        {pendingPasses.length > 0 && (
-          <button
-            onClick={handleClearAll}
-            disabled={loading}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Trash2 className="w-4 h-4" />
-            Limpiar Todos ({pendingPasses.length})
-          </button>
-        )}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">Puertos Pendientes de Validación</h2>
+        <p className="text-sm text-gray-600 mt-1">
+          {pendingPasses.length} puerto(s) esperando aprobación
+        </p>
       </div>
 
       {pendingPasses.length === 0 ? (
