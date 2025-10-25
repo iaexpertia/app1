@@ -21,6 +21,7 @@ export interface MountainPass {
     time?: string;
   }[];
   imageUrl: string;
+  category: string;
 }
 
 export interface ConquestData {
@@ -98,6 +99,10 @@ export interface Collaborator {
     phone?: string;
     website?: string;
     address?: string;
+  };
+  coordinates?: {
+    lat: number;
+    lng: number;
   };
   images: string[];
   isActive: boolean;
