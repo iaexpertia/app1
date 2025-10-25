@@ -4,14 +4,15 @@ import { Translation } from '../i18n/translations';
 import { loadCollaborators, loadCategories, addCategory, removeCategory } from '../utils/collaboratorStorage';
 import { defaultCollaborators } from '../data/defaultCollaborators';
 import { exportCollaborators } from '../utils/excelExport';
-import { 
-  Store, 
-  Hotel, 
-  UtensilsCrossed, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
+import { CollaboratorsMap } from './CollaboratorsMap';
+import {
+  Store,
+  Hotel,
+  UtensilsCrossed,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
   Star,
   Users,
   ExternalLink,
@@ -19,7 +20,8 @@ import {
   ChevronRight,
   Search,
   Filter,
-  Download
+  Download,
+  Map
 } from 'lucide-react';
 
 interface CollaboratorsViewProps {
@@ -34,6 +36,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
   const [featuredSlideIndex, setFeaturedSlideIndex] = useState(0);
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     const loadedCollaborators = loadCollaborators();
@@ -236,6 +239,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
               </button>
             ))}
           </div>
+
         </div>
       </div>
 
@@ -478,6 +482,19 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
           <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <p className="text-xl text-slate-600 mb-2">No hay colaboradores disponibles</p>
           <p className="text-slate-500">Próximamente añadiremos más colaboradores</p>
+        </div>
+      )}
+
+      {/* Map View */}
+      {filteredCollaborators.length > 0 && (
+        <div className="mt-12">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center mb-4">
+              <MapPin className="h-6 w-6 text-orange-500 mr-3" />
+              <h3 className="text-xl font-semibold text-slate-800">Ubicaciones de Colaboradores</h3>
+            </div>
+            <CollaboratorsMap collaborators={filteredCollaborators} />
+          </div>
         </div>
       )}
       
