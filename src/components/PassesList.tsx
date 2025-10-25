@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { PassCard } from './PassCard';
-import { AuthRequiredBanner } from './AuthRequiredBanner';
 import { Search, Filter, ChevronLeft, ChevronRight, Tag, Users, ExternalLink, Globe, Phone, Mail, Mountain } from 'lucide-react';
 import { loadBrands } from '../utils/brandsStorage';
 import { loadCollaborators } from '../utils/collaboratorStorage';
@@ -16,8 +15,6 @@ interface PassesListProps {
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos: (passId: string) => void;
   t: Translation;
-  isAuthenticated?: boolean;
-  onRegisterClick?: () => void;
 }
 
 export const PassesList: React.FC<PassesListProps> = ({
@@ -26,19 +23,17 @@ export const PassesList: React.FC<PassesListProps> = ({
   onToggleConquest,
   onViewDetails,
   onAddPhotos,
-  t,
-  isAuthenticated = false,
-  onRegisterClick = () => {}
+  t
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterRegion, setFilterRegion] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [brandsSlideIndex, setBrandsSlideIndex] = useState(0);
   const [collaboratorsSlideIndex, setCollaboratorsSlideIndex] = useState(0);
 
-  // Get unique categories from passes
-  const availableCategories = [...new Set(passes.map(pass => pass.category))];
+  // Get unique regions from passes
+  const availableRegions = [...new Set(passes.map(pass => pass.region))].sort();
 
   // Load brands and collaborators
   const brands = (() => {
@@ -51,18 +46,6 @@ export const PassesList: React.FC<PassesListProps> = ({
     return loadedCollaborators.length > 0 ? loadedCollaborators : defaultCollaborators;
   })().filter(collaborator => collaborator.isActive);
   
-  const getCategoryText = (category: string) => {
-    // Si la categoría ya está en español, la devolvemos tal como está
-    // Si no, intentamos traducirla
-    const categoryMap: Record<string, string> = {
-      'Alps': 'Alpes',
-      'Pyrenees': 'Pirineos',
-      'Dolomites': 'Dolomitas',
-      'Andes': 'Andes',
-      'Other': 'Otros'
-    };
-    return categoryMap[category] || category;
-  };
 
   const nextBrandsSlide = () => {
     setBrandsSlideIndex((prev) => (prev + 1) % Math.ceil(brands.length / 3));
@@ -86,34 +69,18 @@ export const PassesList: React.FC<PassesListProps> = ({
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
-    const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
+    const matchesRegion = filterRegion === 'all' || pass.region === filterRegion;
     const isConquered = conqueredPassIds.has(pass.id);
     const matchesStatus = filterStatus === 'all' || 
                          (filterStatus === 'conquered' && isConquered) ||
                          (filterStatus === 'pending' && !isConquered);
     
-    return matchesSearch && matchesDifficulty && matchesCategory && matchesStatus;
+    return matchesSearch && matchesDifficulty && matchesRegion && matchesStatus;
   });
-
-  const handleActionClick = (action: () => void) => {
-    if (!isAuthenticated) {
-      onRegisterClick();
-      return;
-    }
-    action();
-  };
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Auth Banner */}
-      {!isAuthenticated && (
-        <AuthRequiredBanner
-          onRegisterClick={onRegisterClick}
-          message="Regístrate para marcar puertos como conquistados, añadir fotos y acceder a todas las funcionalidades"
-        />
-      )}
-
       <div className="mb-8">
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -147,14 +114,14 @@ export const PassesList: React.FC<PassesListProps> = ({
             </select>
             
             <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              value={filterRegion}
+              onChange={(e) => setFilterRegion(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
             >
-              <option value="all">{t.allCategories}</option>
-              {availableCategories.map(category => (
-                <option key={category} value={category}>
-                  {getCategoryText(category)}
+              <option value="all">Todas las Regiones</option>
+              {availableRegions.map(region => (
+                <option key={region} value={region}>
+                  {region}
                 </option>
               ))}
             </select>
@@ -178,7 +145,7 @@ export const PassesList: React.FC<PassesListProps> = ({
             key={pass.id}
             pass={pass}
             isConquered={conqueredPassIds.has(pass.id)}
-            onToggleConquest={(passId) => handleActionClick(() => onToggleConquest(passId))}
+            onToggleConquest={onToggleConquest}
             onViewDetails={onViewDetails}
             onAddPhotos={onAddPhotos}
             t={t}
