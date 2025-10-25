@@ -35,7 +35,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterRegion, setFilterRegion] = useState<string>('all');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newPass, setNewPass] = useState<Partial<MountainPass>>({
@@ -51,12 +51,11 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     coordinates: { lat: 0, lng: 0 },
     description: '',
     famousWinners: [],
-    imageUrl: '',
-    category: 'Otros'
+    imageUrl: ''
   });
 
   const userPassIds = new Set(userPasses.map(p => p.id));
-  const availableCategories = [...new Set(allPasses.map(pass => pass.category))];
+  const availableRegions = [...new Set(allPasses.map(pass => pass.region))].sort();
 
   const filteredPasses = allPasses.filter(pass => {
     const matchesSearch = pass.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,11 +63,11 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
-    const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
+    const matchesRegion = filterRegion === 'all' || pass.region === filterRegion;
     const isInUserPasses = userPassIds.has(pass.id);
     const matchesAvailability = !showOnlyAvailable || !isInUserPasses;
     
-    return matchesSearch && matchesDifficulty && matchesCategory && matchesAvailability;
+    return matchesSearch && matchesDifficulty && matchesRegion && matchesAvailability;
   });
 
   const getDifficultyText = (difficulty: string) => {
@@ -112,14 +111,6 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     Especial: 'bg-red-100 text-red-800',
   };
 
-  const categoryColors = {
-    Alpes: 'bg-blue-100 text-blue-800 border-blue-300',
-    Pirineos: 'bg-purple-100 text-purple-800 border-purple-300',
-    Dolomitas: 'bg-pink-100 text-pink-800 border-pink-300',
-    Andes: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    Otros: 'bg-gray-100 text-gray-800 border-gray-300',
-    Provenza: 'bg-yellow-100 text-yellow-800 border-yellow-300'
-  };
 
   const handleAddNewPass = () => {
     if (!newPass.name || !newPass.country || !newPass.region) {
@@ -141,8 +132,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       coordinates: newPass.coordinates || { lat: 0, lng: 0 },
       description: newPass.description || '',
       famousWinners: [],
-      imageUrl: newPass.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
-      category: newPass.category || 'Otros'
+      imageUrl: newPass.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg'
     };
 
     onAddPass(passToAdd);
@@ -160,8 +150,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       coordinates: { lat: 0, lng: 0 },
       description: '',
       famousWinners: [],
-      imageUrl: '',
-      category: 'Otros'
+      imageUrl: ''
     });
   };
 
@@ -271,14 +260,14 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
             </select>
             
             <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              value={filterRegion}
+              onChange={(e) => setFilterRegion(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
             >
-              <option value="all">{t.allCategories}</option>
-              {availableCategories.map(category => (
-                <option key={category} value={category}>
-                  {category}
+              <option value="all">Todas las Regiones</option>
+              {availableRegions.map(region => (
+                <option key={region} value={region}>
+                  {region}
                 </option>
               ))}
             </select>
@@ -311,10 +300,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                   alt={pass.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-3 right-3 flex space-x-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryColors[pass.category] || categoryColors.Otros}`}>
-                    {pass.category}
-                  </span>
+                <div className="absolute top-3 right-3">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[pass.difficulty]}`}>
                     {getDifficultyText(pass.difficulty)}
                   </span>
@@ -455,23 +441,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                     required
                   />
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-                  <select
-                    value={newPass.category || 'Otros'}
-                    onChange={(e) => setNewPass({ ...newPass, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="Alpes">Alpes</option>
-                    <option value="Pirineos">Pirineos</option>
-                    <option value="Dolomitas">Dolomitas</option>
-                    <option value="Andes">Andes</option>
-                    <option value="Provenza">Provenza</option>
-                    <option value="Otros">Otros</option>
-                  </select>
-                </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Altitud Máxima (m)</label>
                   <input

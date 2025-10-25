@@ -27,13 +27,13 @@ export const PassesList: React.FC<PassesListProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterRegion, setFilterRegion] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [brandsSlideIndex, setBrandsSlideIndex] = useState(0);
   const [collaboratorsSlideIndex, setCollaboratorsSlideIndex] = useState(0);
 
-  // Get unique categories from passes
-  const availableCategories = [...new Set(passes.map(pass => pass.category))];
+  // Get unique regions from passes
+  const availableRegions = [...new Set(passes.map(pass => pass.region))].sort();
 
   // Load brands and collaborators
   const brands = (() => {
@@ -46,18 +46,6 @@ export const PassesList: React.FC<PassesListProps> = ({
     return loadedCollaborators.length > 0 ? loadedCollaborators : defaultCollaborators;
   })().filter(collaborator => collaborator.isActive);
   
-  const getCategoryText = (category: string) => {
-    // Si la categoría ya está en español, la devolvemos tal como está
-    // Si no, intentamos traducirla
-    const categoryMap: Record<string, string> = {
-      'Alps': 'Alpes',
-      'Pyrenees': 'Pirineos',
-      'Dolomites': 'Dolomitas',
-      'Andes': 'Andes',
-      'Other': 'Otros'
-    };
-    return categoryMap[category] || category;
-  };
 
   const nextBrandsSlide = () => {
     setBrandsSlideIndex((prev) => (prev + 1) % Math.ceil(brands.length / 3));
@@ -81,13 +69,13 @@ export const PassesList: React.FC<PassesListProps> = ({
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
-    const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
+    const matchesRegion = filterRegion === 'all' || pass.region === filterRegion;
     const isConquered = conqueredPassIds.has(pass.id);
     const matchesStatus = filterStatus === 'all' || 
                          (filterStatus === 'conquered' && isConquered) ||
                          (filterStatus === 'pending' && !isConquered);
     
-    return matchesSearch && matchesDifficulty && matchesCategory && matchesStatus;
+    return matchesSearch && matchesDifficulty && matchesRegion && matchesStatus;
   });
 
   return (
@@ -126,14 +114,14 @@ export const PassesList: React.FC<PassesListProps> = ({
             </select>
             
             <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              value={filterRegion}
+              onChange={(e) => setFilterRegion(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
             >
-              <option value="all">{t.allCategories}</option>
-              {availableCategories.map(category => (
-                <option key={category} value={category}>
-                  {getCategoryText(category)}
+              <option value="all">Todas las Regiones</option>
+              {availableRegions.map(region => (
+                <option key={region} value={region}>
+                  {region}
                 </option>
               ))}
             </select>

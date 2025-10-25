@@ -137,14 +137,6 @@ export const PassModal: React.FC<PassModalProps> = ({ pass, onClose, t }) => {
                   <p className="text-lg font-semibold">{pass.distance}km</p>
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-3">
-                <MapPin className="h-5 w-5 text-orange-500" />
-                <div>
-                  <p className="text-sm text-slate-500">{t.category}</p>
-                  <p className="text-lg font-semibold">{pass.category}</p>
-                </div>
-              </div>
             </div>
           </div>
           
