@@ -6,6 +6,7 @@ import { PassesList } from './components/PassesList';
 import { PassModal } from './components/PassModal';
 import { Footer } from './components/Footer';
 import { CookieBanner } from './components/CookieBanner';
+import { AuthBanner } from './components/AuthBanner';
 
 const InteractiveMap = lazy(() => import('./components/InteractiveMap').then(m => ({ default: m.InteractiveMap })));
 const PhotosModal = lazy(() => import('./components/PhotosModal').then(m => ({ default: m.PhotosModal })));
@@ -105,6 +106,13 @@ function App() {
   }, []);
 
   const handleToggleConquest = (passId: string) => {
+    // Verificar si el usuario está autenticado
+    if (!currentCyclist) {
+      alert('Debes registrarte o iniciar sesión para marcar puertos como conquistados');
+      setActiveTab('register');
+      return;
+    }
+
     if (isPassConquered(passId)) {
       removeConquest(passId);
       const updatedConquests = conquests.filter(c => c.passId !== passId);
@@ -191,6 +199,19 @@ function App() {
   const userStats = calculateUserStats(passes, conquests);
   const conqueredPasses = mountainPasses.filter(pass => conqueredPassIds.has(pass.id));
 
+  // Lista de tabs que requieren autenticación
+  const protectedTabs: ActiveTab[] = ['passes', 'map', 'stats', 'conquered', 'database', 'admin'];
+
+  // Verificar si la tab actual requiere autenticación
+  const requiresAuth = protectedTabs.includes(activeTab);
+
+  // Redirigir a finder si no está autenticado e intenta acceder a una tab protegida
+  useEffect(() => {
+    if (!currentCyclist && requiresAuth && activeTab !== 'register') {
+      setActiveTab('finder');
+    }
+  }, [currentCyclist, requiresAuth, activeTab]);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header
@@ -208,14 +229,18 @@ function App() {
       {showSuccessMessage && (
         <div className="bg-green-500 text-white px-4 py-3 text-center">
           <p>
-            {activeTab === 'passes' && !isAdmin 
-              ? 'Sesión cerrada correctamente' 
+            {activeTab === 'passes' && !isAdmin
+              ? 'Sesión cerrada correctamente'
               : t.registrationSuccess
             }
           </p>
         </div>
       )}
-      
+
+      {!currentCyclist && activeTab !== 'register' && (
+        <AuthBanner onRegister={() => setActiveTab('register')} />
+      )}
+
       <main>
         <Suspense fallback={
           <div className="flex items-center justify-center h-64">
