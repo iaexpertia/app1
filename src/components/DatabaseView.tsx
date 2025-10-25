@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { exportMountainPasses } from '../utils/excelExport';
-import { 
-  Database, 
-  Plus, 
-  Minus, 
-  Check, 
-  Search, 
+import { createPassInDB } from '../utils/passesService';
+import { getCurrentUser } from '../utils/cyclistStorage';
+import { getAllRegions, addRegion, Region } from '../utils/regionsService';
+import { AuthRequiredBanner } from './AuthRequiredBanner';
+import {
+  Database,
+  Plus,
+  Minus,
+  Check,
+  Search,
   Filter,
   Mountain,
   TrendingUp,
@@ -24,6 +28,8 @@ interface DatabaseViewProps {
   onAddPass: (pass: MountainPass) => void;
   onRemovePass: (passId: string) => void;
   t: Translation;
+  isAuthenticated?: boolean;
+  onRegisterClick?: () => void;
 }
 
 export const DatabaseView: React.FC<DatabaseViewProps> = ({
@@ -31,13 +37,19 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   userPasses,
   onAddPass,
   onRemovePass,
-  t
+  t,
+  isAuthenticated = false,
+  onRegisterClick = () => {}
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
   const [filterRegion, setFilterRegion] = useState<string>('all');
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [showAddRegionModal, setShowAddRegionModal] = useState(false);
+  const [newRegionName, setNewRegionName] = useState('');
+  const [newRegionCountry, setNewRegionCountry] = useState('');
   const [newPass, setNewPass] = useState<Partial<MountainPass>>({
     name: '',
     country: '',
@@ -51,22 +63,50 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     coordinates: { lat: 0, lng: 0 },
     description: '',
     famousWinners: [],
-    imageUrl: ''
+    imageUrl: '',
+    category: 'Otros'
   });
 
+  useEffect(() => {
+    loadRegions();
+  }, []);
+
+  const loadRegions = async () => {
+    const loadedRegions = await getAllRegions();
+    setRegions(loadedRegions);
+  };
+
+  const handleAddRegion = async () => {
+    if (!newRegionName.trim()) {
+      alert('Por favor ingresa el nombre de la región');
+      return;
+    }
+
+    const result = await addRegion(newRegionName, newRegionCountry || 'Sin especificar');
+    alert(result.message);
+
+    if (result.success) {
+      await loadRegions();
+      setNewPass({ ...newPass, region: newRegionName });
+      setNewRegionName('');
+      setNewRegionCountry('');
+      setShowAddRegionModal(false);
+    }
+  };
+
   const userPassIds = new Set(userPasses.map(p => p.id));
-  const availableRegions = [...new Set(allPasses.map(pass => pass.region))].sort();
+  const availableRegions = regions.map(r => r.name).sort();
 
   const filteredPasses = allPasses.filter(pass => {
     const matchesSearch = pass.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pass.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
     const matchesRegion = filterRegion === 'all' || pass.region === filterRegion;
     const isInUserPasses = userPassIds.has(pass.id);
     const matchesAvailability = !showOnlyAvailable || !isInUserPasses;
-    
+
     return matchesSearch && matchesDifficulty && matchesRegion && matchesAvailability;
   });
 
@@ -111,18 +151,26 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     Especial: 'bg-red-100 text-red-800',
   };
 
+  const categoryColors = {
+    Alpes: 'bg-blue-100 text-blue-800 border-blue-300',
+    Pirineos: 'bg-purple-100 text-purple-800 border-purple-300',
+    Dolomitas: 'bg-pink-100 text-pink-800 border-pink-300',
+    Andes: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    Otros: 'bg-gray-100 text-gray-800 border-gray-300',
+    Provenza: 'bg-yellow-100 text-yellow-800 border-yellow-300'
+  };
 
-  const handleAddNewPass = () => {
-    if (!newPass.name || !newPass.country || !newPass.region) {
-      alert('Por favor completa al menos el nombre, país y región');
+  const handleAddNewPass = async () => {
+    if (!newPass.name) {
+      alert('Por favor completa al menos el nombre del puerto');
       return;
     }
 
     const passToAdd: MountainPass = {
       id: `custom-${Date.now()}`,
       name: newPass.name!,
-      country: newPass.country!,
-      region: newPass.region!,
+      country: newPass.country || 'Sin especificar',
+      region: newPass.region || 'Sin especificar',
       maxAltitude: newPass.maxAltitude || 0,
       elevationGain: newPass.elevationGain || 0,
       averageGradient: newPass.averageGradient || 0,
@@ -132,26 +180,35 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       coordinates: newPass.coordinates || { lat: 0, lng: 0 },
       description: newPass.description || '',
       famousWinners: [],
-      imageUrl: newPass.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg'
+      imageUrl: newPass.imageUrl || 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg',
+      category: newPass.category || 'Otros'
     };
 
-    onAddPass(passToAdd);
-    setShowAddModal(false);
-    setNewPass({
-      name: '',
-      country: '',
-      region: '',
-      maxAltitude: 0,
-      elevationGain: 0,
-      averageGradient: 0,
-      maxGradient: 0,
-      distance: 0,
-      difficulty: 'Cuarta',
-      coordinates: { lat: 0, lng: 0 },
-      description: '',
-      famousWinners: [],
-      imageUrl: ''
-    });
+    const user = await getCurrentUser();
+    const result = await createPassInDB(passToAdd, user?.email);
+
+    alert(result.message);
+
+    if (result.success) {
+      onAddPass(passToAdd);
+      setShowAddModal(false);
+      setNewPass({
+        name: '',
+        country: '',
+        region: '',
+        maxAltitude: 0,
+        elevationGain: 0,
+        averageGradient: 0,
+        maxGradient: 0,
+        distance: 0,
+        difficulty: 'Cuarta',
+        coordinates: { lat: 0, lng: 0 },
+        description: '',
+        famousWinners: [],
+        imageUrl: '',
+        category: 'Otros'
+      });
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,16 +254,26 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
           </div>
         </div>
         
-        {/* Add New Pass Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Añadir Nuevo Puerto</span>
-          </button>
-        </div>
+        {/* Auth Banner */}
+        {!isAuthenticated && (
+          <AuthRequiredBanner
+            onRegisterClick={onRegisterClick}
+            message="Regístrate para añadir nuevos puertos a la base de datos y acceder a todas las funcionalidades de la aplicación"
+          />
+        )}
+
+        {/* Add New Pass Button - Only for authenticated users */}
+        {isAuthenticated && (
+          <div className="mb-6">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Añadir Nuevo Puerto</span>
+            </button>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
@@ -300,7 +367,10 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                   alt={pass.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 flex space-x-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryColors[pass.category] || categoryColors.Otros}`}>
+                    {pass.category}
+                  </span>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[pass.difficulty]}`}>
                     {getDifficultyText(pass.difficulty)}
                   </span>
@@ -430,18 +500,32 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Región <span className="text-red-500">*</span>
+                    Región
                   </label>
-                  <input
-                    type="text"
-                    value={newPass.region || ''}
-                    onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="Ej: Alpes"
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={newPass.region || ''}
+                      onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="">Seleccionar región</option>
+                      {regions.map((region) => (
+                        <option key={region.id} value={region.name}>
+                          {region.name} ({region.country})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddRegionModal(true)}
+                      className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                      title="Añadir nueva región"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-
+                
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Altitud Máxima (m)</label>
                   <input
@@ -635,6 +719,67 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                 >
                   <Save className="h-4 w-4" />
                   <span>Añadir Puerto</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Region Modal */}
+      {showAddRegionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-800">Añadir Nueva Región</h3>
+              <button
+                onClick={() => setShowAddRegionModal(false)}
+                className="text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Nombre de la Región <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newRegionName}
+                  onChange={(e) => setNewRegionName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  placeholder="Ej: Picos de Europa"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  País
+                </label>
+                <input
+                  type="text"
+                  value={newRegionCountry}
+                  onChange={(e) => setNewRegionCountry(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  placeholder="Ej: España"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <button
+                  onClick={() => setShowAddRegionModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddRegion}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Añadir Región</span>
                 </button>
               </div>
             </div>

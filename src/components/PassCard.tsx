@@ -29,6 +29,14 @@ const difficultyColors = {
   Especial: 'bg-red-100 text-red-800',
 };
 
+const categoryColors = {
+  Alpes: 'bg-blue-100 text-blue-800 border-blue-300',
+  Pirineos: 'bg-purple-100 text-purple-800 border-purple-300',
+  Dolomitas: 'bg-pink-100 text-pink-800 border-pink-300',
+  Andes: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  Otros: 'bg-gray-100 text-gray-800 border-gray-300',
+  Provenza: 'bg-yellow-100 text-yellow-800 border-yellow-300'
+};
 
 export const PassCard: React.FC<PassCardProps> = ({ 
   pass, 
@@ -47,6 +55,17 @@ export const PassCard: React.FC<PassCardProps> = ({
       'Especial': 'especial',
     };
     return t[difficultyMap[difficulty]] || difficulty;
+  };
+
+  const getCategoryText = (category: string) => {
+    const categoryMap: Record<string, keyof Translation> = {
+      'Alpes': 'alps',
+      'Pirineos': 'pyrenees',
+      'Dolomitas': 'dolomites', 
+      'Andes': 'andes',
+      'Otros': 'other'
+    };
+    return t[categoryMap[category]] || category;
   };
 
   const getCountryText = (country: string) => {
@@ -81,7 +100,10 @@ export const PassCard: React.FC<PassCardProps> = ({
           alt={pass.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex space-x-2">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryColors[pass.category]}`}>
+            {getCategoryText(pass.category)}
+          </span>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[pass.difficulty]}`}>
             {getDifficultyText(pass.difficulty)}
           </span>
