@@ -47,6 +47,27 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
     };
     fetchCyclists();
   }, []);
+
+  // Check URL params for auto-opening login modal
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'login') {
+      setShowLogin(true);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    // Listen for custom event from Header
+    const handleOpenLogin = () => {
+      setShowLogin(true);
+    };
+
+    window.addEventListener('openLoginModal', handleOpenLogin);
+
+    return () => {
+      window.removeEventListener('openLoginModal', handleOpenLogin);
+    };
+  }, []);
   
   const [formData, setFormData] = useState({
     name: '',

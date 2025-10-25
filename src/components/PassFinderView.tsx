@@ -3,6 +3,7 @@ import { Search, MapPin, TrendingUp } from 'lucide-react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { PassCard } from './PassCard';
+import { AuthRequiredBanner } from './AuthRequiredBanner';
 
 interface PassFinderViewProps {
   passes: MountainPass[];
@@ -11,6 +12,8 @@ interface PassFinderViewProps {
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos: (passId: string) => void;
   t: Translation;
+  isAuthenticated?: boolean;
+  onRegisterClick?: () => void;
 }
 
 export const PassFinderView: React.FC<PassFinderViewProps> = ({
@@ -19,15 +22,29 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
   onToggleConquest,
   onViewDetails,
   onAddPhotos,
-  t
+  t,
+  isAuthenticated = false,
+  onRegisterClick = () => {}
 }) => {
+  const handleActionClick = (action: () => void) => {
+    if (!isAuthenticated) {
+      onRegisterClick();
+      return;
+    }
+    action();
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const regions = useMemo(() => {
     const uniqueRegions = Array.from(new Set(passes.map(pass => pass.region)));
     return uniqueRegions.sort();
+  }, [passes]);
+
+  const sortedPassNames = useMemo(() => {
+    return passes.map(p => p.name).sort();
   }, [passes]);
 
   const difficulties: Array<MountainPass['difficulty']> = ['Cuarta', 'Tercera', 'Segunda', 'Primera', 'Especial'];
@@ -62,6 +79,14 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Auth Banner */}
+      {!isAuthenticated && (
+        <AuthRequiredBanner
+          onRegisterClick={onRegisterClick}
+          message="Regístrate para marcar puertos como conquistados y acceder a todas las funcionalidades"
+        />
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">{t.passFinderTitle}</h1>
         <p className="text-slate-600">{t.passFinderDescription}</p>
@@ -70,14 +95,50 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5 z-10" />
             <input
               type="text"
               placeholder={t.searchPass}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              list="pass-suggestions"
               className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
+            <datalist id="pass-suggestions">
+              {sortedPassNames.map((passName, index) => (
+                <option key={index} value={passName} />
+              ))}
+            </datalist>
+            {showSuggestions && searchTerm && (
+              <div className="absolute z-20 w-full mt-1 bg-white border border-slate-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {passes
+                  .filter(pass => pass.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .slice(0, 10)
+                  .map((pass) => (
+                    <button
+                      key={pass.id}
+                      type="button"
+                      onClick={() => {
+                        setSearchTerm(pass.name);
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-slate-100 last:border-b-0"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-slate-800">{pass.name}</p>
+                          <p className="text-sm text-slate-500">{pass.region}, {pass.country}</p>
+                        </div>
+                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded">
+                          {pass.difficulty}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
 
           <div className="relative">
@@ -130,7 +191,7 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
                   key={pass.id}
                   pass={pass}
                   isConquered={conqueredPassIds.has(pass.id)}
-                  onToggleConquest={onToggleConquest}
+                  onToggleConquest={(passId) => handleActionClick(() => onToggleConquest(passId))}
                   onViewDetails={onViewDetails}
                   onAddPhotos={onAddPhotos}
                   t={t}
@@ -155,7 +216,7 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
                 key={pass.id}
                 pass={pass}
                 isConquered={conqueredPassIds.has(pass.id)}
-                onToggleConquest={onToggleConquest}
+                onToggleConquest={(passId) => handleActionClick(() => onToggleConquest(passId))}
                 onViewDetails={onViewDetails}
                 onAddPhotos={onAddPhotos}
                 t={t}
