@@ -1038,7 +1038,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                             className={pass.isActive !== false ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}
                             title={pass.isActive !== false ? 'Desactivar' : 'Activar'}
                           >
-                            {pass.isActive !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                            {pass.isActive !== false ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                           <button
                             onClick={() => handleDeletePass(pass.id)}
