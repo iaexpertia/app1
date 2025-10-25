@@ -89,17 +89,12 @@ export async function getAllPassesFromDB(includeUnvalidated = false): Promise<Mo
   return data.map(dbToMountainPass);
 }
 
-export async function checkDuplicatePass(name: string, onlyValidated: boolean = false): Promise<MountainPass | null> {
-  let query = supabase
+export async function checkDuplicatePass(name: string): Promise<MountainPass | null> {
+  const { data, error } = await supabase
     .from('mountain_passes')
     .select('*')
-    .ilike('name', name);
-
-  if (onlyValidated) {
-    query = query.eq('is_validated', true);
-  }
-
-  const { data, error } = await query.maybeSingle();
+    .ilike('name', name)
+    .maybeSingle();
 
   if (error) {
     console.error('Error checking duplicate:', error);
@@ -113,13 +108,13 @@ export async function createPassInDB(
   pass: MountainPass,
   submittedBy?: string
 ): Promise<{ success: boolean; message: string; pass?: MountainPass }> {
-  // Check for duplicates only in validated passes
-  const duplicate = await checkDuplicatePass(pass.name, true);
+  // Check for duplicates by name only (case insensitive)
+  const duplicate = await checkDuplicatePass(pass.name);
 
   if (duplicate) {
     return {
       success: false,
-      message: 'Este puerto ya existe validado en la base de datos'
+      message: 'Este puerto ya existe en la base de datos'
     };
   }
 
