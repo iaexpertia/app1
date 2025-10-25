@@ -21,6 +21,7 @@ export interface MountainPass {
     time?: string;
   }[];
   imageUrl: string;
+  category: string;
 }
 
 export interface ConquestData {

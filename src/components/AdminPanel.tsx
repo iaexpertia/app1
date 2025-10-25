@@ -46,11 +46,6 @@ import {
   updateSocialLink,
   removeSocialLink
 } from '../utils/socialLinksStorage';
-import {
-  loadRegions,
-  addRegion,
-  Region
-} from '../utils/regionsService';
 
 interface AdminPanelProps {
   passes: MountainPass[];
@@ -68,12 +63,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [races, setRaces] = useState<CyclingRace[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [regions, setRegions] = useState<Region[]>([]);
-
+  
   // Modal states
   const [showCyclistModal, setShowCyclistModal] = useState(false);
   const [showPassModal, setShowPassModal] = useState(false);
-  const [showAddRegionModal, setShowAddRegionModal] = useState(false);
   const [showBrandModal, setShowBrandModal] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
@@ -103,7 +96,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const [passForm, setPassForm] = useState({
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-    description: '', imageUrl: ''
+    description: '', imageUrl: '', category: 'Otros'
   });
   
   const [brandForm, setBrandForm] = useState({
@@ -135,11 +128,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     is_active: true
   });
 
-  const [newRegionForm, setNewRegionForm] = useState({
-    name: '',
-    country: ''
-  });
-
   // Load data on component mount
   useEffect(() => {
     loadAllData();
@@ -147,8 +135,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
   const loadAllData = async () => {
     const loadedCyclists = await loadCyclists();
-    const loadedRegions = await loadRegions();
-    setRegions(loadedRegions);
     setCyclists(loadedCyclists);
     setBrands(loadBrands());
     setCollaborators(loadCollaborators());
@@ -757,89 +743,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
     });
   };
 
-  const handleCreatePass = () => {
-    if (!passForm.name || !passForm.country || !passForm.region) {
-      alert('Por favor completa los campos obligatorios: Nombre, País y Región');
-      return;
-    }
-
-    const newPass: MountainPass = {
-      id: Date.now().toString(),
-      name: passForm.name,
-      country: passForm.country,
-      region: passForm.region,
-      maxAltitude: passForm.maxAltitude,
-      elevationGain: passForm.elevationGain,
-      averageGradient: passForm.averageGradient,
-      maxGradient: passForm.maxGradient,
-      distance: passForm.distance,
-      difficulty: passForm.difficulty as any,
-      coordinates: { lat: 0, lng: 0 },
-      description: passForm.description,
-      imageUrl: passForm.imageUrl,
-      famousWinners: []
-    };
-
-    onUpdatePass(newPass);
-    setShowPassModal(false);
-    resetPassForm();
-    alert('Puerto añadido exitosamente');
-  };
-
-  const handleUpdatePass = () => {
-    if (!editingPass) return;
-    if (!passForm.name || !passForm.country || !passForm.region) {
-      alert('Por favor completa los campos obligatorios: Nombre, País y Región');
-      return;
-    }
-
-    const updatedPass: MountainPass = {
-      ...editingPass,
-      name: passForm.name,
-      country: passForm.country,
-      region: passForm.region,
-      maxAltitude: passForm.maxAltitude,
-      elevationGain: passForm.elevationGain,
-      averageGradient: passForm.averageGradient,
-      maxGradient: passForm.maxGradient,
-      distance: passForm.distance,
-      difficulty: passForm.difficulty as any,
-      description: passForm.description,
-      imageUrl: passForm.imageUrl
-    };
-
-    onUpdatePass(updatedPass);
-    setShowPassModal(false);
-    setEditingPass(null);
-    resetPassForm();
-    alert('Puerto actualizado exitosamente');
-  };
-
-  const resetPassForm = () => {
-    setPassForm({
-      name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
-      averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-      description: '', imageUrl: ''
-    });
-  };
-
-  const handleAddNewRegion = async () => {
-    if (!newRegionForm.name || !newRegionForm.country) {
-      alert('Por favor completa el nombre y país de la región');
-      return;
-    }
-
-    const newRegion = await addRegion(newRegionForm.name, newRegionForm.country);
-    if (newRegion) {
-      const loadedRegions = await loadRegions();
-      setRegions(loadedRegions);
-      setPassForm({ ...passForm, region: newRegion.name });
-      setShowAddRegionModal(false);
-      setNewRegionForm({ name: '', country: '' });
-      alert('Región añadida exitosamente');
-    }
-  };
-
   const tabs = [
     { id: 'cyclists', label: 'Gestionar Ciclistas', icon: Users },
     { id: 'passes', label: 'Gestionar Puertos', icon: Mountain },
@@ -964,13 +867,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowPassModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Añadir Nuevo Puerto
-                </button>
-                <button
                   onClick={downloadExcelTemplate}
                   className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
@@ -1032,7 +928,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                               distance: pass.distance,
                               difficulty: pass.difficulty,
                               description: pass.description,
-                              imageUrl: pass.imageUrl
+                              imageUrl: pass.imageUrl,
+                              category: pass.category
                             });
                             setShowPassModal(true);
                           }}
@@ -2107,266 +2004,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
         </div>
       )}
 
-      {/* Pass Modal */}
-      {showPassModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowPassModal(false);
-            setEditingPass(null);
-            resetPassForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">
-                {editingPass ? 'Editar Puerto' : 'Añadir Nuevo Puerto'}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowPassModal(false);
-                  setEditingPass(null);
-                  resetPassForm();
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-                  <input
-                    type="text"
-                    value={passForm.name}
-                    onChange={(e) => setPassForm({...passForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">País *</label>
-                  <input
-                    type="text"
-                    value={passForm.country}
-                    onChange={(e) => setPassForm({...passForm, country: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Región *</label>
-                  <div className="flex gap-2">
-                    <select
-                      value={passForm.region}
-                      onChange={(e) => setPassForm({...passForm, region: e.target.value})}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Selecciona una región</option>
-                      {regions.map((region) => (
-                        <option key={region.id} value={region.name}>
-                          {region.name} ({region.country})
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddRegionModal(true)}
-                      className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
-                      title="Añadir nueva región"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Altitud Máxima (m)</label>
-                  <input
-                    type="number"
-                    value={passForm.maxAltitude}
-                    onChange={(e) => setPassForm({...passForm, maxAltitude: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Desnivel (m)</label>
-                  <input
-                    type="number"
-                    value={passForm.elevationGain}
-                    onChange={(e) => setPassForm({...passForm, elevationGain: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pendiente Media (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={passForm.averageGradient}
-                    onChange={(e) => setPassForm({...passForm, averageGradient: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pendiente Máxima (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={passForm.maxGradient}
-                    onChange={(e) => setPassForm({...passForm, maxGradient: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Distancia (km)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={passForm.distance}
-                    onChange={(e) => setPassForm({...passForm, distance: parseFloat(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dificultad</label>
-                  <select
-                    value={passForm.difficulty}
-                    onChange={(e) => setPassForm({...passForm, difficulty: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Cuarta">Cuarta</option>
-                    <option value="Tercera">Tercera</option>
-                    <option value="Segunda">Segunda</option>
-                    <option value="Primera">Primera</option>
-                    <option value="Especial">Especial</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                  <textarea
-                    value={passForm.description}
-                    onChange={(e) => setPassForm({...passForm, description: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen</label>
-                  <input
-                    type="url"
-                    value={passForm.imageUrl}
-                    onChange={(e) => setPassForm({...passForm, imageUrl: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowPassModal(false);
-                  setEditingPass(null);
-                  resetPassForm();
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={editingPass ? handleUpdatePass : handleCreatePass}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {editingPass ? 'Actualizar' : 'Crear'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Region Modal */}
-      {showAddRegionModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]"
-          onClick={() => setShowAddRegionModal(false)}
-        >
-          <div
-            className="bg-white rounded-xl max-w-md w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">Añadir Nueva Región</h3>
-              <button
-                onClick={() => setShowAddRegionModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la Región *</label>
-                <input
-                  type="text"
-                  value={newRegionForm.name}
-                  onChange={(e) => setNewRegionForm({...newRegionForm, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: Alpes, Pirineos, Dolomitas"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">País *</label>
-                <input
-                  type="text"
-                  value={newRegionForm.country}
-                  onChange={(e) => setNewRegionForm({...newRegionForm, country: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: Francia, España, Italia"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="p-6 border-t flex justify-end space-x-3">
-              <button
-                onClick={() => setShowAddRegionModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleAddNewRegion}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Añadir Región
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
