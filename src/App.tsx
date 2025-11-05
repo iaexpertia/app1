@@ -20,6 +20,7 @@ const NewsView = lazy(() => import('./components/NewsView').then(m => ({ default
 const PassFinderView = lazy(() => import('./components/PassFinderView').then(m => ({ default: m.PassFinderView })));
 const PasswordReset = lazy(() => import('./components/PasswordReset').then(m => ({ default: m.PasswordReset })));
 const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
+const RacesView = lazy(() => import('./components/RacesView').then(m => ({ default: m.RacesView })));
 import { mountainPasses } from './data/mountainPasses';
 import {
   loadConquests,
@@ -35,7 +36,7 @@ import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, 
 import { getAllPassesFromDB } from './utils/passesService';
 import { Cyclist } from './types';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races';
 
 function App() {
   // Check if we're on the password reset page
@@ -340,6 +341,12 @@ function App() {
 
           {activeTab === 'news' && (
             <NewsView
+              t={t}
+            />
+          )}
+
+          {activeTab === 'races' && (
+            <RacesView
               t={t}
             />
           )}

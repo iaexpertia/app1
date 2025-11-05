@@ -9,7 +9,8 @@ export interface Translation {
   admin: string;
   database: string;
   collaborators: string;
-  
+  races: string;
+
   // Pass Card
   altitude: string;
   elevation: string;
@@ -176,7 +177,8 @@ export const translations: Record<string, Translation> = {
     admin: 'Admin',
     database: 'Base de Datos',
     collaborators: 'Colaboradores',
-    
+    races: 'Carreras',
+
     // Pass Card
     altitude: 'Altitud',
     elevation: 'Desnivel',
@@ -338,7 +340,9 @@ export const translations: Record<string, Translation> = {
     register: 'Register',
     admin: 'Admin',
     database: 'Database',
-    
+    collaborators: 'Collaborators',
+    races: 'Races',
+
     // Pass Card
     altitude: 'Altitude',
     elevation: 'Elevation',
@@ -477,7 +481,6 @@ export const translations: Record<string, Translation> = {
     alreadyInMyPasses: 'Already in My Passes',
     availablePasses: 'Available Passes',
     mySelectedPasses: 'My Selected Passes',
-    collaborators: 'Collaborators',
     collaboratorsDescription: 'Discover our collaborators and sponsors supporting the cycling community',
 
     // Pass Finder
@@ -500,7 +503,9 @@ export const translations: Record<string, Translation> = {
     register: 'Inscription',
     admin: 'Admin',
     database: 'Base de Données',
-    
+    collaborators: 'Collaborateurs',
+    races: 'Courses',
+
     // Pass Card
     altitude: 'Altitude',
     elevation: 'Dénivelé',
@@ -639,7 +644,6 @@ export const translations: Record<string, Translation> = {
     alreadyInMyPasses: 'Déjà dans Mes Cols',
     availablePasses: 'Cols Disponibles',
     mySelectedPasses: 'Mes Cols Sélectionnés',
-    collaborators: 'Collaborateurs',
     collaboratorsDescription: 'Découvrez nos collaborateurs et sponsors qui soutiennent la communauté cycliste',
 
     // Pass Finder
@@ -662,7 +666,9 @@ export const translations: Record<string, Translation> = {
     register: 'Registrazione',
     admin: 'Admin',
     database: 'Database',
-    
+    collaborators: 'Collaboratori',
+    races: 'Gare',
+
     // Pass Card
     altitude: 'Altitudine',
     elevation: 'Dislivello',
@@ -801,7 +807,6 @@ export const translations: Record<string, Translation> = {
     alreadyInMyPasses: 'Già nei Miei Passi',
     availablePasses: 'Passi Disponibili',
     mySelectedPasses: 'I Miei Passi Selezionati',
-    collaborators: 'Collaboratori',
     collaboratorsDescription: 'Scopri i nostri collaboratori e sponsor che supportano la comunità ciclistica',
 
     // Pass Finder
