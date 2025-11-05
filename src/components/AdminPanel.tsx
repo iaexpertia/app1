@@ -46,7 +46,7 @@ import {
   updateSocialLink,
   removeSocialLink
 } from '../utils/socialLinksStorage';
-import { togglePassActiveStatus, deletePassFromDB } from '../utils/passesService';
+import { togglePassActiveStatus, deletePassFromDB, createPassInDB, updatePassInDB } from '../utils/passesService';
 
 interface AdminPanelProps {
   passes: MountainPass[];
@@ -407,6 +407,77 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       name: '', category: 'Bicicletas', description: '', logo: '', website: '',
       country: '', foundedYear: '', specialties: '', featured: false
     });
+  };
+
+  const resetPassForm = () => {
+    setPassForm({
+      name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
+      averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
+      description: '', imageUrl: '', category: 'Otros'
+    });
+  };
+
+  // Mountain Pass handlers
+  const handleCreatePass = async () => {
+    const newPass: MountainPass = {
+      id: `pass-${Date.now()}`,
+      name: passForm.name,
+      country: passForm.country,
+      region: passForm.region,
+      maxAltitude: passForm.maxAltitude,
+      elevationGain: passForm.elevationGain,
+      averageGradient: passForm.averageGradient,
+      maxGradient: passForm.maxGradient,
+      distance: passForm.distance,
+      difficulty: passForm.difficulty as MountainPass['difficulty'],
+      coordinates: { lat: 0, lng: 0 },
+      description: passForm.description,
+      imageUrl: passForm.imageUrl,
+      category: passForm.category,
+      famousWinners: [],
+      isActive: true
+    };
+
+    const created = await createPassInDB(newPass);
+    if (created) {
+      await onRefreshPasses();
+      setShowPassModal(false);
+      resetPassForm();
+      alert('Puerto creado exitosamente');
+    } else {
+      alert('Error al crear el puerto');
+    }
+  };
+
+  const handleUpdatePassData = async () => {
+    if (!editingPass) return;
+
+    const updatedPass: MountainPass = {
+      ...editingPass,
+      name: passForm.name,
+      country: passForm.country,
+      region: passForm.region,
+      maxAltitude: passForm.maxAltitude,
+      elevationGain: passForm.elevationGain,
+      averageGradient: passForm.averageGradient,
+      maxGradient: passForm.maxGradient,
+      distance: passForm.distance,
+      difficulty: passForm.difficulty as MountainPass['difficulty'],
+      description: passForm.description,
+      imageUrl: passForm.imageUrl,
+      category: passForm.category
+    };
+
+    const updated = await updatePassInDB(updatedPass);
+    if (updated) {
+      await onRefreshPasses();
+      setShowPassModal(false);
+      setEditingPass(null);
+      resetPassForm();
+      alert('Puerto actualizado exitosamente');
+    } else {
+      alert('Error al actualizar el puerto');
+    }
   };
 
   // Mountain Pass handlers
@@ -2497,6 +2568,208 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               >
                 <Save className="w-4 h-4" />
                 {editingRace ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pass Modal */}
+      {showPassModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setShowPassModal(false);
+            setEditingPass(null);
+            resetPassForm();
+          }}
+        >
+          <div
+            className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editingPass ? 'Editar Puerto de Montaña' : 'Nuevo Puerto de Montaña'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowPassModal(false);
+                  setEditingPass(null);
+                  resetPassForm();
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                  <input
+                    type="text"
+                    value={passForm.name}
+                    onChange={(e) => setPassForm({...passForm, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">País *</label>
+                  <input
+                    type="text"
+                    value={passForm.country}
+                    onChange={(e) => setPassForm({...passForm, country: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Región *</label>
+                  <input
+                    type="text"
+                    value={passForm.region}
+                    onChange={(e) => setPassForm({...passForm, region: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dificultad</label>
+                  <select
+                    value={passForm.difficulty}
+                    onChange={(e) => setPassForm({...passForm, difficulty: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Cuarta">Cuarta</option>
+                    <option value="Tercera">Tercera</option>
+                    <option value="Segunda">Segunda</option>
+                    <option value="Primera">Primera</option>
+                    <option value="Especial">Especial</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Altitud Máx. (m) *</label>
+                  <input
+                    type="number"
+                    value={passForm.maxAltitude}
+                    onChange={(e) => setPassForm({...passForm, maxAltitude: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Desnivel (m) *</label>
+                  <input
+                    type="number"
+                    value={passForm.elevationGain}
+                    onChange={(e) => setPassForm({...passForm, elevationGain: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Distancia (km) *</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={passForm.distance}
+                    onChange={(e) => setPassForm({...passForm, distance: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gradiente Prom. (%) *</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={passForm.averageGradient}
+                    onChange={(e) => setPassForm({...passForm, averageGradient: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gradiente Máx. (%) *</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={passForm.maxGradient}
+                    onChange={(e) => setPassForm({...passForm, maxGradient: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                <input
+                  type="text"
+                  value={passForm.category}
+                  onChange={(e) => setPassForm({...passForm, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Tour de Francia, Giro d'Italia, etc."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen</label>
+                <input
+                  type="url"
+                  value={passForm.imageUrl}
+                  onChange={(e) => setPassForm({...passForm, imageUrl: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                <textarea
+                  value={passForm.description}
+                  onChange={(e) => setPassForm({...passForm, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="Descripción del puerto de montaña..."
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowPassModal(false);
+                  setEditingPass(null);
+                  resetPassForm();
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={editingPass ? handleUpdatePassData : handleCreatePass}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {editingPass ? 'Actualizar' : 'Crear'}
               </button>
             </div>
           </div>
