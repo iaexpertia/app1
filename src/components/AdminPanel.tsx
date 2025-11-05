@@ -1835,7 +1835,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   value={brandForm.logo}
                   onChange={(e) => setBrandForm({...brandForm, logo: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://ejemplo.com/logo.jpg"
                 />
+                <p className="text-xs text-gray-500 mt-1">Formatos aceptados: JPG, PNG, WebP</p>
               </div>
               
               <div>
@@ -2050,8 +2052,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   onChange={(e) => setCollaboratorForm({...collaboratorForm, images: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   rows={2}
-                  placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
+                  placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.png"
                 />
+                <p className="text-xs text-gray-500 mt-1">Formatos aceptados: JPG, PNG, WebP</p>
               </div>
               
               <div className="space-y-3">
@@ -2291,8 +2294,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   value={newsForm.imageUrl}
                   onChange={(e) => setNewsForm({...newsForm, imageUrl: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://ejemplo.com/noticia.jpg"
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">Formatos aceptados: JPG, PNG, WebP</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -2736,7 +2741,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Puedes subir la imagen a un servicio como Imgur y copiar la URL aquí
+                    Formatos aceptados: JPG, PNG, WebP
                   </p>
                 </div>
 
@@ -2953,6 +2958,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="https://ejemplo.com/imagen.jpg"
                 />
+                <p className="text-xs text-gray-500 mt-1">Formatos aceptados: JPG, PNG, WebP</p>
               </div>
 
               <div>
