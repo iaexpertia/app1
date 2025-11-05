@@ -18,6 +18,7 @@ interface DBMountainPass {
   image_url: string;
   category: string;
   famous_winners: any;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +43,7 @@ function dbToMountainPass(dbPass: DBMountainPass): MountainPass {
     imageUrl: dbPass.image_url,
     category: dbPass.category,
     famousWinners: dbPass.famous_winners || [],
+    isActive: dbPass.is_active,
   };
 }
 
@@ -63,6 +65,7 @@ function mountainPassToDB(pass: MountainPass): Omit<DBMountainPass, 'created_at'
     image_url: pass.imageUrl,
     category: pass.category,
     famous_winners: pass.famousWinners || [],
+    is_active: pass.isActive ?? true,
   };
 }
 
@@ -123,6 +126,20 @@ export async function deletePassFromDB(passId: string): Promise<boolean> {
 
   if (error) {
     console.error('Error deleting pass:', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function togglePassActiveStatus(passId: string, isActive: boolean): Promise<boolean> {
+  const { error } = await supabase
+    .from('mountain_passes')
+    .update({ is_active: isActive })
+    .eq('id', passId);
+
+  if (error) {
+    console.error('Error toggling pass active status:', error);
     return false;
   }
 

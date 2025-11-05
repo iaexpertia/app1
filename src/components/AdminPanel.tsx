@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, Power, PowerOff } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
-import { 
-  loadCyclists, 
-  addCyclist, 
-  removeCyclist, 
+import {
+  loadCyclists,
+  addCyclist,
+  removeCyclist,
   updateCyclist,
-  saveCyclists 
+  saveCyclists
 } from '../utils/cyclistStorage';
-import { 
-  loadBrands, 
-  addBrand, 
-  removeBrand, 
+import {
+  loadBrands,
+  addBrand,
+  removeBrand,
   updateBrand,
   saveBrands,
-  loadBrandCategories 
+  loadBrandCategories
 } from '../utils/brandsStorage';
-import { 
-  loadCollaborators, 
-  addCollaborator, 
-  removeCollaborator, 
+import {
+  loadCollaborators,
+  addCollaborator,
+  removeCollaborator,
   updateCollaborator,
   saveCollaborators,
-  loadCategories as loadCollaboratorCategories 
+  loadCategories as loadCollaboratorCategories
 } from '../utils/collaboratorStorage';
 import {
   loadNews,
@@ -46,6 +46,7 @@ import {
   updateSocialLink,
   removeSocialLink
 } from '../utils/socialLinksStorage';
+import { togglePassActiveStatus, deletePassFromDB } from '../utils/passesService';
 
 interface AdminPanelProps {
   passes: MountainPass[];
@@ -405,6 +406,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       name: '', category: 'Bicicletas', description: '', logo: '', website: '',
       country: '', foundedYear: '', specialties: '', featured: false
     });
+  };
+
+  // Mountain Pass handlers
+  const handleTogglePassActive = async (pass: MountainPass) => {
+    const newActiveStatus = !pass.isActive;
+    const success = await togglePassActiveStatus(pass.id, newActiveStatus);
+
+    if (success) {
+      const updatedPass = { ...pass, isActive: newActiveStatus };
+      onUpdatePass(updatedPass);
+    } else {
+      alert('Error al cambiar el estado del puerto');
+    }
+  };
+
+  const handleDeletePass = async (passId: string) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este puerto? Esta acción no se puede deshacer.')) {
+      const success = await deletePassFromDB(passId);
+
+      if (success) {
+        window.location.reload();
+      } else {
+        alert('Error al eliminar el puerto');
+      }
+    }
   };
 
   // Collaborator handlers
@@ -899,12 +925,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">País</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Altitud</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dificultad</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {passes.map((pass) => (
-                    <tr key={pass.id}>
+                    <tr key={pass.id} className={!pass.isActive ? 'bg-gray-50 opacity-60' : ''}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pass.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.country}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.maxAltitude}m</td>
@@ -913,30 +940,54 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                           {pass.difficulty}
                         </span>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          pass.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {pass.isActive ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => {
-                            setEditingPass(pass);
-                            setPassForm({
-                              name: pass.name,
-                              country: pass.country,
-                              region: pass.region,
-                              maxAltitude: pass.maxAltitude,
-                              elevationGain: pass.elevationGain,
-                              averageGradient: pass.averageGradient,
-                              maxGradient: pass.maxGradient,
-                              distance: pass.distance,
-                              difficulty: pass.difficulty,
-                              description: pass.description,
-                              imageUrl: pass.imageUrl,
-                              category: pass.category
-                            });
-                            setShowPassModal(true);
-                          }}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              setEditingPass(pass);
+                              setPassForm({
+                                name: pass.name,
+                                country: pass.country,
+                                region: pass.region,
+                                maxAltitude: pass.maxAltitude,
+                                elevationGain: pass.elevationGain,
+                                averageGradient: pass.averageGradient,
+                                maxGradient: pass.maxGradient,
+                                distance: pass.distance,
+                                difficulty: pass.difficulty,
+                                description: pass.description,
+                                imageUrl: pass.imageUrl,
+                                category: pass.category
+                              });
+                              setShowPassModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Editar puerto"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleTogglePassActive(pass)}
+                            className={pass.isActive ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}
+                            title={pass.isActive ? 'Desactivar puerto' : 'Activar puerto'}
+                          >
+                            {pass.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                          </button>
+                          <button
+                            onClick={() => handleDeletePass(pass.id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Eliminar puerto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
