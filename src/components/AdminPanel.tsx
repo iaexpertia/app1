@@ -482,14 +482,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
   // Mountain Pass handlers
   const handleTogglePassActive = async (pass: MountainPass) => {
-    const newActiveStatus = !pass.isActive;
-    const success = await togglePassActiveStatus(pass.id, newActiveStatus);
+    try {
+      // Si isActive es undefined, lo tratamos como true (activo por defecto)
+      const currentStatus = pass.isActive ?? true;
+      const newActiveStatus = !currentStatus;
 
-    if (success) {
-      const updatedPass = { ...pass, isActive: newActiveStatus };
-      await onUpdatePass(updatedPass);
-      await onRefreshPasses();
-    } else {
+      console.log('Cambiando estado de puerto:', pass.id, 'de', currentStatus, 'a', newActiveStatus);
+
+      const success = await togglePassActiveStatus(pass.id, newActiveStatus);
+
+      if (success) {
+        console.log('Estado actualizado exitosamente en BD');
+        // Esperar un momento para que la BD se actualice
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await onRefreshPasses();
+        console.log('Lista de puertos refrescada');
+        alert(`Puerto ${newActiveStatus ? 'activado' : 'desactivado'} exitosamente`);
+      } else {
+        console.error('Error al cambiar el estado del puerto');
+        alert('Error al cambiar el estado del puerto');
+      }
+    } catch (error) {
+      console.error('Error en handleTogglePassActive:', error);
       alert('Error al cambiar el estado del puerto');
     }
   };
@@ -507,8 +521,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   };
 
   const handleRefreshDatabase = async () => {
-    await onRefreshPasses();
-    alert('Base de datos actualizada correctamente');
+    try {
+      console.log('Refrescando base de datos...');
+      await onRefreshPasses();
+      alert('Base de datos actualizada correctamente');
+    } catch (error) {
+      console.error('Error al refrescar base de datos:', error);
+      alert('Error al refrescar la base de datos');
+    }
   };
 
   // Collaborator handlers
@@ -1015,8 +1035,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {passes.map((pass) => (
-                    <tr key={pass.id} className={!pass.isActive ? 'bg-gray-50 opacity-60' : ''}>
+                  {passes.map((pass) => {
+                    const isActive = pass.isActive ?? true;
+                    return (
+                    <tr key={pass.id} className={!isActive ? 'bg-gray-50 opacity-60' : ''}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pass.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.country}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.maxAltitude}m</td>
@@ -1027,9 +1049,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          pass.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                          {pass.isActive ? 'Activo' : 'Inactivo'}
+                          {isActive ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1060,10 +1082,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                           </button>
                           <button
                             onClick={() => handleTogglePassActive(pass)}
-                            className={pass.isActive ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}
-                            title={pass.isActive ? 'Desactivar puerto' : 'Activar puerto'}
+                            className={isActive ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}
+                            title={isActive ? 'Desactivar puerto' : 'Activar puerto'}
                           >
-                            {pass.isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                            {isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
                           </button>
                           <button
                             onClick={() => handleDeletePass(pass.id)}
@@ -1075,7 +1097,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

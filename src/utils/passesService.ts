@@ -70,6 +70,8 @@ function mountainPassToDB(pass: MountainPass): Omit<DBMountainPass, 'created_at'
 }
 
 export async function getAllPassesFromDB(): Promise<MountainPass[]> {
+  console.log('getAllPassesFromDB - Fetching all passes from database...');
+
   const { data, error } = await supabase
     .from('mountain_passes')
     .select('*')
@@ -80,7 +82,15 @@ export async function getAllPassesFromDB(): Promise<MountainPass[]> {
     return [];
   }
 
-  return data.map(dbToMountainPass);
+  console.log('getAllPassesFromDB - Fetched', data.length, 'passes');
+  const passes = data.map(dbToMountainPass);
+
+  // Log estados activos/inactivos
+  const activeCount = passes.filter(p => p.isActive !== false).length;
+  const inactiveCount = passes.filter(p => p.isActive === false).length;
+  console.log(`getAllPassesFromDB - Activos: ${activeCount}, Inactivos: ${inactiveCount}`);
+
+  return passes;
 }
 
 export async function createPassInDB(pass: MountainPass): Promise<MountainPass | null> {
@@ -133,16 +143,20 @@ export async function deletePassFromDB(passId: string): Promise<boolean> {
 }
 
 export async function togglePassActiveStatus(passId: string, isActive: boolean): Promise<boolean> {
-  const { error } = await supabase
+  console.log('togglePassActiveStatus - Updating pass:', passId, 'to:', isActive);
+
+  const { data, error } = await supabase
     .from('mountain_passes')
     .update({ is_active: isActive })
-    .eq('id', passId);
+    .eq('id', passId)
+    .select();
 
   if (error) {
     console.error('Error toggling pass active status:', error);
     return false;
   }
 
+  console.log('togglePassActiveStatus - Update successful:', data);
   return true;
 }
 
