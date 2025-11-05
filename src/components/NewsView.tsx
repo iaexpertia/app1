@@ -3,6 +3,7 @@ import { Translation } from '../i18n/translations';
 import { NewsArticle } from '../types';
 import { loadNews } from '../utils/newsStorage';
 import { exportNews } from '../utils/excelExport';
+import { ShareButton } from './ShareButton';
 import { 
   Newspaper, 
   Calendar, 
@@ -161,7 +162,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <div className="flex items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Newspaper className="h-8 w-8 text-orange-500 mr-3" />
             <div>
@@ -169,6 +170,10 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
               <p className="text-slate-600">Mantente al día con las últimas noticias del mundo del ciclismo</p>
             </div>
           </div>
+          <ShareButton
+            title="Noticias de Ciclismo"
+            text="Mantente al día con las últimas noticias del mundo del ciclismo"
+          />
           </div>
         </div>
         

@@ -4,11 +4,12 @@ import { Translation } from '../i18n/translations';
 import { loadBrands, loadBrandCategories } from '../utils/brandsStorage';
 import { defaultBrands } from '../data/defaultBrands';
 import { exportBrands } from '../utils/excelExport';
-import { 
-  Tag, 
-  ExternalLink, 
-  Globe, 
-  Calendar, 
+import { ShareButton } from './ShareButton';
+import {
+  Tag,
+  ExternalLink,
+  Globe,
+  Calendar,
   MapPin,
   Star,
   Search,
@@ -74,7 +75,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <div className="flex items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Tag className="h-8 w-8 text-orange-500 mr-3" />
             <div>
@@ -82,6 +83,10 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
               <p className="text-slate-600">Descubre las mejores marcas del mundo del ciclismo</p>
             </div>
           </div>
+          <ShareButton
+            title="Marcas de Ciclismo"
+            text="Descubre las mejores marcas del mundo del ciclismo"
+          />
         </div>
         
         {/* Search and Filters */}

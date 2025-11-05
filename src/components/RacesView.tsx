@@ -4,6 +4,7 @@ import { Icon } from 'leaflet';
 import { Translation } from '../i18n/translations';
 import { CyclingRace } from '../types';
 import { loadRaces } from '../utils/racesStorage';
+import { ShareButton } from './ShareButton';
 import {
   Calendar,
   MapPin,
@@ -98,10 +99,19 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Calendario de Carreras</h1>
-          <p className="text-orange-100 text-lg">
-            Descubre las próximas carreras ciclistas y planifica tu temporada
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-4">Calendario de Carreras</h1>
+              <p className="text-orange-100 text-lg">
+                Descubre las próximas carreras ciclistas y planifica tu temporada
+              </p>
+            </div>
+            <ShareButton
+              title="Calendario de Carreras"
+              text="Descubre las próximas carreras ciclistas y planifica tu temporada"
+              className="bg-white text-orange-600 hover:bg-orange-50"
+            />
+          </div>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { Translation } from '../i18n/translations';
 import { loadCollaborators, loadCategories, addCategory, removeCategory } from '../utils/collaboratorStorage';
 import { defaultCollaborators } from '../data/defaultCollaborators';
 import { exportCollaborators } from '../utils/excelExport';
+import { ShareButton } from './ShareButton';
 import { 
   Store, 
   Hotel, 
@@ -150,7 +151,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <div className="flex items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Users className="h-8 w-8 text-orange-500 mr-3" />
             <div>
@@ -158,6 +159,10 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
               <p className="text-slate-600">{t.collaboratorsDescription}</p>
             </div>
           </div>
+          <ShareButton
+            title={t.collaborators}
+            text={t.collaboratorsDescription}
+          />
         </div>
         
         {/* Search and Filters */}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MountainPass, ConquestData, Cyclist } from '../types';
 import { Translation } from '../i18n/translations';
 import { StravaConnect } from './StravaConnect';
+import { ShareButton } from './ShareButton';
 import { Activity } from 'lucide-react';
 import { Award, Calendar, Camera, FileText, Mountain, TrendingUp, MapPin, ChevronRight, ChevronLeft, Eye, CreditCard as Edit, Save, X, Plus } from 'lucide-react';
 
@@ -102,14 +103,20 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Award className="h-8 w-8 text-orange-500 mr-3" />
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800">Puertos Conquistados</h2>
-              <p className="text-slate-600">
-                Has conquistado {conqueredPasses.length} puerto{conqueredPasses.length !== 1 ? 's' : ''}
-              </p>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Award className="h-8 w-8 text-orange-500 mr-3" />
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Puertos Conquistados</h2>
+                <p className="text-slate-600">
+                  Has conquistado {conqueredPasses.length} puerto{conqueredPasses.length !== 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
+            <ShareButton
+              title="Mis Puertos Conquistados"
+              text={`He conquistado ${conqueredPasses.length} puerto${conqueredPasses.length !== 1 ? 's' : ''} de montaña!`}
+            />
           </div>
 
           {currentCyclist && (
