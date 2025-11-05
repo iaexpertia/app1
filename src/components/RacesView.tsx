@@ -26,7 +26,7 @@ interface RacesViewProps {
 }
 
 const raceIcon = new Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -96,10 +96,10 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-12">
+      <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Calendario de Carreras</h1>
-          <p className="text-red-100 text-lg">
+          <p className="text-orange-100 text-lg">
             Descubre las próximas carreras ciclistas y planifica tu temporada
           </p>
         </div>
@@ -117,7 +117,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Buscar carreras por nombre o ubicación..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -126,7 +126,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
                 <option value="all">Todos los tipos</option>
                 {types.map(type => (
@@ -139,7 +139,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
                 <option value="all">Todas las categorías</option>
                 {categories.map(cat => (
@@ -155,7 +155,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
               onClick={() => setViewMode('map')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 viewMode === 'map'
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-orange-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -166,7 +166,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
               onClick={() => setViewMode('list')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-orange-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -221,7 +221,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                               </div>
                               <button
                                 onClick={() => setSelectedRace(race)}
-                                className="mt-2 text-red-600 hover:text-red-700 font-medium text-sm"
+                                className="mt-2 text-orange-600 hover:text-orange-700 font-medium text-sm"
                               >
                                 Ver detalles →
                               </button>
@@ -270,12 +270,12 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-red-600" />
+                    <Calendar className="w-4 h-4 text-orange-600" />
                     <span>{formatDate(race.date)}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-red-600" />
+                    <MapPin className="w-4 h-4 text-orange-600" />
                     <span>{race.city}, {race.region}</span>
                   </div>
 
@@ -286,14 +286,14 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                   {race.distance && (
                     <div className="flex items-center gap-2">
-                      <Navigation className="w-4 h-4 text-red-600" />
+                      <Navigation className="w-4 h-4 text-orange-600" />
                       <span>{race.distance} km</span>
                     </div>
                   )}
 
                   {race.elevation && (
                     <div className="flex items-center gap-2">
-                      <Mountain className="w-4 h-4 text-red-600" />
+                      <Mountain className="w-4 h-4 text-orange-600" />
                       <span>{race.elevation}m de desnivel</span>
                     </div>
                   )}
@@ -353,7 +353,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-gray-700">
-                    <Calendar className="w-5 h-5 text-red-600" />
+                    <Calendar className="w-5 h-5 text-orange-600" />
                     <div>
                       <p className="text-sm text-gray-500">Fecha</p>
                       <p className="font-semibold">{formatDate(selectedRace.date)}</p>
@@ -362,7 +362,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   </div>
 
                   <div className="flex items-center gap-3 text-gray-700">
-                    <MapPin className="w-5 h-5 text-red-600" />
+                    <MapPin className="w-5 h-5 text-orange-600" />
                     <div>
                       <p className="text-sm text-gray-500">Ubicación</p>
                       <p className="font-semibold">{selectedRace.city}</p>
@@ -372,7 +372,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                   {selectedRace.organizer && (
                     <div className="flex items-center gap-3 text-gray-700">
-                      <Users className="w-5 h-5 text-red-600" />
+                      <Users className="w-5 h-5 text-orange-600" />
                       <div>
                         <p className="text-sm text-gray-500">Organizador</p>
                         <p className="font-semibold">{selectedRace.organizer}</p>
@@ -384,7 +384,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 <div className="space-y-3">
                   {selectedRace.distance && (
                     <div className="flex items-center gap-3 text-gray-700">
-                      <Navigation className="w-5 h-5 text-red-600" />
+                      <Navigation className="w-5 h-5 text-orange-600" />
                       <div>
                         <p className="text-sm text-gray-500">Distancia</p>
                         <p className="font-semibold">{selectedRace.distance} km</p>
@@ -394,7 +394,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                   {selectedRace.elevation && (
                     <div className="flex items-center gap-3 text-gray-700">
-                      <Mountain className="w-5 h-5 text-red-600" />
+                      <Mountain className="w-5 h-5 text-orange-600" />
                       <div>
                         <p className="text-sm text-gray-500">Desnivel</p>
                         <p className="font-semibold">{selectedRace.elevation}m</p>
@@ -404,7 +404,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                   {selectedRace.maxParticipants && (
                     <div className="flex items-center gap-3 text-gray-700">
-                      <Users className="w-5 h-5 text-red-600" />
+                      <Users className="w-5 h-5 text-orange-600" />
                       <div>
                         <p className="text-sm text-gray-500">Plazas</p>
                         <p className="font-semibold">{selectedRace.maxParticipants} participantes</p>
@@ -414,7 +414,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                   {selectedRace.price && (
                     <div className="flex items-center gap-3 text-gray-700">
-                      <DollarSign className="w-5 h-5 text-red-600" />
+                      <DollarSign className="w-5 h-5 text-orange-600" />
                       <div>
                         <p className="text-sm text-gray-500">Inscripción</p>
                         <p className="font-semibold text-green-600">{selectedRace.price}€</p>
@@ -437,7 +437,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     href={selectedRace.registrationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
                   >
                     Inscribirse
                     <ExternalLink className="w-5 h-5" />
