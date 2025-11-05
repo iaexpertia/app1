@@ -75,6 +75,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [showRaceModal, setShowRaceModal] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   
   // Edit states
   const [editingCyclist, setEditingCyclist] = useState<Cyclist | null>(null);
@@ -110,6 +111,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     name: '', category: 'Tienda de Bicicletas', description: '', email: '',
     phone: '', website: '', address: '', images: '', featured: false
   });
+
+  const [collaboratorCategories, setCollaboratorCategories] = useState<string[]>([
+    'Tienda de Bicicletas',
+    'Hotel',
+    'Restaurante',
+    'Guía Turístico',
+    'Equipamiento',
+    'Otros'
+  ]);
+
+  const [newCategory, setNewCategory] = useState('');
   
   const [newsForm, setNewsForm] = useState({
     title: '', summary: '', content: '', author: '', category: 'Noticias',
@@ -133,6 +145,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   // Load data on component mount
   useEffect(() => {
     loadAllData();
+    // Cargar categorías guardadas
+    const savedCategories = localStorage.getItem('collaboratorCategories');
+    if (savedCategories) {
+      setCollaboratorCategories(JSON.parse(savedCategories));
+    }
   }, []);
 
   const loadAllData = async () => {
@@ -608,6 +625,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       name: '', category: 'Tienda de Bicicletas', description: '', email: '',
       phone: '', website: '', address: '', images: '', featured: false
     });
+  };
+
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !collaboratorCategories.includes(newCategory.trim())) {
+      const updatedCategories = [...collaboratorCategories, newCategory.trim()];
+      setCollaboratorCategories(updatedCategories);
+      setCollaboratorForm({...collaboratorForm, category: newCategory.trim()});
+      setNewCategory('');
+      setShowCategoryModal(false);
+      localStorage.setItem('collaboratorCategories', JSON.stringify(updatedCategories));
+    }
+  };
+
+  const handleDeleteCategory = (categoryToDelete: string) => {
+    const defaultCategories = ['Tienda de Bicicletas', 'Hotel', 'Restaurante', 'Guía Turístico', 'Equipamiento', 'Otros'];
+    if (defaultCategories.includes(categoryToDelete)) {
+      alert('No se pueden eliminar las categorías predeterminadas');
+      return;
+    }
+
+    if (confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoryToDelete}"?`)) {
+      const updatedCategories = collaboratorCategories.filter(c => c !== categoryToDelete);
+      setCollaboratorCategories(updatedCategories);
+      localStorage.setItem('collaboratorCategories', JSON.stringify(updatedCategories));
+    }
   };
 
   // News handlers
@@ -1892,18 +1934,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                <select
-                  value={collaboratorForm.category}
-                  onChange={(e) => setCollaboratorForm({...collaboratorForm, category: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Tienda de Bicicletas">Tienda de Bicicletas</option>
-                  <option value="Hotel">Hotel</option>
-                  <option value="Restaurante">Restaurante</option>
-                  <option value="Guía Turístico">Guía Turístico</option>
-                  <option value="Equipamiento">Equipamiento</option>
-                  <option value="Otros">Otros</option>
-                </select>
+                <div className="flex gap-2">
+                  <select
+                    value={collaboratorForm.category}
+                    onChange={(e) => setCollaboratorForm({...collaboratorForm, category: e.target.value})}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    {collaboratorCategories.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowCategoryModal(true)}
+                    className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
+                    title="Agregar nueva categoría"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               
               <div>
@@ -1998,6 +2047,101 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               >
                 <Save className="w-4 h-4" />
                 {editingCollaborator ? 'Actualizar' : 'Crear'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Management Modal */}
+      {showCategoryModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setShowCategoryModal(false);
+            setNewCategory('');
+          }}
+        >
+          <div
+            className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Gestionar Categorías de Colaboradores
+              </h3>
+              <button
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setNewCategory('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nueva Categoría</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: Mecánico, Entrenador, etc."
+                  />
+                  <button
+                    onClick={handleAddCategory}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Categorías Actuales</label>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {collaboratorCategories.map((category) => {
+                    const isDefault = ['Tienda de Bicicletas', 'Hotel', 'Restaurante', 'Guía Turístico', 'Equipamiento', 'Otros'].includes(category);
+                    return (
+                      <div
+                        key={category}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <span className="text-sm text-gray-900">{category}</span>
+                        {!isDefault && (
+                          <button
+                            onClick={() => handleDeleteCategory(category)}
+                            className="text-red-600 hover:text-red-800"
+                            title="Eliminar categoría"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {isDefault && (
+                          <span className="text-xs text-gray-500 italic">Predeterminada</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t flex justify-end">
+              <button
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setNewCategory('');
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Cerrar
               </button>
             </div>
           </div>
