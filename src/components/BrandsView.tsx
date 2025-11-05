@@ -34,12 +34,14 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
 
   useEffect(() => {
     const loadedBrands = loadBrands();
-    if (loadedBrands.length === 0) {
-      setBrands(defaultBrands);
+    // Filtrar solo marcas activas
+    const activeBrands = loadedBrands.filter(b => b.isActive !== false);
+    if (activeBrands.length === 0) {
+      setBrands(defaultBrands.filter(b => b.isActive !== false));
     } else {
-      setBrands(loadedBrands);
+      setBrands(activeBrands);
     }
-    
+
     setCategories(loadBrandCategories());
   }, []);
 

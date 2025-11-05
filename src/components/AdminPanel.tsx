@@ -99,12 +99,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [passForm, setPassForm] = useState({
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-    description: '', imageUrl: '', category: 'Otros'
+    description: '', imageUrl: '', category: 'Otros', isActive: true
   });
   
   const [brandForm, setBrandForm] = useState({
     name: '', category: 'Bicicletas', description: '', logo: '', website: '',
-    country: '', foundedYear: '', specialties: '', featured: false
+    country: '', foundedYear: '', specialties: '', featured: false, isActive: true
   });
   
   const [collaboratorForm, setCollaboratorForm] = useState({
@@ -363,7 +363,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       country: brandForm.country || undefined,
       foundedYear: brandForm.foundedYear ? parseInt(brandForm.foundedYear) : undefined,
       specialties: brandForm.specialties ? brandForm.specialties.split(',').map(s => s.trim()) : [],
-      isActive: true,
+      isActive: brandForm.isActive,
       featured: brandForm.featured
     };
     
@@ -384,7 +384,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       country: brand.country || '',
       foundedYear: brand.foundedYear?.toString() || '',
       specialties: brand.specialties.join(', '),
-      featured: brand.featured
+      featured: brand.featured,
+      isActive: brand.isActive
     });
     setShowBrandModal(true);
   };
@@ -402,9 +403,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       country: brandForm.country || undefined,
       foundedYear: brandForm.foundedYear ? parseInt(brandForm.foundedYear) : undefined,
       specialties: brandForm.specialties ? brandForm.specialties.split(',').map(s => s.trim()) : [],
-      featured: brandForm.featured
+      featured: brandForm.featured,
+      isActive: brandForm.isActive
     };
-    
+
     updateBrand(updatedBrand);
     setBrands(loadBrands());
     setShowBrandModal(false);
@@ -422,7 +424,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const resetBrandForm = () => {
     setBrandForm({
       name: '', category: 'Bicicletas', description: '', logo: '', website: '',
-      country: '', foundedYear: '', specialties: '', featured: false
+      country: '', foundedYear: '', specialties: '', featured: false, isActive: true
     });
   };
 
@@ -430,7 +432,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setPassForm({
       name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
       averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-      description: '', imageUrl: '', category: 'Otros'
+      description: '', imageUrl: '', category: 'Otros', isActive: true
     });
   };
 
@@ -452,7 +454,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       imageUrl: passForm.imageUrl,
       category: passForm.category,
       famousWinners: [],
-      isActive: true
+      isActive: passForm.isActive
     };
 
     const created = await createPassInDB(newPass);
@@ -482,7 +484,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       difficulty: passForm.difficulty as MountainPass['difficulty'],
       description: passForm.description,
       imageUrl: passForm.imageUrl,
-      category: passForm.category
+      category: passForm.category,
+      isActive: passForm.isActive
     };
 
     const updated = await updatePassInDB(updatedPass);
@@ -1179,16 +1182,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">País</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destacada</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {brands.map((brand) => (
-                    <tr key={brand.id}>
+                  {brands.map((brand) => {
+                    const isActive = brand.isActive !== false;
+                    return (
+                    <tr key={brand.id} className={!isActive ? 'bg-gray-50 opacity-60' : ''}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{brand.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{brand.category}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{brand.country || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {isActive ? 'Activa' : 'Inactiva'}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           brand.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
@@ -1211,7 +1224,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               {brands.length === 0 && (
@@ -1867,7 +1881,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                 />
               </div>
               
-              <div>
+              <div className="space-y-3">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={brandForm.isActive}
+                    onChange={(e) => setBrandForm({...brandForm, isActive: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Activa (visible en el sitio web)</span>
+                </label>
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -2940,6 +2964,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   rows={3}
                   placeholder="Descripción del puerto de montaña..."
                 />
+              </div>
+
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={passForm.isActive ?? true}
+                    onChange={(e) => setPassForm({...passForm, isActive: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Activo (visible en el sitio web)</span>
+                </label>
               </div>
             </div>
 
