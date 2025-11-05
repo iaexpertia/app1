@@ -51,8 +51,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     coordinates: { lat: 0, lng: 0 },
     description: '',
     famousWinners: [],
-    imageUrl: '',
-    category: 'Otros'
+    imageUrl: ''
   });
 
   const userPassIds = new Set(userPasses.map(p => p.id));
@@ -446,30 +445,30 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Región <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={newPass.region || ''}
-                    onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="Ej: Alpes"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
-                  <select
-                    value={newPass.category || 'Otros'}
-                    onChange={(e) => setNewPass({ ...newPass, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="Alpes">Alpes</option>
-                    <option value="Pirineos">Pirineos</option>
-                    <option value="Dolomitas">Dolomitas</option>
-                    <option value="Andes">Andes</option>
-                    <option value="Provenza">Provenza</option>
-                    <option value="Otros">Otros</option>
-                  </select>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newPass.region || ''}
+                      onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      placeholder="Ej: Alpes"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const regionName = prompt('Introduce el nombre de la nueva región:');
+                        if (regionName && regionName.trim()) {
+                          setNewPass({ ...newPass, region: regionName.trim() });
+                        }
+                      }}
+                      className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                      title="Añadir nueva región"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Región
+                    </button>
+                  </div>
                 </div>
                 
                 <div>
