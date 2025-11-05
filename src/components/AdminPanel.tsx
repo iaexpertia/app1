@@ -51,10 +51,11 @@ import { togglePassActiveStatus, deletePassFromDB } from '../utils/passesService
 interface AdminPanelProps {
   passes: MountainPass[];
   onUpdatePass: (pass: MountainPass) => void;
+  onRefreshPasses: () => Promise<void>;
   t: (key: string) => string;
 }
 
-export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t }) => {
+export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, onRefreshPasses, t }) => {
   const [activeTab, setActiveTab] = useState('cyclists');
   
   // Data states
@@ -415,7 +416,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
 
     if (success) {
       const updatedPass = { ...pass, isActive: newActiveStatus };
-      onUpdatePass(updatedPass);
+      await onUpdatePass(updatedPass);
+      await onRefreshPasses();
     } else {
       alert('Error al cambiar el estado del puerto');
     }
@@ -426,11 +428,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
       const success = await deletePassFromDB(passId);
 
       if (success) {
-        window.location.reload();
+        await onRefreshPasses();
       } else {
         alert('Error al eliminar el puerto');
       }
     }
+  };
+
+  const handleRefreshDatabase = async () => {
+    await onRefreshPasses();
+    alert('Base de datos actualizada correctamente');
   };
 
   // Collaborator handlers
@@ -892,6 +899,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Gestión de Puertos de Montaña</h2>
               <div className="flex gap-3">
+                <button
+                  onClick={handleRefreshDatabase}
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Database className="w-4 h-4" />
+                  Refrescar BD
+                </button>
                 <button
                   onClick={downloadExcelTemplate}
                   className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"

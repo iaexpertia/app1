@@ -21,10 +21,10 @@ const PassFinderView = lazy(() => import('./components/PassFinderView').then(m =
 const PasswordReset = lazy(() => import('./components/PasswordReset').then(m => ({ default: m.PasswordReset })));
 const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
 import { mountainPasses } from './data/mountainPasses';
-import { 
-  loadConquests, 
-  addConquest, 
-  removeConquest, 
+import {
+  loadConquests,
+  addConquest,
+  removeConquest,
   isPassConquered,
   updateConquestPhotos,
   getConquestByPassId,
@@ -32,6 +32,7 @@ import {
 } from './utils/storage';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
+import { getAllPassesFromDB } from './utils/passesService';
 import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder';
@@ -89,6 +90,12 @@ function App() {
       // Cargar el ciclista actual
       const cyclist = await getCurrentUser();
       setCurrentCyclist(cyclist);
+
+      // Cargar puertos desde la base de datos
+      const dbPasses = await getAllPassesFromDB();
+      if (dbPasses.length > 0) {
+        setPasses(dbPasses);
+      }
     };
 
     initializeApp();
@@ -160,11 +167,24 @@ function App() {
     setCurrentCyclist(cyclist);
   };
 
-  const handleUpdatePass = (updatedPass: MountainPass) => {
-    const updatedPasses = passes.map(pass => 
+  const handleUpdatePass = async (updatedPass: MountainPass) => {
+    const updatedPasses = passes.map(pass =>
       pass.id === updatedPass.id ? updatedPass : pass
     );
     setPasses(updatedPasses);
+
+    // Recargar puertos desde la base de datos para asegurar sincronización
+    const dbPasses = await getAllPassesFromDB();
+    if (dbPasses.length > 0) {
+      setPasses(dbPasses);
+    }
+  };
+
+  const handleRefreshPasses = async () => {
+    const dbPasses = await getAllPassesFromDB();
+    if (dbPasses.length > 0) {
+      setPasses(dbPasses);
+    }
   };
 
   const handleAddPass = (passToAdd: MountainPass) => {
@@ -188,8 +208,11 @@ function App() {
     setConquests(updatedConquests);
   };
 
-  const userStats = calculateUserStats(passes, conquests);
-  const conqueredPasses = mountainPasses.filter(pass => conqueredPassIds.has(pass.id));
+  // Filtrar solo puertos activos para mostrar en la vista pública
+  const activePasses = passes.filter(pass => pass.isActive !== false);
+
+  const userStats = calculateUserStats(activePasses, conquests);
+  const conqueredPasses = activePasses.filter(pass => conqueredPassIds.has(pass.id));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -197,7 +220,7 @@ function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         conqueredCount={conquests.length}
-        totalCount={passes.length}
+        totalCount={activePasses.length}
         t={t}
         language={language}
         onLanguageChange={changeLanguage}
@@ -224,7 +247,7 @@ function App() {
         }>
           {activeTab === 'passes' && (
             <PassesList
-              passes={passes}
+              passes={activePasses}
               conqueredPassIds={conqueredPassIds}
               onToggleConquest={handleToggleConquest}
               onViewDetails={handleViewDetails}
@@ -235,7 +258,7 @@ function App() {
 
           {activeTab === 'finder' && (
             <PassFinderView
-              passes={passes}
+              passes={activePasses}
               conqueredPassIds={conqueredPassIds}
               onToggleConquest={handleToggleConquest}
               onViewDetails={handleViewDetails}
@@ -246,7 +269,7 @@ function App() {
 
           {activeTab === 'map' && (
             <InteractiveMap
-              passes={passes}
+              passes={activePasses}
               conqueredPassIds={conqueredPassIds}
               onPassClick={handleViewDetails}
               t={t}
@@ -274,6 +297,7 @@ function App() {
             <AdminPanel
               passes={passes}
               onUpdatePass={handleUpdatePass}
+              onRefreshPasses={handleRefreshPasses}
               t={t}
             />
           )}
