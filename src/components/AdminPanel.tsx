@@ -109,7 +109,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   
   const [collaboratorForm, setCollaboratorForm] = useState({
     name: '', category: 'Tienda de Bicicletas', description: '', email: '',
-    phone: '', website: '', address: '', images: '', featured: false
+    phone: '', website: '', address: '', images: '', featured: false, isActive: true
   });
 
   const [collaboratorCategories, setCollaboratorCategories] = useState<string[]>([
@@ -562,7 +562,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
         address: collaboratorForm.address || undefined
       },
       images: collaboratorForm.images ? collaboratorForm.images.split(',').map(s => s.trim()) : [],
-      isActive: true,
+      isActive: collaboratorForm.isActive,
       featured: collaboratorForm.featured
     };
     
@@ -583,7 +583,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       website: collaborator.contactInfo.website || '',
       address: collaborator.contactInfo.address || '',
       images: collaborator.images.join(', '),
-      featured: collaborator.featured
+      featured: collaborator.featured,
+      isActive: collaborator.isActive
     });
     setShowCollaboratorModal(true);
   };
@@ -603,7 +604,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
         address: collaboratorForm.address || undefined
       },
       images: collaboratorForm.images ? collaboratorForm.images.split(',').map(s => s.trim()) : [],
-      featured: collaboratorForm.featured
+      featured: collaboratorForm.featured,
+      isActive: collaboratorForm.isActive
     };
     
     updateCollaborator(updatedCollaborator);
@@ -623,7 +625,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const resetCollaboratorForm = () => {
     setCollaboratorForm({
       name: '', category: 'Tienda de Bicicletas', description: '', email: '',
-      phone: '', website: '', address: '', images: '', featured: false
+      phone: '', website: '', address: '', images: '', featured: false, isActive: true
     });
   };
 
@@ -1251,16 +1253,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destacado</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {collaborators.map((collaborator) => (
-                    <tr key={collaborator.id}>
+                  {collaborators.map((collaborator) => {
+                    const isActive = collaborator.isActive !== false;
+                    return (
+                    <tr key={collaborator.id} className={!isActive ? 'bg-gray-50 opacity-60' : ''}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{collaborator.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collaborator.category}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collaborator.contactInfo.email || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {isActive ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           collaborator.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
@@ -1283,7 +1295,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               {collaborators.length === 0 && (
@@ -2017,7 +2030,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                 />
               </div>
               
-              <div>
+              <div className="space-y-3">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={collaboratorForm.isActive}
+                    onChange={(e) => setCollaboratorForm({...collaboratorForm, isActive: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Activo (visible en el sitio web)</span>
+                </label>
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"

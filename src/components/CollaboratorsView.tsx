@@ -37,10 +37,12 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
 
   useEffect(() => {
     const loadedCollaborators = loadCollaborators();
-    if (loadedCollaborators.length === 0) {
-      setCollaborators(defaultCollaborators);
+    // Filtrar solo colaboradores activos
+    const activeCollaborators = loadedCollaborators.filter(c => c.isActive !== false);
+    if (activeCollaborators.length === 0) {
+      setCollaborators(defaultCollaborators.filter(c => c.isActive !== false));
     } else {
-      setCollaborators(loadedCollaborators);
+      setCollaborators(activeCollaborators);
     }
     
     // Función para cargar y refrescar categorías
