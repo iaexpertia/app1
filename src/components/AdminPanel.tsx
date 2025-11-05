@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, CheckSquare } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
-import { PassValidation } from './PassValidation';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
-import {
-  loadCyclists,
-  addCyclist,
-  removeCyclist,
+import { 
+  loadCyclists, 
+  addCyclist, 
+  removeCyclist, 
   updateCyclist,
-  saveCyclists
+  saveCyclists 
 } from '../utils/cyclistStorage';
-import { getAllPassesFromDB } from '../utils/passesService';
 import { 
   loadBrands, 
   addBrand, 
@@ -60,7 +58,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   
   // Data states
   const [cyclists, setCyclists] = useState<Cyclist[]>([]);
-  const [adminPasses, setAdminPasses] = useState<MountainPass[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [news, setNews] = useState<NewsArticle[]>([]);
@@ -89,7 +86,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<string[]>([]);
-  const [validationKey, setValidationKey] = useState(0);
 
   // Form states
   const [cyclistForm, setCyclistForm] = useState({
@@ -135,25 +131,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   // Load data on component mount
   useEffect(() => {
     loadAllData();
-
-    const handlePassesUpdated = async () => {
-      setValidationKey(prev => prev + 1);
-      const allPasses = await getAllPassesFromDB(true);
-      setAdminPasses(allPasses);
-    };
-
-    window.addEventListener('passesUpdated', handlePassesUpdated);
-
-    return () => {
-      window.removeEventListener('passesUpdated', handlePassesUpdated);
-    };
   }, []);
 
   const loadAllData = async () => {
     const loadedCyclists = await loadCyclists();
     setCyclists(loadedCyclists);
-    const allPasses = await getAllPassesFromDB(true);
-    setAdminPasses(allPasses);
     setBrands(loadBrands());
     setCollaborators(loadCollaborators());
     setNews(loadNews());
@@ -210,7 +192,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   };
 
   const handleExportPasses = () => {
-    exportMountainPasses(adminPasses);
+    exportMountainPasses(passes);
   };
 
   const handleExportBrands = () => {
@@ -764,7 +746,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
   const tabs = [
     { id: 'cyclists', label: 'Gestionar Ciclistas', icon: Users },
     { id: 'passes', label: 'Gestionar Puertos', icon: Mountain },
-    { id: 'validate', label: 'Validar Puertos', icon: CheckSquare },
     { id: 'brands', label: 'Gestionar Marcas', icon: Tag },
     { id: 'collaborators', label: 'Gestionar Colaboradores', icon: UserCheck },
     { id: 'news', label: 'Gestionar Noticias', icon: Newspaper },
@@ -900,7 +881,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   Importar CSV
                 </button>
                 <button
-                  onClick={() => exportPassesToExcel(adminPasses)}
+                  onClick={() => exportPassesToExcel(passes)}
                   className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                 >
                   <Download className="h-4 w-4" />
@@ -922,7 +903,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {adminPasses.map((pass) => (
+                  {passes.map((pass) => (
                     <tr key={pass.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pass.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pass.country}</td>
@@ -963,10 +944,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, t 
               </table>
             </div>
           </div>
-        )}
-
-        {activeTab === 'validate' && (
-          <PassValidation key={validationKey} />
         )}
 
         {activeTab === 'brands' && (

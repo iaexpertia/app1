@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { PassCard } from './PassCard';
-import { AuthRequiredBanner } from './AuthRequiredBanner';
 import { Search, Filter, ChevronLeft, ChevronRight, Tag, Users, ExternalLink, Globe, Phone, Mail, Mountain } from 'lucide-react';
 import { loadBrands } from '../utils/brandsStorage';
 import { loadCollaborators } from '../utils/collaboratorStorage';
@@ -16,8 +15,6 @@ interface PassesListProps {
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos: (passId: string) => void;
   t: Translation;
-  isAuthenticated?: boolean;
-  onRegisterClick?: () => void;
 }
 
 export const PassesList: React.FC<PassesListProps> = ({
@@ -26,9 +23,7 @@ export const PassesList: React.FC<PassesListProps> = ({
   onToggleConquest,
   onViewDetails,
   onAddPhotos,
-  t,
-  isAuthenticated = false,
-  onRegisterClick = () => {}
+  t
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
@@ -95,25 +90,9 @@ export const PassesList: React.FC<PassesListProps> = ({
     return matchesSearch && matchesDifficulty && matchesCategory && matchesStatus;
   });
 
-  const handleActionClick = (action: () => void) => {
-    if (!isAuthenticated) {
-      onRegisterClick();
-      return;
-    }
-    action();
-  };
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Auth Banner */}
-      {!isAuthenticated && (
-        <AuthRequiredBanner
-          onRegisterClick={onRegisterClick}
-          message="Regístrate para marcar puertos como conquistados, añadir fotos y acceder a todas las funcionalidades"
-        />
-      )}
-
       <div className="mb-8">
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -178,7 +157,7 @@ export const PassesList: React.FC<PassesListProps> = ({
             key={pass.id}
             pass={pass}
             isConquered={conqueredPassIds.has(pass.id)}
-            onToggleConquest={(passId) => handleActionClick(() => onToggleConquest(passId))}
+            onToggleConquest={onToggleConquest}
             onViewDetails={onViewDetails}
             onAddPhotos={onAddPhotos}
             t={t}

@@ -12,10 +12,6 @@ export const defaultCollaborators: Collaborator[] = [
       website: 'https://ciclosmontanapro.com',
       address: 'Calle Ciclista 123, Madrid'
     },
-    coordinates: {
-      lat: 40.4168,
-      lng: -3.7038
-    },
     images: [
       'https://images.pexels.com/photos/100582/pexels-photo-100582.jpeg',
       'https://images.pexels.com/photos/276517/pexels-photo-276517.jpeg'
@@ -34,10 +30,6 @@ export const defaultCollaborators: Collaborator[] = [
       website: 'https://refugiociclista.com',
       address: 'Carretera de Montaña Km 15, Asturias'
     },
-    coordinates: {
-      lat: 43.3614,
-      lng: -5.8593
-    },
     images: [
       'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg',
       'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg'
@@ -55,10 +47,6 @@ export const defaultCollaborators: Collaborator[] = [
       phone: '+33 5 62 91 94 15',
       website: 'https://restaurante-elpuerto.fr',
       address: 'Route du Col du Tourmalet, Francia'
-    },
-    coordinates: {
-      lat: 42.9097,
-      lng: 0.1433
     },
     images: [
       'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg',
