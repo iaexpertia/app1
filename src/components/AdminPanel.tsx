@@ -99,7 +99,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [passForm, setPassForm] = useState({
     name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
     averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-    description: '', imageUrl: '', category: 'Otros', isActive: true
+    description: '', imageUrl: '', category: 'Otros', isActive: true,
+    lat: 0, lng: 0
   });
   
   const [brandForm, setBrandForm] = useState({
@@ -432,7 +433,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setPassForm({
       name: '', country: '', region: '', maxAltitude: 0, elevationGain: 0,
       averageGradient: 0, maxGradient: 0, distance: 0, difficulty: 'Cuarta',
-      description: '', imageUrl: '', category: 'Otros', isActive: true
+      description: '', imageUrl: '', category: 'Otros', isActive: true,
+      lat: 0, lng: 0
     });
   };
 
@@ -449,7 +451,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       maxGradient: passForm.maxGradient,
       distance: passForm.distance,
       difficulty: passForm.difficulty as MountainPass['difficulty'],
-      coordinates: { lat: 0, lng: 0 },
+      coordinates: { lat: passForm.lat || 0, lng: passForm.lng || 0 },
       description: passForm.description,
       imageUrl: passForm.imageUrl,
       category: passForm.category,
@@ -482,6 +484,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       maxGradient: passForm.maxGradient,
       distance: passForm.distance,
       difficulty: passForm.difficulty as MountainPass['difficulty'],
+      coordinates: { lat: passForm.lat || 0, lng: passForm.lng || 0 },
       description: passForm.description,
       imageUrl: passForm.imageUrl,
       category: passForm.category,
@@ -1118,7 +1121,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                                 difficulty: pass.difficulty,
                                 description: pass.description,
                                 imageUrl: pass.imageUrl,
-                                category: pass.category
+                                category: pass.category,
+                                isActive: pass.isActive ?? true,
+                                lat: pass.coordinates?.lat || 0,
+                                lng: pass.coordinates?.lng || 0
                               });
                               setShowPassModal(true);
                             }}
@@ -2970,6 +2976,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   rows={3}
                   placeholder="Descripción del puerto de montaña..."
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    value={passForm.lat}
+                    onChange={(e) => setPassForm({...passForm, lat: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="45.0914"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    value={passForm.lng}
+                    onChange={(e) => setPassForm({...passForm, lng: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="6.4069"
+                  />
+                </div>
               </div>
 
               <div>
