@@ -33,11 +33,13 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
   const difficulties: Array<MountainPass['difficulty']> = ['Cuarta', 'Tercera', 'Segunda', 'Primera', 'Especial'];
 
   const latestPasses = useMemo(() => {
-    return [...passes].slice(-6).reverse();
+    // Solo mostrar puertos activos en los últimos agregados
+    return [...passes].filter(pass => pass.isActive !== false).slice(-6).reverse();
   }, [passes]);
 
   const filteredPasses = useMemo(() => {
-    let filtered = passes;
+    // CRÍTICO: Primero filtrar solo puertos activos
+    let filtered = passes.filter(pass => pass.isActive !== false);
 
     if (searchTerm) {
       filtered = filtered.filter(pass =>

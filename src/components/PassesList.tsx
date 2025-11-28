@@ -76,17 +76,21 @@ export const PassesList: React.FC<PassesListProps> = ({
   };
   
   const filteredPasses = passes.filter(pass => {
+    // CRÍTICO: Solo mostrar puertos activos en el frontend público
+    const isActive = pass.isActive ?? true; // Si no está definido, asumimos activo por defecto
+    if (!isActive) return false; // Excluir puertos inactivos
+
     const matchesSearch = pass.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pass.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
     const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
     const isConquered = conqueredPassIds.has(pass.id);
-    const matchesStatus = filterStatus === 'all' || 
+    const matchesStatus = filterStatus === 'all' ||
                          (filterStatus === 'conquered' && isConquered) ||
                          (filterStatus === 'pending' && !isConquered);
-    
+
     return matchesSearch && matchesDifficulty && matchesCategory && matchesStatus;
   });
 

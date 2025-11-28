@@ -196,9 +196,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             
-            {passes.map((pass) => {
+            {passes
+              .filter(pass => pass.isActive !== false) // Solo mostrar puertos activos
+              .map((pass) => {
               const isConquered = conqueredPassIds.has(pass.id);
-              
+
               return (
                 <Marker
                   key={pass.id}

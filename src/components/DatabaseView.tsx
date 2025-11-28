@@ -58,15 +58,19 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
   const availableCategories = [...new Set(allPasses.map(pass => pass.category))];
 
   const filteredPasses = allPasses.filter(pass => {
+    // CRÍTICO: Solo mostrar puertos activos
+    const isActive = pass.isActive !== false;
+    if (!isActive) return false;
+
     const matchesSearch = pass.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pass.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
     const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
     const isInUserPasses = userPassIds.has(pass.id);
     const matchesAvailability = !showOnlyAvailable || !isInUserPasses;
-    
+
     return matchesSearch && matchesDifficulty && matchesCategory && matchesAvailability;
   });
 
