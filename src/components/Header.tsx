@@ -74,9 +74,11 @@ export const Header: React.FC<HeaderProps> = ({
   const navigationItems = [
     { key: 'passes', icon: Mountain, label: t.passes, tooltip: 'Explora todos los puertos de montaña disponibles' },
     { key: 'finder', icon: Search, label: 'Buscador', tooltip: 'Busca puertos por región y dificultad' },
-    { key: 'conquered', icon: Trophy, label: 'Conquistados', tooltip: 'Ve tus puertos conquistados con fotos y notas' },
+    // Solo mostrar conquistados si el usuario está registrado
+    ...(isLoggedIn ? [{ key: 'conquered', icon: Trophy, label: 'Conquistados', tooltip: 'Ve tus puertos conquistados con fotos y notas' }] : []),
     { key: 'map', icon: Map, label: t.map, tooltip: 'Mapa interactivo con ubicaciones de puertos' },
-    { key: 'stats', icon: Award, label: t.stats, tooltip: 'Estadísticas de tu progreso y conquistas' },
+    // Solo mostrar stats si el usuario está registrado
+    ...(isLoggedIn ? [{ key: 'stats', icon: Award, label: t.stats, tooltip: 'Estadísticas de tu progreso y conquistas' }] : []),
     { key: 'races', icon: Flag, label: t.races, tooltip: 'Calendario de carreras ciclistas' },
     { key: 'brands', icon: Tag, label: 'Marcas', tooltip: 'Marcas de ciclismo y equipamiento' },
     { key: 'news', icon: Newspaper, label: 'Noticias', tooltip: 'Últimas noticias del mundo del ciclismo' },
