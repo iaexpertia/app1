@@ -142,22 +142,37 @@ export async function deletePassFromDB(passId: string): Promise<boolean> {
   return true;
 }
 
-export async function togglePassActiveStatus(passId: string, isActive: boolean): Promise<boolean> {
+export async function togglePassActiveStatus(
+  passId: string,
+  isActive: boolean
+): Promise<{ success: boolean; error?: string; data?: any }> {
   console.log('togglePassActiveStatus - Updating pass:', passId, 'to:', isActive);
 
   const { data, error } = await supabase
     .from('mountain_passes')
-    .update({ is_active: isActive })
+    .update({ is_active: isActive, updated_at: new Date().toISOString() })
     .eq('id', passId)
-    .select();
+    .select()
+    .maybeSingle();
 
   if (error) {
     console.error('Error toggling pass active status:', error);
-    return false;
+    return {
+      success: false,
+      error: error.message || 'Error desconocido al actualizar el estado'
+    };
+  }
+
+  if (!data) {
+    console.error('No data returned after update');
+    return {
+      success: false,
+      error: 'Puerto no encontrado en la base de datos'
+    };
   }
 
   console.log('togglePassActiveStatus - Update successful:', data);
-  return true;
+  return { success: true, data };
 }
 
 export async function syncPassesToDB(passes: MountainPass[]): Promise<{ success: number; errors: number }> {

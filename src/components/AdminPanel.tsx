@@ -503,31 +503,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     }
   };
 
-  // Mountain Pass handlers
+  // Mountain Pass handlers - Optimistic UI with rollback
   const handleTogglePassActive = async (pass: MountainPass) => {
+    const currentStatus = pass.isActive ?? true;
+    const newActiveStatus = !currentStatus;
+
+    console.log('🔄 Toggle iniciado:', {
+      passId: pass.id,
+      passName: pass.name,
+      from: currentStatus,
+      to: newActiveStatus
+    });
+
+    // STEP 1: Optimistic UI Update - Actualizar inmediatamente el estado local
+    const updatedPass = { ...pass, isActive: newActiveStatus };
+    const optimisticPasses = passes.map(p =>
+      p.id === pass.id ? updatedPass : p
+    );
+
+    // Actualizar UI inmediatamente
+    onUpdatePass(updatedPass);
+
+    console.log('✅ UI actualizada optimísticamente');
+
+    // STEP 2: Actualizar en Supabase
     try {
-      // Si isActive es undefined, lo tratamos como true (activo por defecto)
-      const currentStatus = pass.isActive ?? true;
-      const newActiveStatus = !currentStatus;
+      const result = await togglePassActiveStatus(pass.id, newActiveStatus);
 
-      console.log('Cambiando estado de puerto:', pass.id, 'de', currentStatus, 'a', newActiveStatus);
+      if (result.success) {
+        console.log('✅ Actualización en BD exitosa:', result.data);
 
-      const success = await togglePassActiveStatus(pass.id, newActiveStatus);
-
-      if (success) {
-        console.log('Estado actualizado exitosamente en BD');
-        // Esperar un momento para que la BD se actualice
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Refrescar desde la base de datos para confirmar
         await onRefreshPasses();
-        console.log('Lista de puertos refrescada');
-        alert(`Puerto ${newActiveStatus ? 'activado' : 'desactivado'} exitosamente`);
+
+        console.log(`✅ Puerto "${pass.name}" ${newActiveStatus ? 'activado' : 'desactivado'} exitosamente`);
       } else {
-        console.error('Error al cambiar el estado del puerto');
-        alert('Error al cambiar el estado del puerto');
+        // STEP 3: Rollback en caso de error
+        console.error('❌ Error en BD, haciendo rollback:', result.error);
+
+        // Revertir al estado original
+        onUpdatePass(pass);
+
+        throw new Error(result.error || 'Error al actualizar en base de datos');
       }
     } catch (error) {
-      console.error('Error en handleTogglePassActive:', error);
-      alert('Error al cambiar el estado del puerto');
+      console.error('❌ Error crítico en handleTogglePassActive:', error);
+
+      // Asegurar rollback
+      onUpdatePass(pass);
+
+      // Refrescar desde BD para asegurar consistencia
+      await onRefreshPasses();
+
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al cambiar el estado';
+      alert(`Error: ${errorMessage}\n\nEl cambio no se ha guardado.`);
     }
   };
 
