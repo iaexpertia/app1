@@ -1586,18 +1586,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* Cyclist Modal */}
       {showCyclistModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowCyclistModal(false);
-            setEditingCyclist(null);
-            resetCyclistForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingCyclist ? 'Editar Ciclista' : 'Nuevo Ciclista'}
@@ -1796,18 +1786,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* Brand Modal */}
       {showBrandModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowBrandModal(false);
-            setEditingBrand(null);
-            resetBrandForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingBrand ? 'Editar Marca' : 'Nueva Marca'}
@@ -1966,18 +1946,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* Collaborator Modal */}
       {showCollaboratorModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowCollaboratorModal(false);
-            setEditingCollaborator(null);
-            resetCollaboratorForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingCollaborator ? 'Editar Colaborador' : 'Nuevo Colaborador'}
@@ -2235,18 +2205,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* News Modal */}
       {showNewsModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowNewsModal(false);
-            setEditingNews(null);
-            resetNewsForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingNews ? 'Editar Noticia' : 'Nueva Noticia'}
@@ -2522,18 +2482,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* Race Modal */}
       {showRaceModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowRaceModal(false);
-            setEditingRace(null);
-            resetRaceForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingRace ? 'Editar Carrera' : 'Nueva Carrera'}
@@ -2830,18 +2780,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* Pass Modal */}
       {showPassModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowPassModal(false);
-            setEditingPass(null);
-            resetPassForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingPass ? 'Editar Puerto de Montaña' : 'Nuevo Puerto de Montaña'}
@@ -3071,18 +3011,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
       {/* Social Media Modal */}
       {showSocialModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            setShowSocialModal(false);
-            setEditingSocialLink(null);
-            resetSocialForm();
-          }}
-        >
-          <div
-            className="bg-white rounded-xl max-w-md w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingSocialLink ? 'Editar Red Social' : 'Agregar Red Social'}
