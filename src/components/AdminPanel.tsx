@@ -68,6 +68,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [existingRegions, setExistingRegions] = useState<Array<{name: string, country: string}>>([]);
   const [showNewRegionMessage, setShowNewRegionMessage] = useState(false);
+  const [isDuplicatePass, setIsDuplicatePass] = useState(false);
+  const [duplicatePassInfo, setDuplicatePassInfo] = useState<{name: string, country: string, region: string} | null>(null);
   
   // Modal states
   const [showCyclistModal, setShowCyclistModal] = useState(false);
@@ -193,6 +195,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       } catch (error) {
         console.error('Error creating region:', error);
       }
+    }
+  };
+
+  const checkDuplicatePass = async (passName: string) => {
+    if (!passName.trim()) {
+      setIsDuplicatePass(false);
+      setDuplicatePassInfo(null);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('mountain_passes')
+        .select('name, country, region')
+        .ilike('name', passName.trim())
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data && (!editingPass || data.name.toLowerCase() !== editingPass.name.toLowerCase())) {
+        setIsDuplicatePass(true);
+        setDuplicatePassInfo(data);
+      } else {
+        setIsDuplicatePass(false);
+        setDuplicatePassInfo(null);
+      }
+    } catch (error) {
+      console.error('Error checking duplicate pass:', error);
+      setIsDuplicatePass(false);
+      setDuplicatePassInfo(null);
     }
   };
 
@@ -481,10 +513,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       lat: 0, lng: 0
     });
     setShowNewRegionMessage(false);
+    setIsDuplicatePass(false);
+    setDuplicatePassInfo(null);
   };
 
   // Mountain Pass handlers
   const handleCreatePass = async () => {
+    if (isDuplicatePass) {
+      alert(`⚠️ Ya existe un puerto con el nombre "${passForm.name}".\n\nUbicación: ${duplicatePassInfo?.region}, ${duplicatePassInfo?.country}\n\nPor favor, verifica si es el mismo puerto o usa un nombre diferente.`);
+      return;
+    }
+
     await ensureRegionExists(passForm.region, passForm.country);
 
     const newPass: MountainPass = {
@@ -2854,10 +2893,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   <input
                     type="text"
                     value={passForm.name}
-                    onChange={(e) => setPassForm({...passForm, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      setPassForm({...passForm, name: newName});
+                      checkDuplicatePass(newName);
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      isDuplicatePass ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                    }`}
+                    placeholder="Nombre del puerto de montaña"
                     required
                   />
+                  {isDuplicatePass && duplicatePassInfo && (
+                    <div className="mt-2 p-3 bg-red-50 border border-red-300 rounded-lg">
+                      <p className="text-sm font-semibold text-red-800 mb-1">
+                        ⚠️ Puerto duplicado detectado
+                      </p>
+                      <p className="text-xs text-red-700">
+                        Ya existe "{duplicatePassInfo.name}" en <strong>{duplicatePassInfo.region}, {duplicatePassInfo.country}</strong>
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -3079,7 +3135,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               </button>
               <button
                 onClick={editingPass ? handleUpdatePassData : handleCreatePass}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                disabled={!editingPass && isDuplicatePass}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                  !editingPass && isDuplicatePass
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
                 <Save className="w-4 h-4" />
                 {editingPass ? 'Actualizar' : 'Crear'}
