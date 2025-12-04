@@ -27,7 +27,6 @@ export const PassesList: React.FC<PassesListProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [brandsSlideIndex, setBrandsSlideIndex] = useState(0);
   const [collaboratorsSlideIndex, setCollaboratorsSlideIndex] = useState(0);
@@ -85,13 +84,12 @@ export const PassesList: React.FC<PassesListProps> = ({
                          pass.region.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDifficulty = filterDifficulty === 'all' || pass.difficulty === filterDifficulty;
-    const matchesCategory = filterCategory === 'all' || pass.category === filterCategory;
     const isConquered = conqueredPassIds.has(pass.id);
     const matchesStatus = filterStatus === 'all' ||
                          (filterStatus === 'conquered' && isConquered) ||
                          (filterStatus === 'pending' && !isConquered);
 
-    return matchesSearch && matchesDifficulty && matchesCategory && matchesStatus;
+    return matchesSearch && matchesDifficulty && matchesStatus;
   });
 
   return (
@@ -272,7 +270,7 @@ export const PassesList: React.FC<PassesListProps> = ({
             <span className="text-sm font-medium text-slate-700">{t.filters}</span>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto">
             <select
               value={filterDifficulty}
               onChange={(e) => setFilterDifficulty(e.target.value)}
@@ -285,20 +283,7 @@ export const PassesList: React.FC<PassesListProps> = ({
               <option value="Primera">{t.primera}</option>
               <option value="Especial">{t.especial}</option>
             </select>
-            
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="all">{t.allCategories}</option>
-              {availableCategories.map(category => (
-                <option key={category} value={category}>
-                  {getCategoryText(category)}
-                </option>
-              ))}
-            </select>
-            
+
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
