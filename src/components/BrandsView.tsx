@@ -79,13 +79,13 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
           <div className="flex items-center">
             <Tag className="h-8 w-8 text-orange-500 mr-3" />
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Marcas de Ciclismo</h2>
-              <p className="text-slate-600">Descubre las mejores marcas del mundo del ciclismo</p>
+              <h2 className="text-2xl font-bold text-slate-800">{t.brandsTitle}</h2>
+              <p className="text-slate-600">{t.brandsDescription}</p>
             </div>
           </div>
           <ShareButton
-            title="Marcas de Ciclismo"
-            text="Descubre las mejores marcas del mundo del ciclismo"
+            title={t.brandsTitle}
+            text={t.brandsDescription}
           />
         </div>
         
@@ -95,7 +95,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Buscar marcas por nombre, descripción o país..."
+              placeholder={t.searchBrands}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
@@ -105,7 +105,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
           <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">Filtros:</span>
+              <span className="text-sm font-medium text-slate-700">{t.filters}</span>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto">
@@ -114,7 +114,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
               >
-                <option value="all">Todas las Categorías</option>
+                <option value="all">{t.allCategories}</option>
                 {categories.map(category => (
                   <option key={category} value={category}>
                     {category}
@@ -129,7 +129,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                   onChange={(e) => setShowOnlyFeatured(e.target.checked)}
                   className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
                 />
-                <span className="text-sm text-slate-700">Solo Destacadas</span>
+                <span className="text-sm text-slate-700">{t.onlyFeatured}</span>
               </label>
             </div>
           </div>
@@ -141,7 +141,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
         <div className="mb-12">
           <h3 className="text-xl font-semibold text-slate-800 mb-6 flex items-center">
             <Star className="h-5 w-5 text-yellow-500 mr-2" />
-            Marcas Destacadas
+            {t.featuredBrands}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredBrands.map(brand => {
@@ -164,7 +164,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                     <div className="absolute top-3 right-3">
                       <span className="px-2 py-1 bg-yellow-500 text-white rounded-full text-xs font-medium flex items-center">
                         <Star className="h-3 w-3 mr-1" />
-                        Destacada
+                        {t.featured}
                       </span>
                     </div>
                     <div className="absolute top-3 left-3">
@@ -204,7 +204,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                           className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                         >
                           <Globe className="h-4 w-4" />
-                          <span>Visitar Web</span>
+                          <span>{t.visitWebsite}</span>
                           <ExternalLink className="h-4 w-4" />
                         </a>
                       ) : (
@@ -213,7 +213,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                       
                       {brand.specialties.length > 0 && (
                         <span className="text-xs text-slate-500">
-                          {brand.specialties.length} especialidad{brand.specialties.length !== 1 ? 'es' : ''}
+                          {brand.specialties.length} {brand.specialties.length !== 1 ? t.specialties : t.specialty}
                         </span>
                       )}
                     </div>
@@ -229,7 +229,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
       {regularBrands.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-slate-800 mb-6">
-            Todas las Marcas
+            {t.allBrands}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {regularBrands.map(brand => {
@@ -291,7 +291,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                           className="inline-flex items-center space-x-1 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                         >
                           <Globe className="h-3 w-3" />
-                          <span>Web</span>
+                          <span>{t.web}</span>
                         </a>
                       ) : (
                         <div></div>
@@ -299,7 +299,7 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                       
                       {brand.specialties.length > 0 && (
                         <span className="text-xs text-slate-500">
-                          {brand.specialties.length} especialidad{brand.specialties.length !== 1 ? 'es' : ''}
+                          {brand.specialties.length} {brand.specialties.length !== 1 ? t.specialties : t.specialty}
                         </span>
                       )}
                     </div>
@@ -314,8 +314,8 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
       {filteredBrands.length === 0 && (
         <div className="text-center py-12">
           <Tag className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-xl text-slate-600 mb-2">No se encontraron marcas</p>
-          <p className="text-slate-500">Intenta ajustar tu búsqueda o filtros</p>
+          <p className="text-xl text-slate-600 mb-2">{t.noBrandsFound}</p>
+          <p className="text-slate-500">{t.noBrandsFoundDesc}</p>
         </div>
       )}
     </div>

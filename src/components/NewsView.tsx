@@ -166,13 +166,13 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
           <div className="flex items-center">
             <Newspaper className="h-8 w-8 text-orange-500 mr-3" />
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Noticias de Ciclismo</h2>
-              <p className="text-slate-600">Mantente al día con las últimas noticias del mundo del ciclismo</p>
+              <h2 className="text-2xl font-bold text-slate-800">{t.cyclingNews}</h2>
+              <p className="text-slate-600">{t.newsDescription}</p>
             </div>
           </div>
           <ShareButton
-            title="Noticias de Ciclismo"
-            text="Mantente al día con las últimas noticias del mundo del ciclismo"
+            title={t.cyclingNews}
+            text={t.newsDescription}
           />
           </div>
         </div>
@@ -183,7 +183,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Buscar noticias por título, contenido o autor..."
+              placeholder={t.searchNews}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
@@ -193,7 +193,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
           <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">Filtros:</span>
+              <span className="text-sm font-medium text-slate-700">{t.filters}</span>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto">
@@ -202,7 +202,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
               >
-                <option value="all">Todas las Categorías</option>
+                <option value="all">{t.allCategories}</option>
                 {categories.map(category => (
                   <option key={category} value={category}>
                     {category}
@@ -217,7 +217,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                   onChange={(e) => setShowOnlyFeatured(e.target.checked)}
                   className="rounded border-slate-300 text-orange-500 focus:ring-orange-500"
                 />
-                <span className="text-sm text-slate-700">Solo Destacadas</span>
+                <span className="text-sm text-slate-700">{t.onlyFeatured}</span>
               </label>
             </div>
           </div>
@@ -229,7 +229,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
         <div className="mb-12">
           <h3 className="text-xl font-semibold text-slate-800 mb-6 flex items-center">
             <TrendingUp className="h-5 w-5 text-orange-500 mr-2" />
-            Noticias Destacadas
+            {t.featuredNews}
           </h3>
           
           {/* Main Featured Article */}
@@ -266,13 +266,13 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                       </span>
                       <span className="flex items-center">
                         <Clock className="h-4 w-4 mr-1" />
-                        {featuredNews[0].readTime} min
+                        {t.readingTime.replace('{minutes}', String(featuredNews[0].readTime))}
                       </span>
                     </div>
                   </div>
                   
                   <button className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                    <span>Leer Artículo</span>
+                    <span>{t.readArticle}</span>
                     <ExternalLink className="h-4 w-4" />
                   </button>
                 </div>
@@ -315,12 +315,12 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                         </span>
                         <span className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          {article.readTime} min
+                          {t.readingTime.replace('{minutes}', String(article.readTime))}
                         </span>
                       </div>
-                      
+
                       <button className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
-                        Leer Más
+                        {t.readMore}
                       </button>
                     </div>
                   </div>
@@ -335,7 +335,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
       {regularNews.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-slate-800 mb-6">
-            Todas las Noticias
+            {t.allNews}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {regularNews.map(article => {
@@ -374,11 +374,11 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                     <div className="flex items-center justify-between">
                       <span className="flex items-center text-xs text-slate-500">
                         <Clock className="h-3 w-3 mr-1" />
-                        {article.readTime} min lectura
+                        {t.readingTime.replace('{minutes}', String(article.readTime))}
                       </span>
-                      
+
                       <button className="px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm">
-                        Leer
+                        {t.read}
                       </button>
                     </div>
                   </div>
@@ -392,8 +392,8 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
       {filteredNews.length === 0 && (
         <div className="text-center py-12">
           <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-xl text-slate-600 mb-2">No se encontraron noticias</p>
-          <p className="text-slate-500">Intenta ajustar tu búsqueda o filtros</p>
+          <p className="text-xl text-slate-600 mb-2">{t.noNewsFound}</p>
+          <p className="text-slate-500">{t.noNewsFoundDesc}</p>
         </div>
       )}
     </div>

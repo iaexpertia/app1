@@ -171,7 +171,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Buscar colaboradores por nombre, descripción o ubicación..."
+              placeholder={t.searchCollaborators}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
@@ -181,7 +181,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
           <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-4">
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">Filtros:</span>
+              <span className="text-sm font-medium text-slate-700">{t.filters}</span>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full sm:w-auto">
@@ -190,7 +190,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
               >
-                <option value="all">Todas las Categorías</option>
+                <option value="all">{t.allCategories}</option>
                 {categories.map(category => (
                   <option key={category} value={category}>
                     {getCategoryText(category)}
@@ -203,7 +203,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
                 onChange={(e) => setSelectedCity(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
               >
-                <option value="all">Todas las Ciudades</option>
+                <option value="all">{t.allCities}</option>
                 {cities.map(city => (
                   <option key={city} value={city}>
                     {city}
@@ -215,7 +215,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
           
           {/* Category Pills */}
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-slate-800">CATEGORÍAS</h3>
+            <h3 className="text-lg font-semibold text-slate-800">{t.categories}</h3>
           </div>
           
           <div className="flex flex-wrap gap-2">
@@ -227,7 +227,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Todos
+              {t.all}
             </button>
             {categories.map(category => (
               <button
@@ -253,7 +253,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <Users className="h-6 w-6 text-orange-500 mr-3" />
-                <h3 className="text-xl font-semibold text-slate-800">Colaboradores Destacados</h3>
+                <h3 className="text-xl font-semibold text-slate-800">{t.featuredCollaborators}</h3>
               </div>
               {featuredCollaborators.length > 3 && (
                 <div className="flex space-x-2">
@@ -308,7 +308,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
                       )}
                       <div className="absolute top-3 right-3">
                         <span className="px-2 py-1 bg-orange-500 text-white rounded-full text-xs font-medium">
-                          Destacado
+                          {t.featured}
                         </span>
                       </div>
                       <div className="absolute top-3 left-3">
@@ -337,7 +337,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
                             className="inline-flex items-center space-x-1 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                           >
                             <Globe className="h-3 w-3" />
-                            <span>Web</span>
+                            <span>{t.web}</span>
                           </a>
                         ) : (
                           <div></div>
@@ -388,7 +388,7 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
       {regularCollaborators.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-slate-800 mb-6">
-            Nuestros Colaboradores
+            {t.ourCollaborators}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {regularCollaborators.map(collaborator => {
@@ -447,12 +447,12 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
                           className="inline-flex items-center space-x-1 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
                         >
                           <Globe className="h-3 w-3" />
-                          <span>Web</span>
+                          <span>{t.web}</span>
                         </a>
                       ) : (
                         <div></div>
                       )}
-                      
+
                       <div className="flex space-x-2">
                         {collaborator.contactInfo.phone && (
                           <a
@@ -483,8 +483,8 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
       {filteredCollaborators.length === 0 && (
         <div className="text-center py-12">
           <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-xl text-slate-600 mb-2">No hay colaboradores disponibles</p>
-          <p className="text-slate-500">Próximamente añadiremos más colaboradores</p>
+          <p className="text-xl text-slate-600 mb-2">{t.noCollaboratorsFound}</p>
+          <p className="text-slate-500">{t.noCollaboratorsDesc}</p>
         </div>
       )}
       

@@ -101,14 +101,14 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold mb-4">Calendario de Carreras</h1>
+              <h1 className="text-4xl font-bold mb-4">{t.racesCalendar}</h1>
               <p className="text-orange-100 text-lg">
-                Descubre las próximas carreras ciclistas y planifica tu temporada
+                {t.racesDescription}
               </p>
             </div>
             <ShareButton
-              title="Calendario de Carreras"
-              text="Descubre las próximas carreras ciclistas y planifica tu temporada"
+              title={t.racesCalendar}
+              text={t.racesDescription}
               className="bg-white text-orange-600 hover:bg-orange-50"
             />
           </div>
@@ -126,7 +126,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar carreras por nombre o ubicación..."
+                  placeholder={t.searchRaces}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
@@ -138,7 +138,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 onChange={(e) => setSelectedType(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="all">Todos los tipos</option>
+                <option value="all">{t.allTypes}</option>
                 {types.map(type => (
                   <option key={type} value={type}>{type}</option>
                 ))}
@@ -151,7 +151,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="all">Todas las categorías</option>
+                <option value="all">{t.allCategories}</option>
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
@@ -170,7 +170,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
               }`}
             >
               <MapPin className="w-4 h-4 inline mr-2" />
-              Mapa
+              {t.mapView}
             </button>
             <button
               onClick={() => setViewMode('list')}
@@ -180,14 +180,14 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              Vista Lista
+              {t.listView}
             </button>
           </div>
         </div>
 
         {/* Results count */}
         <div className="mb-4 text-gray-600">
-          {filteredRaces.length} {filteredRaces.length === 1 ? 'carrera encontrada' : 'carreras encontradas'}
+          {filteredRaces.length} {filteredRaces.length === 1 ? t.raceFound : t.racesFound}
         </div>
 
         {/* Map View */}
@@ -233,7 +233,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                                 onClick={() => setSelectedRace(race)}
                                 className="mt-2 text-orange-600 hover:text-orange-700 font-medium text-sm"
                               >
-                                Ver detalles →
+                                {t.seeDetails} →
                               </button>
                             </div>
                           </Popup>
@@ -304,7 +304,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   {race.elevation && (
                     <div className="flex items-center gap-2">
                       <Mountain className="w-4 h-4 text-orange-600" />
-                      <span>{race.elevation}m de desnivel</span>
+                      <span>{race.elevation}m {t.elevation.toLowerCase()}</span>
                     </div>
                   )}
                 </div>
@@ -323,8 +323,8 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
         {filteredRaces.length === 0 && (
           <div className="text-center py-16 bg-white rounded-xl">
             <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No se encontraron carreras</h3>
-            <p className="text-gray-500">Intenta ajustar tus filtros de búsqueda</p>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">{t.noRacesFound}</h3>
+            <p className="text-gray-500">{t.noRacesFoundDesc}</p>
           </div>
         )}
       </div>
@@ -365,7 +365,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   <div className="flex items-center gap-3 text-gray-700">
                     <Calendar className="w-5 h-5 text-orange-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Fecha</p>
+                      <p className="text-sm text-gray-500">{t.date}</p>
                       <p className="font-semibold">{formatDate(selectedRace.date)}</p>
                       {selectedRace.startTime && <p className="text-sm">{selectedRace.startTime}</p>}
                     </div>
@@ -374,7 +374,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                   <div className="flex items-center gap-3 text-gray-700">
                     <MapPin className="w-5 h-5 text-orange-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Ubicación</p>
+                      <p className="text-sm text-gray-500">{t.location}</p>
                       <p className="font-semibold">{selectedRace.city}</p>
                       <p className="text-sm">{selectedRace.region}, {selectedRace.country}</p>
                     </div>
@@ -384,7 +384,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     <div className="flex items-center gap-3 text-gray-700">
                       <Users className="w-5 h-5 text-orange-600" />
                       <div>
-                        <p className="text-sm text-gray-500">Organizador</p>
+                        <p className="text-sm text-gray-500">{t.organizer}</p>
                         <p className="font-semibold">{selectedRace.organizer}</p>
                       </div>
                     </div>
@@ -396,7 +396,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     <div className="flex items-center gap-3 text-gray-700">
                       <Navigation className="w-5 h-5 text-orange-600" />
                       <div>
-                        <p className="text-sm text-gray-500">Distancia</p>
+                        <p className="text-sm text-gray-500">{t.distance}</p>
                         <p className="font-semibold">{selectedRace.distance} km</p>
                       </div>
                     </div>
@@ -406,7 +406,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     <div className="flex items-center gap-3 text-gray-700">
                       <Mountain className="w-5 h-5 text-orange-600" />
                       <div>
-                        <p className="text-sm text-gray-500">Desnivel</p>
+                        <p className="text-sm text-gray-500">{t.elevation}</p>
                         <p className="font-semibold">{selectedRace.elevation}m</p>
                       </div>
                     </div>
@@ -416,8 +416,8 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     <div className="flex items-center gap-3 text-gray-700">
                       <Users className="w-5 h-5 text-orange-600" />
                       <div>
-                        <p className="text-sm text-gray-500">Plazas</p>
-                        <p className="font-semibold">{selectedRace.maxParticipants} participantes</p>
+                        <p className="text-sm text-gray-500">{t.places}</p>
+                        <p className="font-semibold">{selectedRace.maxParticipants} {t.participants}</p>
                       </div>
                     </div>
                   )}
@@ -426,7 +426,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     <div className="flex items-center gap-3 text-gray-700">
                       <DollarSign className="w-5 h-5 text-orange-600" />
                       <div>
-                        <p className="text-sm text-gray-500">Inscripción</p>
+                        <p className="text-sm text-gray-500">{t.inscription}</p>
                         <p className="font-semibold text-green-600">{selectedRace.price}€</p>
                       </div>
                     </div>
@@ -436,7 +436,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
               {selectedRace.description && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t.description}</h3>
                   <p className="text-gray-600 leading-relaxed">{selectedRace.description}</p>
                 </div>
               )}
@@ -449,7 +449,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     rel="noopener noreferrer"
                     className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
                   >
-                    Inscribirse
+                    {t.register}
                     <ExternalLink className="w-5 h-5" />
                   </a>
                 )}
@@ -459,7 +459,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                     href={`mailto:${selectedRace.contactEmail}`}
                     className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
                   >
-                    Contactar
+                    {t.contact}
                     <Mail className="w-5 h-5" />
                   </a>
                 )}

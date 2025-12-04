@@ -163,6 +163,64 @@ export interface Translation {
   selectDifficulty: string;
   latestPasses: string;
   searchResults: string;
+
+  // Brands
+  brandsTitle: string;
+  brandsDescription: string;
+  searchBrands: string;
+  onlyFeatured: string;
+  featuredBrands: string;
+  allBrands: string;
+  visitWebsite: string;
+  specialties: string;
+  specialty: string;
+  noBrandsFound: string;
+  noBrandsFoundDesc: string;
+  web: string;
+
+  // Collaborators
+  searchCollaborators: string;
+  allCities: string;
+  categories: string;
+  all: string;
+  featuredCollaborators: string;
+  ourCollaborators: string;
+  featured: string;
+  noCollaboratorsFound: string;
+  noCollaboratorsDesc: string;
+
+  // Races
+  racesCalendar: string;
+  racesDescription: string;
+  searchRaces: string;
+  allTypes: string;
+  mapView: string;
+  listView: string;
+  raceFound: string;
+  racesFound: string;
+  seeDetails: string;
+  date: string;
+  location: string;
+  organizer: string;
+  places: string;
+  inscription: string;
+  contact: string;
+  noRacesFound: string;
+  noRacesFoundDesc: string;
+  participants: string;
+
+  // News
+  cyclingNews: string;
+  newsDescription: string;
+  searchNews: string;
+  featuredNews: string;
+  allNews: string;
+  readArticle: string;
+  readMore: string;
+  read: string;
+  readingTime: string;
+  noNewsFound: string;
+  noNewsFoundDesc: string;
 }
 
 export const translations: Record<string, Translation> = {
@@ -327,7 +385,65 @@ export const translations: Record<string, Translation> = {
     selectRegion: 'Seleccionar región',
     selectDifficulty: 'Seleccionar dificultad',
     latestPasses: 'Últimos Puertos Añadidos',
-    searchResults: 'Resultados de Búsqueda'
+    searchResults: 'Resultados de Búsqueda',
+
+    // Brands
+    brandsTitle: 'Marcas de Ciclismo',
+    brandsDescription: 'Descubre las mejores marcas del mundo del ciclismo',
+    searchBrands: 'Buscar marcas por nombre, descripción o país...',
+    onlyFeatured: 'Solo Destacadas',
+    featuredBrands: 'Marcas Destacadas',
+    allBrands: 'Todas las Marcas',
+    visitWebsite: 'Visitar Web',
+    specialties: 'especialidades',
+    specialty: 'especialidad',
+    noBrandsFound: 'No se encontraron marcas',
+    noBrandsFoundDesc: 'Intenta ajustar tu búsqueda o filtros',
+    web: 'Web',
+
+    // Collaborators
+    searchCollaborators: 'Buscar colaboradores por nombre, descripción o ubicación...',
+    allCities: 'Todas las Ciudades',
+    categories: 'CATEGORÍAS',
+    all: 'Todos',
+    featuredCollaborators: 'Colaboradores Destacados',
+    ourCollaborators: 'Nuestros Colaboradores',
+    featured: 'Destacado',
+    noCollaboratorsFound: 'No hay colaboradores disponibles',
+    noCollaboratorsDesc: 'Próximamente añadiremos más colaboradores',
+
+    // Races
+    racesCalendar: 'Calendario de Carreras',
+    racesDescription: 'Descubre las próximas carreras ciclistas y planifica tu temporada',
+    searchRaces: 'Buscar carreras por nombre o ubicación...',
+    allTypes: 'Todos los tipos',
+    mapView: 'Mapa',
+    listView: 'Vista Lista',
+    raceFound: 'carrera encontrada',
+    racesFound: 'carreras encontradas',
+    seeDetails: 'Ver detalles',
+    date: 'Fecha',
+    location: 'Ubicación',
+    organizer: 'Organizador',
+    places: 'Plazas',
+    inscription: 'Inscripción',
+    contact: 'Contactar',
+    noRacesFound: 'No se encontraron carreras',
+    noRacesFoundDesc: 'Intenta ajustar tus filtros de búsqueda',
+    participants: 'participantes',
+
+    // News
+    cyclingNews: 'Noticias de Ciclismo',
+    newsDescription: 'Mantente al día con las últimas noticias del mundo del ciclismo',
+    searchNews: 'Buscar noticias por título, contenido o autor...',
+    featuredNews: 'Noticias Destacadas',
+    allNews: 'Todas las Noticias',
+    readArticle: 'Leer Artículo',
+    readMore: 'Leer Más',
+    read: 'Leer',
+    readingTime: '{minutes} min lectura',
+    noNewsFound: 'No se encontraron noticias',
+    noNewsFoundDesc: 'Intenta ajustar tu búsqueda o filtros'
   },
   
   en: {
@@ -490,7 +606,65 @@ export const translations: Record<string, Translation> = {
     selectRegion: 'Select region',
     selectDifficulty: 'Select difficulty',
     latestPasses: 'Latest Passes Added',
-    searchResults: 'Search Results'
+    searchResults: 'Search Results',
+
+    // Brands
+    brandsTitle: 'Cycling Brands',
+    brandsDescription: 'Discover the best brands in the cycling world',
+    searchBrands: 'Search brands by name, description or country...',
+    onlyFeatured: 'Featured Only',
+    featuredBrands: 'Featured Brands',
+    allBrands: 'All Brands',
+    visitWebsite: 'Visit Website',
+    specialties: 'specialties',
+    specialty: 'specialty',
+    noBrandsFound: 'No brands found',
+    noBrandsFoundDesc: 'Try adjusting your search or filters',
+    web: 'Web',
+
+    // Collaborators
+    searchCollaborators: 'Search collaborators by name, description or location...',
+    allCities: 'All Cities',
+    categories: 'CATEGORIES',
+    all: 'All',
+    featuredCollaborators: 'Featured Collaborators',
+    ourCollaborators: 'Our Collaborators',
+    featured: 'Featured',
+    noCollaboratorsFound: 'No collaborators available',
+    noCollaboratorsDesc: 'We will add more collaborators soon',
+
+    // Races
+    racesCalendar: 'Race Calendar',
+    racesDescription: 'Discover upcoming cycling races and plan your season',
+    searchRaces: 'Search races by name or location...',
+    allTypes: 'All types',
+    mapView: 'Map',
+    listView: 'List View',
+    raceFound: 'race found',
+    racesFound: 'races found',
+    seeDetails: 'See details',
+    date: 'Date',
+    location: 'Location',
+    organizer: 'Organizer',
+    places: 'Places',
+    inscription: 'Registration',
+    contact: 'Contact',
+    noRacesFound: 'No races found',
+    noRacesFoundDesc: 'Try adjusting your search filters',
+    participants: 'participants',
+
+    // News
+    cyclingNews: 'Cycling News',
+    newsDescription: 'Stay up to date with the latest news from the cycling world',
+    searchNews: 'Search news by title, content or author...',
+    featuredNews: 'Featured News',
+    allNews: 'All News',
+    readArticle: 'Read Article',
+    readMore: 'Read More',
+    read: 'Read',
+    readingTime: '{minutes} min read',
+    noNewsFound: 'No news found',
+    noNewsFoundDesc: 'Try adjusting your search or filters'
   },
   
   fr: {
@@ -653,7 +827,65 @@ export const translations: Record<string, Translation> = {
     selectRegion: 'Sélectionner une région',
     selectDifficulty: 'Sélectionner une difficulté',
     latestPasses: 'Derniers Cols Ajoutés',
-    searchResults: 'Résultats de Recherche'
+    searchResults: 'Résultats de Recherche',
+
+    // Brands
+    brandsTitle: 'Marques de Cyclisme',
+    brandsDescription: 'Découvrez les meilleures marques du monde du cyclisme',
+    searchBrands: 'Rechercher des marques par nom, description ou pays...',
+    onlyFeatured: 'Uniquement en Vedette',
+    featuredBrands: 'Marques en Vedette',
+    allBrands: 'Toutes les Marques',
+    visitWebsite: 'Visiter le Site',
+    specialties: 'spécialités',
+    specialty: 'spécialité',
+    noBrandsFound: 'Aucune marque trouvée',
+    noBrandsFoundDesc: 'Essayez d\'ajuster votre recherche ou vos filtres',
+    web: 'Web',
+
+    // Collaborators
+    searchCollaborators: 'Rechercher des collaborateurs par nom, description ou localisation...',
+    allCities: 'Toutes les Villes',
+    categories: 'CATÉGORIES',
+    all: 'Tous',
+    featuredCollaborators: 'Collaborateurs en Vedette',
+    ourCollaborators: 'Nos Collaborateurs',
+    featured: 'En Vedette',
+    noCollaboratorsFound: 'Aucun collaborateur disponible',
+    noCollaboratorsDesc: 'Nous ajouterons bientôt plus de collaborateurs',
+
+    // Races
+    racesCalendar: 'Calendrier des Courses',
+    racesDescription: 'Découvrez les prochaines courses cyclistes et planifiez votre saison',
+    searchRaces: 'Rechercher des courses par nom ou localisation...',
+    allTypes: 'Tous les types',
+    mapView: 'Carte',
+    listView: 'Vue Liste',
+    raceFound: 'course trouvée',
+    racesFound: 'courses trouvées',
+    seeDetails: 'Voir les détails',
+    date: 'Date',
+    location: 'Localisation',
+    organizer: 'Organisateur',
+    places: 'Places',
+    inscription: 'Inscription',
+    contact: 'Contact',
+    noRacesFound: 'Aucune course trouvée',
+    noRacesFoundDesc: 'Essayez d\'ajuster vos filtres de recherche',
+    participants: 'participants',
+
+    // News
+    cyclingNews: 'Actualités Cyclistes',
+    newsDescription: 'Restez à jour avec les dernières nouvelles du monde du cyclisme',
+    searchNews: 'Rechercher des actualités par titre, contenu ou auteur...',
+    featuredNews: 'Actualités en Vedette',
+    allNews: 'Toutes les Actualités',
+    readArticle: 'Lire l\'Article',
+    readMore: 'Lire Plus',
+    read: 'Lire',
+    readingTime: '{minutes} min de lecture',
+    noNewsFound: 'Aucune actualité trouvée',
+    noNewsFoundDesc: 'Essayez d\'ajuster votre recherche ou vos filtres'
   },
   
   it: {
@@ -816,7 +1048,65 @@ export const translations: Record<string, Translation> = {
     selectRegion: 'Seleziona regione',
     selectDifficulty: 'Seleziona difficoltà',
     latestPasses: 'Ultimi Passi Aggiunti',
-    searchResults: 'Risultati di Ricerca'
+    searchResults: 'Risultati di Ricerca',
+
+    // Brands
+    brandsTitle: 'Marchi Ciclistici',
+    brandsDescription: 'Scopri i migliori marchi del mondo del ciclismo',
+    searchBrands: 'Cerca marchi per nome, descrizione o paese...',
+    onlyFeatured: 'Solo in Evidenza',
+    featuredBrands: 'Marchi in Evidenza',
+    allBrands: 'Tutti i Marchi',
+    visitWebsite: 'Visita il Sito',
+    specialties: 'specialità',
+    specialty: 'specialità',
+    noBrandsFound: 'Nessun marchio trovato',
+    noBrandsFoundDesc: 'Prova ad aggiustare la tua ricerca o i filtri',
+    web: 'Web',
+
+    // Collaborators
+    searchCollaborators: 'Cerca collaboratori per nome, descrizione o posizione...',
+    allCities: 'Tutte le Città',
+    categories: 'CATEGORIE',
+    all: 'Tutti',
+    featuredCollaborators: 'Collaboratori in Evidenza',
+    ourCollaborators: 'I Nostri Collaboratori',
+    featured: 'In Evidenza',
+    noCollaboratorsFound: 'Nessun collaboratore disponibile',
+    noCollaboratorsDesc: 'Aggiungeremo presto più collaboratori',
+
+    // Races
+    racesCalendar: 'Calendario Gare',
+    racesDescription: 'Scopri le prossime gare ciclistiche e pianifica la tua stagione',
+    searchRaces: 'Cerca gare per nome o posizione...',
+    allTypes: 'Tutti i tipi',
+    mapView: 'Mappa',
+    listView: 'Vista Elenco',
+    raceFound: 'gara trovata',
+    racesFound: 'gare trovate',
+    seeDetails: 'Vedi dettagli',
+    date: 'Data',
+    location: 'Posizione',
+    organizer: 'Organizzatore',
+    places: 'Posti',
+    inscription: 'Iscrizione',
+    contact: 'Contatto',
+    noRacesFound: 'Nessuna gara trovata',
+    noRacesFoundDesc: 'Prova ad aggiustare i tuoi filtri di ricerca',
+    participants: 'partecipanti',
+
+    // News
+    cyclingNews: 'Notizie Ciclistiche',
+    newsDescription: 'Rimani aggiornato con le ultime notizie dal mondo del ciclismo',
+    searchNews: 'Cerca notizie per titolo, contenuto o autore...',
+    featuredNews: 'Notizie in Evidenza',
+    allNews: 'Tutte le Notizie',
+    readArticle: 'Leggi Articolo',
+    readMore: 'Leggi Di Più',
+    read: 'Leggi',
+    readingTime: '{minutes} min di lettura',
+    noNewsFound: 'Nessuna notizia trovata',
+    noNewsFoundDesc: 'Prova ad aggiustare la tua ricerca o i filtri'
   }
 };
 
