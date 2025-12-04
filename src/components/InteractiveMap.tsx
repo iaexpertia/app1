@@ -258,7 +258,10 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                       </div>
                       
                       <button
-                        onClick={() => onPassClick(pass)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPassClick(pass);
+                        }}
                         className="w-full mt-3 px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
                       >
                         Ver Detalles
