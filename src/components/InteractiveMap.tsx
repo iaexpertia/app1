@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { MountainPass } from '../types';
@@ -13,13 +13,27 @@ interface InteractiveMapProps {
   t: Translation;
 }
 
-// Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+const MapBoundsUpdater: React.FC<{ passes: MountainPass[] }> = ({ passes }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (passes.length > 0) {
+      const bounds = L.latLngBounds(
+        passes.map(pass => [pass.coordinates.lat, pass.coordinates.lng])
+      );
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 7 });
+    }
+  }, [passes, map]);
+
+  return null;
+};
 
 // Function to create bike icons based on difficulty and conquered status
 const createBikeIcon = (difficulty: string, isConquered: boolean) => {
@@ -112,6 +126,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   onPassClick,
   t
 }) => {
+  const activePasses = passes.filter(pass => pass.isActive !== false);
+
   const getCountryText = (country: string) => {
     const countryMap: Record<string, keyof Translation> = {
       'France': 'france',
@@ -145,10 +161,6 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     };
     return t[difficultyMap[difficulty]] || difficulty;
   };
-
-  // Calculate center of all passes
-  const centerLat = passes.reduce((sum, pass) => sum + pass.coordinates.lat, 0) / passes.length;
-  const centerLng = passes.reduce((sum, pass) => sum + pass.coordinates.lng, 0) / passes.length;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -186,8 +198,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="h-96 w-full">
           <MapContainer
-            center={[centerLat, centerLng]}
-            zoom={6}
+            center={[46.0, 2.0]}
+            zoom={5}
             style={{ height: '100%', width: '100%' }}
             className="rounded-xl"
           >
@@ -195,10 +207,9 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            
-            {passes
-              .filter(pass => pass.isActive !== false) // Solo mostrar puertos activos
-              .map((pass) => {
+            <MapBoundsUpdater passes={activePasses} />
+
+            {activePasses.map((pass) => {
               const isConquered = conqueredPassIds.has(pass.id);
 
               return (
