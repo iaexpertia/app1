@@ -3,6 +3,7 @@ import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, C
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
+import { supabase } from '../utils/supabaseClient';
 import {
   loadCyclists,
   addCyclist,
@@ -65,6 +66,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [races, setRaces] = useState<CyclingRace[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [existingRegions, setExistingRegions] = useState<Array<{name: string, country: string}>>([]);
+  const [showNewRegionMessage, setShowNewRegionMessage] = useState(false);
   
   // Modal states
   const [showCyclistModal, setShowCyclistModal] = useState(false);
@@ -153,6 +156,46 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     }
   }, []);
 
+  const loadRegionsFromDB = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('regions')
+        .select('name, country')
+        .order('name');
+
+      if (error) throw error;
+
+      if (data) {
+        setExistingRegions(data);
+      }
+    } catch (error) {
+      console.error('Error loading regions:', error);
+    }
+  };
+
+  const ensureRegionExists = async (regionName: string, country: string) => {
+    if (!regionName.trim() || !country.trim()) return;
+
+    const regionExists = existingRegions.some(
+      r => r.name.toLowerCase() === regionName.toLowerCase().trim() &&
+           r.country.toLowerCase() === country.toLowerCase()
+    );
+
+    if (!regionExists) {
+      try {
+        const { error } = await supabase
+          .from('regions')
+          .insert([{ name: regionName.trim(), country: country }]);
+
+        if (error) throw error;
+
+        await loadRegionsFromDB();
+      } catch (error) {
+        console.error('Error creating region:', error);
+      }
+    }
+  };
+
   const loadAllData = async () => {
     const loadedCyclists = await loadCyclists();
     setCyclists(loadedCyclists);
@@ -162,6 +205,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setRaces(loadRaces());
     const links = await loadSocialLinks();
     setSocialLinks(links);
+    await loadRegionsFromDB();
   };
 
   // Import handlers
@@ -436,10 +480,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       description: '', imageUrl: '', category: 'Otros', isActive: true,
       lat: 0, lng: 0
     });
+    setShowNewRegionMessage(false);
   };
 
   // Mountain Pass handlers
   const handleCreatePass = async () => {
+    await ensureRegionExists(passForm.region, passForm.country);
+
     const newPass: MountainPass = {
       id: `pass-${Date.now()}`,
       name: passForm.name,
@@ -472,6 +519,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
   const handleUpdatePassData = async () => {
     if (!editingPass) return;
+
+    await ensureRegionExists(passForm.region, passForm.country);
 
     const updatedPass: MountainPass = {
       ...editingPass,
@@ -2829,10 +2878,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   <input
                     type="text"
                     value={passForm.region}
-                    onChange={(e) => setPassForm({...passForm, region: e.target.value})}
+                    onChange={(e) => {
+                      const newRegion = e.target.value;
+                      setPassForm({...passForm, region: newRegion});
+
+                      if (newRegion.trim() && passForm.country) {
+                        const regionExists = existingRegions.some(
+                          r => r.name.toLowerCase() === newRegion.toLowerCase().trim() &&
+                               r.country.toLowerCase() === passForm.country.toLowerCase()
+                        );
+                        setShowNewRegionMessage(!regionExists);
+                      } else {
+                        setShowNewRegionMessage(false);
+                      }
+                    }}
+                    list="regions-list"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Escribe para buscar o añadir nueva región"
                     required
                   />
+                  <datalist id="regions-list">
+                    {existingRegions
+                      .filter(r => passForm.country ? r.country.toLowerCase() === passForm.country.toLowerCase() : true)
+                      .map((region, idx) => (
+                        <option key={idx} value={region.name}>
+                          {region.name} ({region.country})
+                        </option>
+                      ))}
+                  </datalist>
+                  {showNewRegionMessage && passForm.region.trim() && (
+                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-xs text-yellow-800">
+                        ℹ️ <strong>Nueva región:</strong> "{passForm.region}" se añadirá como nueva región para {passForm.country || 'este país'}.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
