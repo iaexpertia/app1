@@ -5,18 +5,34 @@ declare global {
   }
 }
 
+const triggerTranslation = (selectElement: HTMLSelectElement, languageCode: string) => {
+  selectElement.value = languageCode;
+
+  const changeEvent = new Event('change', { bubbles: true });
+  selectElement.dispatchEvent(changeEvent);
+
+  setTimeout(() => {
+    const clickEvent = new MouseEvent('click', { bubbles: true });
+    selectElement.dispatchEvent(clickEvent);
+  }, 100);
+};
+
 export const changeGoogleLanguage = (languageCode: string) => {
   const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement;
 
   if (selectElement) {
-    selectElement.value = languageCode;
-    selectElement.dispatchEvent(new Event('change'));
+    triggerTranslation(selectElement, languageCode);
+
+    setTimeout(() => {
+      if (selectElement.value !== languageCode) {
+        triggerTranslation(selectElement, languageCode);
+      }
+    }, 500);
   } else {
     setTimeout(() => {
       const retrySelect = document.querySelector('.goog-te-combo') as HTMLSelectElement;
       if (retrySelect) {
-        retrySelect.value = languageCode;
-        retrySelect.dispatchEvent(new Event('change'));
+        triggerTranslation(retrySelect, languageCode);
       }
     }, 1000);
   }
@@ -33,7 +49,7 @@ export const waitForGoogleTranslate = (): Promise<void> => {
       const selectElement = document.querySelector('.goog-te-combo');
       if (selectElement) {
         clearInterval(checkInterval);
-        resolve();
+        setTimeout(() => resolve(), 500);
       }
     }, 100);
 
@@ -42,4 +58,13 @@ export const waitForGoogleTranslate = (): Promise<void> => {
       resolve();
     }, 5000);
   });
+};
+
+export const forceRetranslate = () => {
+  const currentLang = getCurrentGoogleLanguage();
+  if (currentLang && currentLang !== 'es') {
+    setTimeout(() => {
+      changeGoogleLanguage(currentLang);
+    }, 300);
+  }
 };
