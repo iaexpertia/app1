@@ -143,7 +143,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   });
 
   const [raceForm, setRaceForm] = useState({
-    name: '', date: '', city: '', region: '', country: '', lat: '', lng: '',
+    name: '', date: '', city: '', region: '', country: '', locationUrl: '',
     distance: '', elevation: '', type: 'Carretera', category: 'Amateur',
     description: '', posterUrl: '', registrationUrl: '', startTime: '',
     maxParticipants: '', price: '', organizer: '', contactEmail: '',
@@ -897,15 +897,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       name: raceForm.name,
       nameTranslations: raceForm.nameTranslations,
       date: raceForm.date,
-      location: {
-        city: raceForm.city,
-        region: raceForm.region,
-        country: raceForm.country,
-        coordinates: {
-          lat: parseFloat(raceForm.lat) || 0,
-          lng: parseFloat(raceForm.lng) || 0
-        }
-      },
+      city: raceForm.city,
+      region: raceForm.region,
+      country: raceForm.country,
+      locationUrl: raceForm.locationUrl || undefined,
       distance: parseFloat(raceForm.distance) || 0,
       elevation: parseFloat(raceForm.elevation) || 0,
       type: raceForm.type as any,
@@ -936,11 +931,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       name: race.name,
       nameTranslations: race.nameTranslations || { es: race.name, en: '', fr: '', it: '' },
       date: race.date,
-      city: race.location.city,
-      region: race.location.region,
-      country: race.location.country,
-      lat: race.location.coordinates.lat.toString(),
-      lng: race.location.coordinates.lng.toString(),
+      city: race.city,
+      region: race.region,
+      country: race.country,
+      locationUrl: race.locationUrl || '',
       distance: race.distance.toString(),
       elevation: race.elevation.toString(),
       type: race.type,
@@ -968,15 +962,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       name: raceForm.name,
       nameTranslations: raceForm.nameTranslations,
       date: raceForm.date,
-      location: {
-        city: raceForm.city,
-        region: raceForm.region,
-        country: raceForm.country,
-        coordinates: {
-          lat: parseFloat(raceForm.lat) || 0,
-          lng: parseFloat(raceForm.lng) || 0
-        }
-      },
+      city: raceForm.city,
+      region: raceForm.region,
+      country: raceForm.country,
+      locationUrl: raceForm.locationUrl || undefined,
       distance: parseFloat(raceForm.distance) || 0,
       elevation: parseFloat(raceForm.elevation) || 0,
       type: raceForm.type as any,
@@ -1010,7 +999,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
   const resetRaceForm = () => {
     setRaceForm({
-      name: '', date: '', city: '', region: '', country: '', lat: '', lng: '',
+      name: '', date: '', city: '', region: '', country: '', locationUrl: '',
       distance: '', elevation: '', type: 'Carretera', category: 'Amateur',
       description: '', posterUrl: '', registrationUrl: '', startTime: '',
       maxParticipants: '', price: '', organizer: '', contactEmail: '',
@@ -2701,36 +2690,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                   />
                 </div>
 
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
-                    Latitud (GPS) *
+                    URL de Google Maps
                   </label>
                   <input
-                    type="number"
-                    step="0.000001"
-                    value={raceForm.lat}
-                    onChange={(e) => setRaceForm({...raceForm, lat: e.target.value})}
+                    type="url"
+                    value={raceForm.locationUrl}
+                    onChange={(e) => setRaceForm({...raceForm, locationUrl: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="40.416775"
-                    required
+                    placeholder="https://www.google.com/maps?q=..."
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Longitud (GPS) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    value={raceForm.lng}
-                    onChange={(e) => setRaceForm({...raceForm, lng: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="-3.703790"
-                    required
-                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Copia y pega el enlace de Google Maps de la ubicación de la carrera
+                  </p>
                 </div>
 
                 <div>

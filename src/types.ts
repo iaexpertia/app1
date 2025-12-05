@@ -145,15 +145,12 @@ export interface CyclingRace {
   name: string;
   nameTranslations?: { es: string; en: string; fr: string; it: string };
   date: string;
-  location: {
-    city: string;
-    region: string;
-    country: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
+  city: string;
+  region: string;
+  country: string;
+  locationUrl?: string;
+  lat?: string;
+  lng?: string;
   distance: number;
   elevation: number;
   type: 'Carretera' | 'MTB' | 'Gravel' | 'Ciclocross' | 'Contrarreloj' | 'Otro';

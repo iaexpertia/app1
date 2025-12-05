@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Icon } from 'leaflet';
 import { Translation } from '../i18n/translations';
 import { CyclingRace } from '../types';
 import { loadRaces } from '../utils/racesStorage';
@@ -20,20 +18,10 @@ import {
   Search,
   Filter
 } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
 
 interface RacesViewProps {
   t: Translation;
 }
-
-const raceIcon = new Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
 
 export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
   const [races, setRaces] = useState<CyclingRace[]>([]);
@@ -42,7 +30,6 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRace, setSelectedRace] = useState<CyclingRace | null>(null);
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
 
   useEffect(() => {
     const loadedRaces = loadRaces();
@@ -159,30 +146,6 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
             </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => setViewMode('map')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                viewMode === 'map'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <MapPin className="w-4 h-4 inline mr-2" />
-              {t.mapView}
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {t.listView}
-            </button>
-          </div>
         </div>
 
         {/* Results count */}
@@ -190,63 +153,6 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
           {filteredRaces.length} {filteredRaces.length === 1 ? t.raceFound : t.racesFound}
         </div>
 
-        {/* Map View */}
-        {viewMode === 'map' && (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-            <div style={{ height: '600px', width: '100%' }}>
-              {filteredRaces.length > 0 && (
-                <MapContainer
-                  center={[
-                    parseFloat(filteredRaces[0].lat) || 40.4168,
-                    parseFloat(filteredRaces[0].lng) || -3.7038
-                  ]}
-                  zoom={6}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  {filteredRaces.map((race) => {
-                    const lat = parseFloat(race.lat);
-                    const lng = parseFloat(race.lng);
-
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                      return (
-                        <Marker
-                          key={race.id}
-                          position={[lat, lng]}
-                          icon={raceIcon}
-                          eventHandlers={{
-                            click: () => setSelectedRace(race)
-                          }}
-                        >
-                          <Popup>
-                            <div className="p-2">
-                              <h3 className="font-bold text-lg mb-2">{race.name}</h3>
-                              <div className="space-y-1 text-sm">
-                                <p><Calendar className="w-4 h-4 inline mr-1" />{formatDate(race.date)}</p>
-                                <p><MapPin className="w-4 h-4 inline mr-1" />{race.city}, {race.region}</p>
-                                <p>{getTypeIcon(race.type)} {race.type} - {race.category}</p>
-                              </div>
-                              <button
-                                onClick={() => setSelectedRace(race)}
-                                className="mt-2 text-orange-600 hover:text-orange-700 font-medium text-sm"
-                              >
-                                {t.seeDetails} →
-                              </button>
-                            </div>
-                          </Popup>
-                        </Marker>
-                      );
-                    }
-                    return null;
-                  })}
-                </MapContainer>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* List View / Race Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -441,13 +347,13 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 </div>
               )}
 
-              <div className="flex gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {selectedRace.registrationUrl && (
                   <a
                     href={selectedRace.registrationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
                   >
                     {t.register}
                     <ExternalLink className="w-5 h-5" />
@@ -457,10 +363,22 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 {selectedRace.contactEmail && (
                   <a
                     href={`mailto:${selectedRace.contactEmail}`}
-                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
                   >
                     {t.contact}
                     <Mail className="w-5 h-5" />
+                  </a>
+                )}
+
+                {selectedRace.locationUrl && (
+                  <a
+                    href={selectedRace.locationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {t.location}
+                    <MapPin className="w-5 h-5" />
                   </a>
                 )}
               </div>
