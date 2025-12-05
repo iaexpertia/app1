@@ -1,14 +1,16 @@
 import React from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
-import { 
-  X, 
-  Mountain, 
-  TrendingUp, 
-  MapPin, 
+import {
+  X,
+  Mountain,
+  TrendingUp,
+  MapPin,
   Award,
   Calendar,
-  Trophy
+  Trophy,
+  ExternalLink,
+  Navigation
 } from 'lucide-react';
 
 interface PassModalProps {
@@ -147,7 +149,50 @@ export const PassModal: React.FC<PassModalProps> = ({ pass, onClose, t }) => {
               </div>
             </div>
           </div>
-          
+
+          <div className="border-t pt-6 mb-6">
+            <div className="flex items-center mb-4">
+              <Navigation className="h-5 w-5 text-orange-500 mr-2" />
+              <h3 className="text-lg font-semibold text-slate-800">Ubicación</h3>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between bg-slate-50 rounded-lg p-3">
+                <div className="flex items-center space-x-3">
+                  <MapPin className="h-4 w-4 text-slate-500" />
+                  <div>
+                    <p className="text-sm text-slate-500">Coordenadas</p>
+                    <p className="font-mono text-slate-800">
+                      {pass.coordinates.lat.toFixed(6)}, {pass.coordinates.lng.toFixed(6)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href={`https://www.google.com/maps?q=${pass.coordinates.lat},${pass.coordinates.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center space-x-2 bg-blue-500 text-white rounded-lg px-4 py-3 hover:bg-blue-600 transition-colors"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="font-medium">Ver en Google Maps</span>
+                </a>
+
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${pass.coordinates.lat}&mlon=${pass.coordinates.lng}&zoom=13`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center space-x-2 bg-green-500 text-white rounded-lg px-4 py-3 hover:bg-green-600 transition-colors"
+                >
+                  <MapPin className="h-4 w-4" />
+                  <span className="font-medium">Ver en OpenStreetMap</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div className="border-t pt-6">
             <div className="flex items-center mb-4">
               <Trophy className="h-5 w-5 text-orange-500 mr-2" />

@@ -40,13 +40,14 @@ const createBikeIcon = (difficulty: string, isConquered: boolean) => {
   // Color mapping based on UCI difficulty categories
   const difficultyColors = {
     'Cuarta': { bg: '#10b981', border: '#059669' }, // Green - 4th category
-    'Tercera': { bg: '#3b82f6', border: '#1d4ed8' }, // Blue - 3rd category  
+    'Tercera': { bg: '#3b82f6', border: '#1d4ed8' }, // Blue - 3rd category
     'Segunda': { bg: '#eab308', border: '#ca8a04' }, // Yellow - 2nd category
     'Primera': { bg: '#f97316', border: '#ea580c' }, // Orange - 1st category
     'Especial': { bg: '#ef4444', border: '#dc2626' }, // Red - Special category
   };
 
-  const colors = difficultyColors[difficulty as keyof typeof difficultyColors] || difficultyColors['Cuarta'];
+  const conqueredColors = { bg: '#10b981', border: '#059669' };
+  const colors = isConquered ? conqueredColors : (difficultyColors[difficulty as keyof typeof difficultyColors] || difficultyColors['Cuarta']);
   
   const pulseAnimation = isConquered ? `
     <style>
