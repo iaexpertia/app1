@@ -91,6 +91,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
   const categories = ['Competición', 'Equipamiento', 'Rutas', 'Noticias', 'Entrevistas'];
 
@@ -156,6 +157,14 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleOpenArticle = (article: NewsArticle) => {
+    if (article.externalUrl) {
+      window.open(article.externalUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      setSelectedArticle(article);
+    }
   };
 
   return (
@@ -271,7 +280,10 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                     </div>
                   </div>
                   
-                  <button className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                  <button
+                    onClick={() => handleOpenArticle(featuredNews[0])}
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
                     <span>{t.readArticle}</span>
                     <ExternalLink className="h-4 w-4" />
                   </button>
@@ -319,7 +331,10 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                         </span>
                       </div>
 
-                      <button className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
+                      <button
+                        onClick={() => handleOpenArticle(article)}
+                        className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                      >
                         {t.readMore}
                       </button>
                     </div>
@@ -377,7 +392,10 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                         {t.readingTime.replace('{minutes}', String(article.readTime))}
                       </span>
 
-                      <button className="px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm">
+                      <button
+                        onClick={() => handleOpenArticle(article)}
+                        className="px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                      >
                         {t.read}
                       </button>
                     </div>
@@ -394,6 +412,58 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
           <Newspaper className="h-16 w-16 text-slate-300 mx-auto mb-4" />
           <p className="text-xl text-slate-600 mb-2">{t.noNewsFound}</p>
           <p className="text-slate-500">{t.noNewsFoundDesc}</p>
+        </div>
+      )}
+
+      {selectedArticle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedArticle(null)}>
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="relative">
+              <img
+                src={selectedArticle.imageUrl}
+                alt={selectedArticle.title}
+                className="w-full h-64 object-cover rounded-t-xl"
+              />
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-slate-100 transition-colors"
+              >
+                <svg className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-8">
+              <div className="flex items-center space-x-2 mb-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedArticle.category)}`}>
+                  {selectedArticle.category}
+                </span>
+              </div>
+
+              <h1 className="text-3xl font-bold text-slate-800 mb-4">{selectedArticle.title}</h1>
+
+              <div className="flex items-center space-x-4 text-sm text-slate-500 mb-6 pb-6 border-b border-slate-200">
+                <span className="flex items-center">
+                  <User className="h-4 w-4 mr-1" />
+                  {selectedArticle.author}
+                </span>
+                <span className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  {formatDate(selectedArticle.publishDate)}
+                </span>
+                <span className="flex items-center">
+                  <Clock className="h-4 w-4 mr-1" />
+                  {t.readingTime.replace('{minutes}', String(selectedArticle.readTime))}
+                </span>
+              </div>
+
+              <div className="prose max-w-none">
+                <p className="text-lg text-slate-600 mb-6 leading-relaxed">{selectedArticle.summary}</p>
+                <div className="text-slate-700 leading-relaxed whitespace-pre-line">{selectedArticle.content}</div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
