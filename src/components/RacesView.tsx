@@ -86,18 +86,11 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-4">{t.racesCalendar}</h1>
-              <p className="text-orange-100 text-lg">
-                {t.racesDescription}
-              </p>
-            </div>
-            <ShareButton
-              title={t.racesCalendar}
-              text={t.racesDescription}
-              className="bg-white text-orange-600 hover:bg-orange-50"
-            />
+          <div>
+            <h1 className="text-4xl font-bold mb-4">{t.racesCalendar}</h1>
+            <p className="text-orange-100 text-lg">
+              {t.racesDescription}
+            </p>
           </div>
         </div>
       </div>
@@ -159,68 +152,77 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
           {filteredRaces.map((race) => (
             <div
               key={race.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-              onClick={() => setSelectedRace(race)}
+              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
             >
-              {race.posterUrl && (
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={race.posterUrl}
-                    alt={race.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              )}
-
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-bold text-gray-900 flex-1">{race.name}</h3>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    race.category === 'Elite' ? 'bg-yellow-100 text-yellow-800' :
-                    race.category === 'Amateur' ? 'bg-blue-100 text-blue-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {race.category}
-                  </span>
-                </div>
-
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-orange-600" />
-                    <span>{formatDate(race.date)}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-orange-600" />
-                    <span>{race.city}, {race.region}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {getTypeIcon(race.type)}
-                    <span>{race.type}</span>
-                  </div>
-
-                  {race.distance && (
-                    <div className="flex items-center gap-2">
-                      <Navigation className="w-4 h-4 text-orange-600" />
-                      <span>{race.distance} km</span>
-                    </div>
-                  )}
-
-                  {race.elevation && (
-                    <div className="flex items-center gap-2">
-                      <Mountain className="w-4 h-4 text-orange-600" />
-                      <span>{race.elevation}m {t.elevation.toLowerCase()}</span>
-                    </div>
-                  )}
-                </div>
-
-                {race.price && (
-                  <div className="flex items-center gap-2 text-green-600 font-semibold">
-                    <Euro className="w-4 h-4" />
-                    <span>{race.price}€</span>
+              <div onClick={() => setSelectedRace(race)} className="cursor-pointer">
+                {race.posterUrl && (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={race.posterUrl}
+                      alt={race.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
                 )}
+
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-xl font-bold text-gray-900 flex-1">{race.name}</h3>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      race.category === 'Elite' ? 'bg-yellow-100 text-yellow-800' :
+                      race.category === 'Amateur' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {race.category}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-orange-600" />
+                      <span>{formatDate(race.date)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-orange-600" />
+                      <span>{race.city}, {race.region}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {getTypeIcon(race.type)}
+                      <span>{race.type}</span>
+                    </div>
+
+                    {race.distance && (
+                      <div className="flex items-center gap-2">
+                        <Navigation className="w-4 h-4 text-orange-600" />
+                        <span>{race.distance} km</span>
+                      </div>
+                    )}
+
+                    {race.elevation && (
+                      <div className="flex items-center gap-2">
+                        <Mountain className="w-4 h-4 text-orange-600" />
+                        <span>{race.elevation}m {t.elevation.toLowerCase()}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {race.price && (
+                    <div className="flex items-center gap-2 text-green-600 font-semibold mb-4">
+                      <Euro className="w-4 h-4" />
+                      <span>{race.price}€</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+                <ShareButton
+                  title={race.name}
+                  text={`${race.name} - ${formatDate(race.date)} en ${race.city}, ${race.region}`}
+                  className="w-full bg-orange-600 text-white hover:bg-orange-700"
+                />
               </div>
             </div>
           ))}
