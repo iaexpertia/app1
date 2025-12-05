@@ -16,7 +16,6 @@ interface DBMountainPass {
   coordinates_lng: number;
   description: string;
   image_url: string;
-  category: string;
   famous_winners: any;
   is_active: boolean;
   created_at: string;
@@ -41,7 +40,6 @@ function dbToMountainPass(dbPass: DBMountainPass): MountainPass {
     },
     description: dbPass.description,
     imageUrl: dbPass.image_url,
-    category: dbPass.category,
     famousWinners: dbPass.famous_winners || [],
     isActive: dbPass.is_active,
   };
@@ -63,7 +61,6 @@ function mountainPassToDB(pass: MountainPass): Omit<DBMountainPass, 'created_at'
     coordinates_lng: pass.coordinates.lng,
     description: pass.description,
     image_url: pass.imageUrl,
-    category: pass.category,
     famous_winners: pass.famousWinners || [],
     is_active: pass.isActive ?? true,
   };
@@ -230,7 +227,6 @@ export async function importPassesFromCSV(csvContent: string): Promise<{ passes:
           },
           description: values[12] || '',
           imageUrl: values[13] || '',
-          category: values[14] || 'Otros',
           famousWinners: [],
         };
         passes.push(pass);

@@ -197,7 +197,6 @@ export const exportMountainPasses = (passes: any[]): void => {
     'Pendiente Máxima',
     'Distancia',
     'Dificultad',
-    'Categoría',
     'Latitud',
     'Longitud',
     'Descripción'
@@ -214,7 +213,6 @@ export const exportMountainPasses = (passes: any[]): void => {
     'Pendiente Máxima': `${pass.maxGradient}%`,
     'Distancia': `${pass.distance}km`,
     'Dificultad': pass.difficulty,
-    'Categoría': pass.category,
     'Latitud': pass.coordinates?.lat || '',
     'Longitud': pass.coordinates?.lng || '',
     'Descripción': pass.description

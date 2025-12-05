@@ -21,7 +21,6 @@ export interface MountainPass {
     time?: string;
   }[];
   imageUrl: string;
-  category: string;
   isActive?: boolean;
 }
 

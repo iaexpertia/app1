@@ -26,7 +26,6 @@ export const exportPassesToExcel = (passes: MountainPass[]): void => {
     'Pendiente Máxima (%)',
     'Distancia (km)',
     'Dificultad',
-    'Categoría',
     'Latitud',
     'Longitud',
     'Descripción',
@@ -44,7 +43,6 @@ export const exportPassesToExcel = (passes: MountainPass[]): void => {
     pass.maxGradient,
     pass.distance,
     pass.difficulty,
-    pass.category,
     pass.coordinates?.lat || '',
     pass.coordinates?.lng || '',
     pass.description,
@@ -102,7 +100,7 @@ export const importPassesFromExcel = (file: File): Promise<MountainPass[]> => {
           }
           values.push(current.trim().replace(/^"|"$/g, ''));
 
-          if (values.length >= 15) {
+          if (values.length >= 14) {
             const pass: MountainPass = {
               id: values[0] || `imported-${Date.now()}-${i}`,
               name: values[1] || '',
@@ -114,13 +112,12 @@ export const importPassesFromExcel = (file: File): Promise<MountainPass[]> => {
               maxGradient: parseFloat(values[7]) || 0,
               distance: parseFloat(values[8]) || 0,
               difficulty: (values[9] || 'Cuarta') as any,
-              category: values[10] || 'Otros',
               coordinates: {
-                lat: parseFloat(values[11]) || 0,
-                lng: parseFloat(values[12]) || 0
+                lat: parseFloat(values[10]) || 0,
+                lng: parseFloat(values[11]) || 0
               },
-              description: values[13] || '',
-              imageUrl: values[14] || '',
+              description: values[12] || '',
+              imageUrl: values[13] || '',
               famousWinners: []
             };
             passes.push(pass);
@@ -153,7 +150,6 @@ export const downloadExcelTemplate = (): void => {
     'Pendiente Máxima (%)',
     'Distancia (km)',
     'Dificultad',
-    'Categoría',
     'Latitud',
     'Longitud',
     'Descripción',
@@ -171,7 +167,6 @@ export const downloadExcelTemplate = (): void => {
     '12',
     '15',
     'Segunda',
-    'Otros',
     '40.0',
     '-3.0',
     'Descripción de ejemplo del puerto',
