@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
 import { PassCard } from './PassCard';
-import { Search, Filter, ChevronLeft, ChevronRight, Tag, Users, ExternalLink, Globe, Phone, Mail, Mountain } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, Tag, Users, ExternalLink, Globe, Phone, Mail, Mountain, Calendar, MapPin, Trophy } from 'lucide-react';
 import { loadBrands } from '../utils/brandsStorage';
 import { loadCollaborators } from '../utils/collaboratorStorage';
+import { loadRaces } from '../utils/racesStorage';
 import { defaultBrands } from '../data/defaultBrands';
 import { defaultCollaborators } from '../data/defaultCollaborators';
 
@@ -34,6 +35,7 @@ export const PassesList: React.FC<PassesListProps> = ({
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [brandsSlideIndex, setBrandsSlideIndex] = useState(0);
   const [collaboratorsSlideIndex, setCollaboratorsSlideIndex] = useState(0);
+  const [racesSlideIndex, setRacesSlideIndex] = useState(0);
 
   // Get unique categories from passes
   const availableCategories = [...new Set(passes.map(pass => pass.category))];
@@ -48,7 +50,9 @@ export const PassesList: React.FC<PassesListProps> = ({
     const loadedCollaborators = loadCollaborators();
     return loadedCollaborators.length > 0 ? loadedCollaborators : defaultCollaborators;
   })().filter(collaborator => collaborator.isActive);
-  
+
+  const races = loadRaces().filter(race => race.isActive && race.featured);
+
   const getCategoryText = (category: string) => {
     // Si la categoría ya está en español, la devolvemos tal como está
     // Si no, intentamos traducirla
@@ -77,7 +81,24 @@ export const PassesList: React.FC<PassesListProps> = ({
   const prevCollaboratorsSlide = () => {
     setCollaboratorsSlideIndex((prev) => (prev - 1 + Math.ceil(collaborators.length / 3)) % Math.ceil(collaborators.length / 3));
   };
-  
+
+  const nextRacesSlide = () => {
+    setRacesSlideIndex((prev) => (prev + 1) % Math.ceil(races.length / 3));
+  };
+
+  const prevRacesSlide = () => {
+    setRacesSlideIndex((prev) => (prev - 1 + Math.ceil(races.length / 3)) % Math.ceil(races.length / 3));
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   const filteredPasses = passes.filter(pass => {
     // CRÍTICO: Solo mostrar puertos activos en el frontend público
     const isActive = pass.isActive ?? true; // Si no está definido, asumimos activo por defecto
@@ -255,6 +276,87 @@ export const PassesList: React.FC<PassesListProps> = ({
           )}
         </div>
       </div>
+
+      {/* Featured Races Section */}
+      {races.length > 0 && (
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Trophy className="h-6 w-6 text-orange-500 mr-3" />
+                <h3 className="text-xl font-semibold text-slate-800">Carreras Destacadas</h3>
+              </div>
+              {races.length > 3 && (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={prevRacesSlide}
+                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <ChevronLeft className="h-4 w-4 text-slate-600" />
+                  </button>
+                  <button
+                    onClick={nextRacesSlide}
+                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <ChevronRight className="h-4 w-4 text-slate-600" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              {races.slice(racesSlideIndex * 3, (racesSlideIndex * 3) + 3).map(race => (
+                <div key={race.id} className="flex items-start space-x-4 p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow">
+                  {race.posterUrl && (
+                    <img
+                      src={race.posterUrl}
+                      alt={race.name}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-slate-800 mb-1">{race.name}</h4>
+                    <div className="flex items-center gap-3 text-xs text-slate-600 mb-2">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-orange-500" />
+                        <span>{formatDate(race.date)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-orange-500" />
+                        <span>{race.city}, {race.region}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500 line-clamp-2">{race.description}</p>
+                  </div>
+                  {race.registrationUrl && (
+                    <a
+                      href={race.registrationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap"
+                    >
+                      Inscribirse
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {races.length > 3 && (
+              <div className="flex justify-center mt-4 space-x-1">
+                {Array.from({ length: Math.ceil(races.length / 3) }).map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === racesSlideIndex ? 'bg-orange-500' : 'bg-slate-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mb-8">
         <div className="relative mb-4">
