@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag } from 'lucide-react';
+import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag, Heart } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
 import { getCurrentUser, loadCyclists } from '../utils/cyclistStorage';
 
 interface HeaderProps {
-  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races';
-  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races') => void;
+  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses';
+  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses') => void;
   conqueredCount: number;
   totalCount: number;
   t: Translation;
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races') => {
+  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
@@ -76,6 +76,8 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'finder', icon: Search, label: 'Buscador', tooltip: 'Busca puertos por región y dificultad' },
     // Solo mostrar conquistados si el usuario está registrado
     ...(isLoggedIn ? [{ key: 'conquered', icon: Trophy, label: 'Conquistados', tooltip: 'Ve tus puertos conquistados con fotos y notas' }] : []),
+    // Solo mostrar mis puertos si el usuario está registrado
+    ...(isLoggedIn ? [{ key: 'mypasses', icon: Heart, label: t.myPasses, tooltip: 'Tu lista de puertos favoritos' }] : []),
     { key: 'map', icon: Map, label: t.map, tooltip: 'Mapa interactivo con ubicaciones de puertos' },
     // Solo mostrar stats si el usuario está registrado
     ...(isLoggedIn ? [{ key: 'stats', icon: Award, label: t.stats, tooltip: 'Estadísticas de tu progreso y conquistas' }] : []),

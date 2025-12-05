@@ -11,7 +11,9 @@ import { defaultCollaborators } from '../data/defaultCollaborators';
 interface PassesListProps {
   passes: MountainPass[];
   conqueredPassIds: Set<string>;
+  favoritePassIds: Set<string>;
   onToggleConquest: (passId: string) => void;
+  onToggleFavorite: (passId: string) => void;
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos: (passId: string) => void;
   t: Translation;
@@ -20,7 +22,9 @@ interface PassesListProps {
 export const PassesList: React.FC<PassesListProps> = ({
   passes,
   conqueredPassIds,
+  favoritePassIds,
   onToggleConquest,
+  onToggleFavorite,
   onViewDetails,
   onAddPhotos,
   t
@@ -303,7 +307,9 @@ export const PassesList: React.FC<PassesListProps> = ({
             key={pass.id}
             pass={pass}
             isConquered={conqueredPassIds.has(pass.id)}
+            isFavorite={favoritePassIds.has(pass.id)}
             onToggleConquest={onToggleConquest}
+            onToggleFavorite={onToggleFavorite}
             onViewDetails={onViewDetails}
             onAddPhotos={onAddPhotos}
             t={t}

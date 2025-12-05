@@ -1,21 +1,25 @@
 import React from 'react';
 import { MountainPass } from '../types';
 import { Translation } from '../i18n/translations';
-import { 
-  CheckCircle, 
-  Circle, 
-  Mountain, 
-  TrendingUp, 
+import {
+  CheckCircle,
+  Circle,
+  Mountain,
+  TrendingUp,
   MapPin,
   Info,
   Flag,
-  Camera
+  Camera,
+  Heart,
+  HeartOff
 } from 'lucide-react';
 
 interface PassCardProps {
   pass: MountainPass;
   isConquered: boolean;
+  isFavorite?: boolean;
   onToggleConquest: (passId: string) => void;
+  onToggleFavorite?: (passId: string) => void;
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos?: (passId: string) => void;
   t: Translation;
@@ -38,10 +42,12 @@ const categoryColors = {
   Provenza: 'bg-yellow-100 text-yellow-800 border-yellow-300'
 };
 
-export const PassCard: React.FC<PassCardProps> = ({ 
-  pass, 
-  isConquered, 
-  onToggleConquest, 
+export const PassCard: React.FC<PassCardProps> = ({
+  pass,
+  isConquered,
+  isFavorite = false,
+  onToggleConquest,
+  onToggleFavorite,
   onViewDetails,
   onAddPhotos,
   t
@@ -160,25 +166,41 @@ export const PassCard: React.FC<PassCardProps> = ({
           </div>
         </div>
         
-        <div className="flex space-x-2">
-          <button
-            onClick={() => onToggleConquest(pass.id)}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 ${
-              isConquered 
-                ? 'bg-green-500 hover:bg-green-600 text-white' 
-                : 'bg-orange-500 hover:bg-orange-600 text-white'
-            }`}
-          >
-            {isConquered ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
-            <span>{isConquered ? t.conquered : t.markAsDone}</span>
-          </button>
-          
-          <button
-            onClick={() => onViewDetails(pass)}
-            className="px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200"
-          >
-            <Info className="h-4 w-4 text-slate-600" />
-          </button>
+        <div className="flex flex-col space-y-2">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => onToggleConquest(pass.id)}
+              className={`flex-1 py-2 px-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 ${
+                isConquered
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white'
+              }`}
+            >
+              {isConquered ? <CheckCircle className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+              <span className="text-sm">{isConquered ? t.conquered : t.markAsDone}</span>
+            </button>
+
+            <button
+              onClick={() => onViewDetails(pass)}
+              className="px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors duration-200"
+            >
+              <Info className="h-4 w-4 text-slate-600" />
+            </button>
+          </div>
+
+          {onToggleFavorite && (
+            <button
+              onClick={() => onToggleFavorite(pass.id)}
+              className={`w-full py-2 px-3 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 ${
+                isFavorite
+                  ? 'bg-red-500 hover:bg-red-600 text-white'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              }`}
+            >
+              {isFavorite ? <Heart className="h-4 w-4 fill-current" /> : <Heart className="h-4 w-4" />}
+              <span className="text-sm">{isFavorite ? t.removeFromMyPasses : t.addToMyPasses}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

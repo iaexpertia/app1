@@ -18,6 +18,7 @@ const ConqueredPassesView = lazy(() => import('./components/ConqueredPassesView'
 const BrandsView = lazy(() => import('./components/BrandsView').then(m => ({ default: m.BrandsView })));
 const NewsView = lazy(() => import('./components/NewsView').then(m => ({ default: m.NewsView })));
 const PassFinderView = lazy(() => import('./components/PassFinderView').then(m => ({ default: m.PassFinderView })));
+const MyPassesView = lazy(() => import('./components/MyPassesView').then(m => ({ default: m.default })));
 const PasswordReset = lazy(() => import('./components/PasswordReset').then(m => ({ default: m.PasswordReset })));
 const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
 const RacesView = lazy(() => import('./components/RacesView').then(m => ({ default: m.RacesView })));
@@ -38,12 +39,18 @@ import {
   updateConquestPhotos as updateConquestPhotosDB,
   subscribeToConquests
 } from './utils/conquestService';
+import {
+  loadFavoritePassesFromDB,
+  addFavoritePassToDB,
+  removeFavoritePassFromDB,
+  subscribeToFavoritePasses
+} from './utils/favoritePassesService';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
 import { getAllPassesFromDB } from './utils/passesService';
 import { Cyclist } from './types';
 
-type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races';
+type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses';
 
 function App() {
   // Check if we're on the password reset page
@@ -56,6 +63,7 @@ function App() {
   const [photosPass, setPhotosPass] = useState<MountainPass | null>(null);
   const [conquests, setConquests] = useState<ConquestData[]>([]);
   const [conqueredPassIds, setConqueredPassIds] = useState<Set<string>>(new Set());
+  const [favoritePassIds, setFavoritePassIds] = useState<Set<string>>(new Set());
   const [passes, setPasses] = useState<MountainPass[]>(mountainPasses);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -83,7 +91,8 @@ function App() {
   };
 
   useEffect(() => {
-    let subscription: any = null;
+    let conquestSubscription: any = null;
+    let favoriteSubscription: any = null;
 
     const initializeApp = async () => {
       // Ensure admin user exists in database
@@ -103,19 +112,30 @@ function App() {
         setConquests(dbConquests);
         setConqueredPassIds(new Set(dbConquests.map(c => c.passId)));
 
-        // Suscribirse a cambios en tiempo real
-        subscription = subscribeToConquests(cyclist.id, async (payload) => {
-          console.log('Real-time update received:', payload);
-          // Recargar conquistas cuando hay cambios
+        // Cargar favoritos desde Supabase
+        const dbFavorites = await loadFavoritePassesFromDB(cyclist.id);
+        setFavoritePassIds(dbFavorites);
+
+        // Suscribirse a cambios en tiempo real para conquistas
+        conquestSubscription = subscribeToConquests(cyclist.id, async (payload) => {
+          console.log('Real-time conquest update received:', payload);
           const updatedConquests = await loadConquestsFromDB(cyclist.id);
           setConquests(updatedConquests);
           setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
+        });
+
+        // Suscribirse a cambios en tiempo real para favoritos
+        favoriteSubscription = subscribeToFavoritePasses(cyclist.id, async (payload) => {
+          console.log('Real-time favorite update received:', payload);
+          const updatedFavorites = await loadFavoritePassesFromDB(cyclist.id);
+          setFavoritePassIds(updatedFavorites);
         });
       } else {
         // Si no hay usuario logueado, cargar desde localStorage como fallback
         const loadedConquests = loadConquests();
         setConquests(loadedConquests);
         setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
+        setFavoritePassIds(new Set());
       }
 
       // Cargar puertos desde la base de datos
@@ -135,8 +155,11 @@ function App() {
 
     return () => {
       window.removeEventListener('userChanged', handleUserChange);
-      if (subscription) {
-        subscription.unsubscribe();
+      if (conquestSubscription) {
+        conquestSubscription.unsubscribe();
+      }
+      if (favoriteSubscription) {
+        favoriteSubscription.unsubscribe();
       }
     };
   }, []);
@@ -194,6 +217,42 @@ function App() {
           dateCompleted: new Date().toISOString().split('T')[0]
         };
         addConquestLocalStorage(newConquest);
+      }
+    }
+  };
+
+  const handleToggleFavorite = async (passId: string) => {
+    const isFavorite = favoritePassIds.has(passId);
+
+    // Optimistic UI update
+    if (isFavorite) {
+      const newFavorites = new Set(favoritePassIds);
+      newFavorites.delete(passId);
+      setFavoritePassIds(newFavorites);
+    } else {
+      const newFavorites = new Set(favoritePassIds);
+      newFavorites.add(passId);
+      setFavoritePassIds(newFavorites);
+    }
+
+    // Save to database if user is logged in
+    if (currentCyclist?.id) {
+      if (isFavorite) {
+        const result = await removeFavoritePassFromDB(currentCyclist.id, passId);
+        if (!result.success) {
+          console.error('Error removing favorite pass from DB:', result.error);
+          // Revert optimistic update on error
+          const revertedFavorites = await loadFavoritePassesFromDB(currentCyclist.id);
+          setFavoritePassIds(revertedFavorites);
+        }
+      } else {
+        const result = await addFavoritePassToDB(currentCyclist.id, passId);
+        if (!result.success) {
+          console.error('Error adding favorite pass to DB:', result.error);
+          // Revert optimistic update on error
+          const revertedFavorites = await loadFavoritePassesFromDB(currentCyclist.id);
+          setFavoritePassIds(revertedFavorites);
+        }
       }
     }
   };
@@ -336,7 +395,9 @@ function App() {
             <PassesList
               passes={activePasses}
               conqueredPassIds={conqueredPassIds}
+              favoritePassIds={favoritePassIds}
               onToggleConquest={handleToggleConquest}
+              onToggleFavorite={handleToggleFavorite}
               onViewDetails={handleViewDetails}
               onAddPhotos={handleAddPhotos}
               t={t}
@@ -347,7 +408,22 @@ function App() {
             <PassFinderView
               passes={activePasses}
               conqueredPassIds={conqueredPassIds}
+              favoritePassIds={favoritePassIds}
               onToggleConquest={handleToggleConquest}
+              onToggleFavorite={handleToggleFavorite}
+              onViewDetails={handleViewDetails}
+              onAddPhotos={handleAddPhotos}
+              t={t}
+            />
+          )}
+
+          {activeTab === 'mypasses' && (
+            <MyPassesView
+              passes={activePasses}
+              conqueredPassIds={conqueredPassIds}
+              favoritePassIds={favoritePassIds}
+              onToggleConquest={handleToggleConquest}
+              onToggleFavorite={handleToggleFavorite}
               onViewDetails={handleViewDetails}
               onAddPhotos={handleAddPhotos}
               t={t}

@@ -7,7 +7,9 @@ import { PassCard } from './PassCard';
 interface PassFinderViewProps {
   passes: MountainPass[];
   conqueredPassIds: Set<string>;
+  favoritePassIds: Set<string>;
   onToggleConquest: (passId: string) => void;
+  onToggleFavorite: (passId: string) => void;
   onViewDetails: (pass: MountainPass) => void;
   onAddPhotos: (passId: string) => void;
   t: Translation;
@@ -16,7 +18,9 @@ interface PassFinderViewProps {
 export const PassFinderView: React.FC<PassFinderViewProps> = ({
   passes,
   conqueredPassIds,
+  favoritePassIds,
   onToggleConquest,
+  onToggleFavorite,
   onViewDetails,
   onAddPhotos,
   t
@@ -132,7 +136,9 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
                   key={pass.id}
                   pass={pass}
                   isConquered={conqueredPassIds.has(pass.id)}
+                  isFavorite={favoritePassIds.has(pass.id)}
                   onToggleConquest={onToggleConquest}
+                  onToggleFavorite={onToggleFavorite}
                   onViewDetails={onViewDetails}
                   onAddPhotos={onAddPhotos}
                   t={t}
@@ -157,7 +163,9 @@ export const PassFinderView: React.FC<PassFinderViewProps> = ({
                 key={pass.id}
                 pass={pass}
                 isConquered={conqueredPassIds.has(pass.id)}
+                isFavorite={favoritePassIds.has(pass.id)}
                 onToggleConquest={onToggleConquest}
+                onToggleFavorite={onToggleFavorite}
                 onViewDetails={onViewDetails}
                 onAddPhotos={onAddPhotos}
                 t={t}

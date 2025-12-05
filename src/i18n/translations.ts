@@ -20,6 +20,9 @@ export interface Translation {
   category: string;
   conquered: string;
   markAsDone: string;
+  addToMyPasses: string;
+  removeFromMyPasses: string;
+  myPasses: string;
   
   // UCI Categories
   cuarta: string;
@@ -246,7 +249,10 @@ export const translations: Record<string, Translation> = {
     category: 'Categoría',
     conquered: '¡Conquistado!',
     markAsDone: 'Conquistado',
-    
+    addToMyPasses: 'Añadir a Mis Puertos',
+    removeFromMyPasses: 'Quitar de Mis Puertos',
+    myPasses: 'Mis Puertos',
+
     // UCI Categories
     cuarta: '4ª Categoría',
     tercera: '3ª Categoría',
@@ -468,7 +474,10 @@ export const translations: Record<string, Translation> = {
     category: 'Category',
     conquered: 'Conquered!',
     markAsDone: 'Conquer',
-    
+    addToMyPasses: 'Add to My Passes',
+    removeFromMyPasses: 'Remove from My Passes',
+    myPasses: 'My Passes',
+
     // UCI Categories
     cuarta: '4th Category',
     tercera: '3rd Category',
@@ -689,7 +698,10 @@ export const translations: Record<string, Translation> = {
     category: 'Catégorie',
     conquered: 'Conquis !',
     markAsDone: 'Conquérir',
-    
+    addToMyPasses: 'Ajouter à Mes Cols',
+    removeFromMyPasses: 'Retirer de Mes Cols',
+    myPasses: 'Mes Cols',
+
     // UCI Categories
     cuarta: '4ème Catégorie',
     tercera: '3ème Catégorie',
@@ -910,7 +922,10 @@ export const translations: Record<string, Translation> = {
     category: 'Categoria',
     conquered: 'Conquistato!',
     markAsDone: 'Conquistare',
-    
+    addToMyPasses: 'Aggiungi ai Miei Passi',
+    removeFromMyPasses: 'Rimuovi dai Miei Passi',
+    myPasses: 'I Miei Passi',
+
     // UCI Categories
     cuarta: '4ª Categoria',
     tercera: '3ª Categoria',
