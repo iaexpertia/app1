@@ -26,8 +26,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
     return acc;
   }, {} as Record<string, number>);
   
-  const categoryStats = conqueredPasses.reduce((acc, pass) => {
-    acc[pass.category] = (acc[pass.category] || 0) + 1;
+  const regionStats = conqueredPasses.reduce((acc, pass) => {
+    acc[pass.region] = (acc[pass.region] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -162,26 +162,32 @@ export const StatsView: React.FC<StatsViewProps> = ({ stats, conqueredPasses, t 
           </div>
           
           <div className="space-y-4">
-            {Object.entries(categoryStats).map(([category, count]) => {
+            {Object.entries(regionStats).map(([region, count]) => {
               const percentage = (count / stats.conqueredPasses) * 100;
               const colorMap: Record<string, string> = {
                 'Alpes': 'bg-blue-500',
-                'Pirineos': 'bg-purple-500', 
+                'Pirineos': 'bg-purple-500',
                 'Dolomitas': 'bg-pink-500',
                 'Andes': 'bg-emerald-500',
                 'Otros': 'bg-gray-500',
-                'Provenza': 'bg-yellow-500'
+                'Provenza': 'bg-yellow-500',
+                'Provence': 'bg-yellow-500',
+                'Lombardy': 'bg-pink-500',
+                'Friuli': 'bg-pink-500',
+                'Asturias': 'bg-orange-500',
+                'Lake District': 'bg-green-500',
+                'Sierra Nevada': 'bg-red-500'
               };
-              
+
               return (
-                <div key={category}>
+                <div key={region}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-700">{category}</span>
+                    <span className="text-slate-700">{region}</span>
                     <span className="text-slate-600">{count} passes</span>
                   </div>
                   <div className="w-full bg-slate-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${colorMap[category]} transition-all duration-500`}
+                    <div
+                      className={`h-2 rounded-full ${colorMap[region] || 'bg-gray-500'} transition-all duration-500`}
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>

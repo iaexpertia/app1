@@ -357,10 +357,22 @@ function App() {
     setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
   };
 
-  const handleUpdateConquest = (conquest: ConquestData) => {
-    updateConquest(conquest);
-    const updatedConquests = loadConquests();
-    setConquests(updatedConquests);
+  const handleUpdateConquest = async (conquest: ConquestData) => {
+    if (currentCyclist?.id) {
+      const result = await addConquestToDB(currentCyclist.id, conquest);
+      if (result.success) {
+        const updatedConquests = await loadConquestsFromDB(currentCyclist.id);
+        setConquests(updatedConquests);
+        setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
+      } else {
+        console.error('Error updating conquest in DB:', result.error);
+      }
+    } else {
+      updateConquest(conquest);
+      const updatedConquests = loadConquests();
+      setConquests(updatedConquests);
+      setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
+    }
   };
 
   // Filtrar solo puertos activos para mostrar en la vista pública

@@ -16,16 +16,16 @@ export interface DatabaseConquest {
   updated_at: string;
 }
 
-function mapToConquestData(dbConquest: DatabaseConquest): ConquestData {
+function mapToConquestData(dbConquest: any): ConquestData {
   return {
     passId: dbConquest.pass_id,
     dateCompleted: dbConquest.date_completed,
-    timeCompleted: dbConquest.time_taken || undefined,
-    personalNotes: dbConquest.notes || undefined,
+    timeCompleted: dbConquest.time_completed || undefined,
+    personalNotes: dbConquest.personal_notes || undefined,
     photos: dbConquest.photos || [],
-    stravaActivityId: (dbConquest as any).strava_activity_id || undefined,
-    stravaActivityUrl: (dbConquest as any).strava_activity_url || undefined,
-    syncedFromStrava: (dbConquest as any).synced_from_strava || undefined,
+    stravaActivityId: dbConquest.strava_activity_id || undefined,
+    stravaActivityUrl: dbConquest.strava_activity_url || undefined,
+    syncedFromStrava: dbConquest.synced_from_strava || undefined,
   };
 }
 
@@ -56,6 +56,9 @@ export async function addConquestToDB(
       personal_notes: conquest.personalNotes || null,
       photos: conquest.photos || [],
       time_completed: conquest.timeCompleted || null,
+      strava_activity_id: conquest.stravaActivityId || null,
+      strava_activity_url: conquest.stravaActivityUrl || null,
+      synced_from_strava: conquest.syncedFromStrava || false,
       updated_at: new Date().toISOString(),
     }, {
       onConflict: 'cyclist_id,pass_id'
