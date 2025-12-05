@@ -404,7 +404,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       {/* Add New Pass Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 border-b flex items-center justify-between">
               <h3 className="text-xl font-semibold text-slate-800">Añadir Nuevo Puerto</h3>
               <button
@@ -449,30 +449,14 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Región <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newPass.region || ''}
-                      onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      placeholder="Ej: Alpes"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const regionName = prompt('Introduce el nombre de la nueva región:');
-                        if (regionName && regionName.trim()) {
-                          setNewPass({ ...newPass, region: regionName.trim() });
-                        }
-                      }}
-                      className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors flex items-center gap-2"
-                      title="Añadir nueva región"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Región
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    value={newPass.region || ''}
+                    onChange={(e) => setNewPass({ ...newPass, region: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    placeholder="Ej: Alpes"
+                    required
+                  />
                 </div>
                 
                 <div>
