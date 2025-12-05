@@ -21,7 +21,7 @@ import {
 interface DatabaseViewProps {
   allPasses: MountainPass[];
   userPasses: MountainPass[];
-  onAddPass: (pass: MountainPass) => void;
+  onAddPass: (pass: MountainPass) => Promise<void>;
   onRemovePass: (passId: string) => void;
   t: Translation;
 }
@@ -124,7 +124,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
     Provenza: 'bg-yellow-100 text-yellow-800 border-yellow-300'
   };
 
-  const handleAddNewPass = () => {
+  const handleAddNewPass = async () => {
     if (!newPass.name || !newPass.country || !newPass.region) {
       alert('Por favor completa al menos el nombre, país y región');
       return;
@@ -148,7 +148,7 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
       category: newPass.category || 'Otros'
     };
 
-    onAddPass(passToAdd);
+    await onAddPass(passToAdd);
     setShowAddModal(false);
     setNewPass({
       name: '',
@@ -375,10 +375,10 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                 </div>
                 
                 <button
-                  onClick={() => isInUserPasses ? onRemovePass(pass.id) : onAddPass(pass)}
+                  onClick={async () => isInUserPasses ? onRemovePass(pass.id) : await onAddPass(pass)}
                   className={`w-full py-2 px-4 rounded-lg transition-all duration-200 font-medium flex items-center justify-center space-x-2 ${
-                    isInUserPasses 
-                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                    isInUserPasses
+                      ? 'bg-red-500 hover:bg-red-600 text-white'
                       : 'bg-green-500 hover:bg-green-600 text-white'
                   }`}
                 >

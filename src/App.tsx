@@ -47,7 +47,7 @@ import {
 } from './utils/favoritePassesService';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
-import { getAllPassesFromDB } from './utils/passesService';
+import { getAllPassesFromDB, createPassInDB } from './utils/passesService';
 import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses';
@@ -333,9 +333,18 @@ function App() {
     }
   };
 
-  const handleAddPass = (passToAdd: MountainPass) => {
-    if (!passes.find(p => p.id === passToAdd.id)) {
-      setPasses([...passes, passToAdd]);
+  const handleAddPass = async (passToAdd: MountainPass) => {
+    if (passes.find(p => p.id === passToAdd.id)) {
+      return;
+    }
+
+    const createdPass = await createPassInDB(passToAdd);
+
+    if (createdPass) {
+      setPasses([...passes, createdPass]);
+    } else {
+      console.error('Error al guardar el puerto en la base de datos');
+      alert('Error al guardar el puerto. Por favor intenta de nuevo.');
     }
   };
 
