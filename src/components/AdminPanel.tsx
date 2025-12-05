@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, Power, PowerOff } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, Power, PowerOff, FolderOpen } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
 import { MultilingualInput } from './MultilingualInput';
+import { NewsCategoriesView } from './NewsCategoriesView';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { supabase } from '../utils/supabaseClient';
@@ -35,6 +36,8 @@ import {
   updateNews,
   saveNews
 } from '../utils/newsStorage';
+import { loadNewsCategories } from '../utils/newsCategoriesStorage';
+import { NewsCategory } from '../types';
 import { sendRegistrationEmail } from '../utils/emailService';
 import {
   loadRaces,
@@ -65,6 +68,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const [brands, setBrands] = useState<Brand[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [news, setNews] = useState<NewsArticle[]>([]);
+  const [newsCategories, setNewsCategories] = useState<NewsCategory[]>([]);
   const [races, setRaces] = useState<CyclingRace[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [existingRegions, setExistingRegions] = useState<Array<{name: string, country: string}>>([]);
@@ -247,6 +251,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setRaces(loadRaces());
     const links = await loadSocialLinks();
     setSocialLinks(links);
+    const categories = await loadNewsCategories();
+    setNewsCategories(categories);
     await loadRegionsFromDB();
   };
 
@@ -1075,6 +1081,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     { id: 'brands', label: 'Gestionar Marcas', icon: Tag },
     { id: 'collaborators', label: 'Gestionar Colaboradores', icon: UserCheck },
     { id: 'news', label: 'Gestionar Noticias', icon: Newspaper },
+    { id: 'newsCategories', label: 'Categorías de Noticias', icon: FolderOpen },
     { id: 'races', label: 'Gestionar Carreras', icon: Trophy },
     { id: 'social', label: 'Redes Sociales', icon: Share2 },
   ];
@@ -1622,6 +1629,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               )}
             </div>
           </div>
+        )}
+
+        {activeTab === 'newsCategories' && (
+          <NewsCategoriesView />
         )}
 
         {activeTab === 'social' && (
@@ -2399,8 +2410,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
                     onChange={(e) => setNewsForm({...newsForm, category: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="Noticias">Noticias</option>
-                    <option value="Entrevistas">Entrevistas</option>
+                    {newsCategories.map(category => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

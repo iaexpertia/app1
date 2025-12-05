@@ -133,11 +133,23 @@ export interface NewsArticle {
   contentTranslations?: { es: string; en: string; fr: string; it: string };
   author: string;
   publishDate: string;
-  category: 'Competición' | 'Equipamiento' | 'Rutas' | 'Noticias' | 'Entrevistas';
+  category: string;
   imageUrl: string;
   readTime: number;
   featured: boolean;
   externalUrl?: string;
+}
+
+export interface NewsCategory {
+  id: string;
+  name: string;
+  name_translations: { es: string; en: string; fr: string; it: string };
+  color: string;
+  icon: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CyclingRace {

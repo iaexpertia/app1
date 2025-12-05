@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Translation } from '../i18n/translations';
-import { NewsArticle } from '../types';
+import { NewsArticle, NewsCategory } from '../types';
 import { loadNews } from '../utils/newsStorage';
+import { loadNewsCategories } from '../utils/newsCategoriesStorage';
 import { exportNews } from '../utils/excelExport';
 import { ShareButton } from './ShareButton';
-import { 
-  Newspaper, 
-  Calendar, 
-  User, 
+import * as Icons from 'lucide-react';
+import {
+  Newspaper,
+  Calendar,
+  User,
   ExternalLink,
   Clock,
   Tag,
@@ -88,54 +90,51 @@ const defaultNews: NewsArticle[] = [
 
 export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
   const [news, setNews] = useState<NewsArticle[]>([]);
+  const [categories, setCategories] = useState<NewsCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
-  const categories = ['Competición', 'Equipamiento', 'Rutas', 'Noticias', 'Entrevistas'];
-
   useEffect(() => {
-    const loadedNews = loadNews();
-    if (loadedNews.length === 0) {
-      setNews(defaultNews);
-    } else {
-      setNews(loadedNews);
-    }
-    
-    // Escuchar cambios en las noticias
+    const loadData = async () => {
+      const loadedNews = loadNews();
+      if (loadedNews.length === 0) {
+        setNews(defaultNews);
+      } else {
+        setNews(loadedNews);
+      }
+
+      const loadedCategories = await loadNewsCategories();
+      setCategories(loadedCategories);
+    };
+
+    loadData();
+
     const handleNewsUpdate = () => {
       const updatedNews = loadNews();
       setNews(updatedNews.length > 0 ? updatedNews : defaultNews);
     };
-    
+
     window.addEventListener('newsUpdated', handleNewsUpdate);
-    
+
     return () => {
       window.removeEventListener('newsUpdated', handleNewsUpdate);
     };
   }, []);
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Competición': return Award;
-      case 'Equipamiento': return Tag;
-      case 'Rutas': return Mountain;
-      case 'Noticias': return Newspaper;
-      case 'Entrevistas': return User;
-      default: return Newspaper;
+  const getCategoryIcon = (categoryName: string) => {
+    const category = categories.find(c => c.name === categoryName);
+    if (category && category.icon) {
+      const IconComponent = (Icons as any)[category.icon];
+      return IconComponent || Newspaper;
     }
+    return Newspaper;
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'Competición': return 'bg-yellow-100 text-yellow-800';
-      case 'Equipamiento': return 'bg-blue-100 text-blue-800';
-      case 'Rutas': return 'bg-green-100 text-green-800';
-      case 'Noticias': return 'bg-purple-100 text-purple-800';
-      case 'Entrevistas': return 'bg-pink-100 text-pink-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getCategoryColor = (categoryName: string) => {
+    const category = categories.find(c => c.name === categoryName);
+    return category?.color || 'bg-gray-100 text-gray-800';
   };
 
   const filteredNews = news.filter(article => {
@@ -213,8 +212,8 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
               >
                 <option value="all">{t.allCategories}</option>
                 {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category}
+                  <option key={category.id} value={category.name}>
+                    {category.name}
                   </option>
                 ))}
               </select>
