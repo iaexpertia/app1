@@ -96,18 +96,24 @@ export async function getAllPassesFromDB(): Promise<MountainPass[]> {
 export async function createPassInDB(pass: MountainPass): Promise<MountainPass | null> {
   const dbPass = mountainPassToDB(pass);
 
-  const { data, error } = await supabase
+  console.log('Creating pass in DB:', dbPass);
+
+  const { error } = await supabase
     .from('mountain_passes')
-    .insert(dbPass)
-    .select()
-    .single();
+    .insert(dbPass);
 
   if (error) {
     console.error('Error creating pass:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    alert(`Error de base de datos: ${error.message}`);
     return null;
   }
 
-  return dbToMountainPass(data);
+  console.log('Pass created successfully');
+  return {
+    ...pass,
+    isActive: pass.isActive ?? true,
+  };
 }
 
 export async function updatePassInDB(pass: MountainPass): Promise<MountainPass | null> {
