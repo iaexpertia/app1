@@ -85,8 +85,8 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'brands', icon: Tag, label: 'Marcas', tooltip: 'Marcas de ciclismo y equipamiento' },
     { key: 'news', icon: Newspaper, label: 'Noticias', tooltip: 'Últimas noticias del mundo del ciclismo' },
     { key: 'collaborators', icon: Users, label: t.collaborators, tooltip: 'Colaboradores y servicios para ciclistas' },
-    // Solo mostrar database si el usuario está registrado
-    ...(isLoggedIn ? [{ key: 'database', icon: Database, label: t.database, tooltip: 'Base de datos completa de puertos' }] : []),
+    // Solo mostrar database si el usuario es administrador
+    ...(isCurrentUserAdmin ? [{ key: 'database', icon: Database, label: t.database, tooltip: 'Base de datos completa de puertos' }] : []),
     // Solo mostrar admin si el usuario actual es administrador
     ...(isCurrentUserAdmin ? [{ key: 'admin', icon: Settings, label: t.admin, tooltip: 'Panel de administración del sistema' }] : [])
   ];
