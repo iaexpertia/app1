@@ -386,7 +386,7 @@ function App() {
       <Header
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        conqueredCount={conquests.length}
+        conqueredCount={conqueredPassIds.size}
         totalCount={activePasses.length}
         t={t}
         language={language}
