@@ -9,7 +9,7 @@ import {
   Users,
   Trophy,
   Clock,
-  DollarSign,
+  Euro,
   ExternalLink,
   Mail,
   Navigation,
@@ -217,7 +217,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                 {race.price && (
                   <div className="flex items-center gap-2 text-green-600 font-semibold">
-                    <DollarSign className="w-4 h-4" />
+                    <Euro className="w-4 h-4" />
                     <span>{race.price}€</span>
                   </div>
                 )}
@@ -330,7 +330,7 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
                   {selectedRace.price && (
                     <div className="flex items-center gap-3 text-gray-700">
-                      <DollarSign className="w-5 h-5 text-orange-600" />
+                      <Euro className="w-5 h-5 text-orange-600" />
                       <div>
                         <p className="text-sm text-gray-500">{t.inscription}</p>
                         <p className="font-semibold text-green-600">{selectedRace.price}€</p>
