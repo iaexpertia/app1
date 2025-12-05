@@ -93,8 +93,10 @@ export interface Bike {
 export interface Collaborator {
   id: string;
   name: string;
+  nameTranslations?: { es: string; en: string; fr: string; it: string };
   category: 'Tienda de Bicicletas' | 'Hotel' | 'Restaurante' | 'Guía Turístico' | 'Equipamiento' | 'Otros';
   description: string;
+  descriptionTranslations?: { es: string; en: string; fr: string; it: string };
   contactInfo: {
     email?: string;
     phone?: string;
@@ -109,8 +111,10 @@ export interface Collaborator {
 export interface Brand {
   id: string;
   name: string;
+  nameTranslations?: { es: string; en: string; fr: string; it: string };
   category: 'Bicicletas' | 'Componentes' | 'Ropa' | 'Accesorios' | 'Nutrición' | 'Otros';
   description: string;
+  descriptionTranslations?: { es: string; en: string; fr: string; it: string };
   logo?: string;
   website?: string;
   country?: string;
@@ -123,8 +127,11 @@ export interface Brand {
 export interface NewsArticle {
   id: string;
   title: string;
+  titleTranslations?: { es: string; en: string; fr: string; it: string };
   summary: string;
+  summaryTranslations?: { es: string; en: string; fr: string; it: string };
   content: string;
+  contentTranslations?: { es: string; en: string; fr: string; it: string };
   author: string;
   publishDate: string;
   category: 'Competición' | 'Equipamiento' | 'Rutas' | 'Noticias' | 'Entrevistas';
@@ -137,6 +144,7 @@ export interface NewsArticle {
 export interface CyclingRace {
   id: string;
   name: string;
+  nameTranslations?: { es: string; en: string; fr: string; it: string };
   date: string;
   location: {
     city: string;
@@ -152,6 +160,7 @@ export interface CyclingRace {
   type: 'Carretera' | 'MTB' | 'Gravel' | 'Ciclocross' | 'Contrarreloj' | 'Otro';
   category: 'Profesional' | 'Amateur' | 'Gran Fondo' | 'Marcha' | 'Otro';
   description: string;
+  descriptionTranslations?: { es: string; en: string; fr: string; it: string };
   posterUrl: string;
   registrationUrl?: string;
   startTime?: string;

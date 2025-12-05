@@ -5,6 +5,8 @@ import { loadCollaborators, loadCategories, addCategory, removeCategory } from '
 import { defaultCollaborators } from '../data/defaultCollaborators';
 import { exportCollaborators } from '../utils/excelExport';
 import { ShareButton } from './ShareButton';
+import { useLanguage } from '../hooks/useLanguage';
+import { getTranslatedText } from '../utils/translationHelpers';
 import { 
   Store, 
   Hotel, 
@@ -28,6 +30,7 @@ interface CollaboratorsViewProps {
 }
 
 export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
+  const { language } = useLanguage();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -115,9 +118,11 @@ export const CollaboratorsView: React.FC<CollaboratorsViewProps> = ({ t }) => {
     const matchesCity = selectedCity === 'all' || (collaborator.contactInfo.address && 
       collaborator.contactInfo.address.toLowerCase().includes(selectedCity.toLowerCase()));
     
-    const matchesSearch = searchTerm === '' || 
-      collaborator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      collaborator.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const collabName = getTranslatedText(collaborator.name, collaborator.nameTranslations, language);
+    const collabDescription = getTranslatedText(collaborator.description, collaborator.descriptionTranslations, language);
+    const matchesSearch = searchTerm === '' ||
+      collabName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      collabDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (collaborator.contactInfo.address && collaborator.contactInfo.address.toLowerCase().includes(searchTerm.toLowerCase()));
     
     return isActive && matchesCategory && matchesCity && matchesSearch;

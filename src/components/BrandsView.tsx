@@ -5,6 +5,8 @@ import { loadBrands, loadBrandCategories } from '../utils/brandsStorage';
 import { defaultBrands } from '../data/defaultBrands';
 import { exportBrands } from '../utils/excelExport';
 import { ShareButton } from './ShareButton';
+import { useLanguage } from '../hooks/useLanguage';
+import { getTranslatedText } from '../utils/translationHelpers';
 import {
   Tag,
   ExternalLink,
@@ -27,6 +29,7 @@ interface BrandsViewProps {
 }
 
 export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
+  const { language } = useLanguage();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -58,13 +61,15 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
   };
 
   const filteredBrands = brands.filter(brand => {
+    const brandName = getTranslatedText(brand.name, brand.nameTranslations, language);
+    const brandDescription = getTranslatedText(brand.description, brand.descriptionTranslations, language);
     const isActive = brand.isActive;
     const matchesCategory = selectedCategory === 'all' || brand.category === selectedCategory;
-    const matchesSearch = brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         brand.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         brandDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (brand.country && brand.country.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFeatured = !showOnlyFeatured || brand.featured;
-    
+
     return isActive && matchesCategory && matchesSearch && matchesFeatured;
   });
 
@@ -146,14 +151,16 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredBrands.map(brand => {
               const Icon = getCategoryIcon(brand.category);
-              
+              const brandName = getTranslatedText(brand.name, brand.nameTranslations, language);
+              const brandDescription = getTranslatedText(brand.description, brand.descriptionTranslations, language);
+
               return (
                 <div key={brand.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                   <div className="relative h-48">
                     {brand.logo ? (
-                      <img 
-                        src={brand.logo} 
-                        alt={`${brand.name} logo`}
+                      <img
+                        src={brand.logo}
+                        alt={`${brandName} logo`}
                         className="w-full h-full object-contain bg-slate-50 p-4"
                       />
                     ) : (
@@ -171,14 +178,14 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                       <Icon className="h-5 w-5 text-orange-500 bg-white rounded-full p-1" />
                     </div>
                   </div>
-                  
+
                   <div className="p-6">
-                    <h3 className="text-lg font-bold text-slate-800 mb-1">{brand.name}</h3>
+                    <h3 className="text-lg font-bold text-slate-800 mb-1">{brandName}</h3>
                     <div className="flex items-center space-x-2 mb-3">
                       <Icon className="h-4 w-4 text-orange-500" />
                       <span className="text-sm text-slate-600">{brand.category}</span>
                     </div>
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-3">{brand.description}</p>
+                    <p className="text-slate-600 text-sm mb-4 line-clamp-3">{brandDescription}</p>
                     
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
                       {brand.country && (
@@ -234,14 +241,16 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {regularBrands.map(brand => {
               const Icon = getCategoryIcon(brand.category);
-              
+              const brandName = getTranslatedText(brand.name, brand.nameTranslations, language);
+              const brandDescription = getTranslatedText(brand.description, brand.descriptionTranslations, language);
+
               return (
                 <div key={brand.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                   <div className="relative h-40">
                     {brand.logo ? (
-                      <img 
-                        src={brand.logo} 
-                        alt={`${brand.name} logo`}
+                      <img
+                        src={brand.logo}
+                        alt={`${brandName} logo`}
                         className="w-full h-full object-contain bg-slate-50 p-3"
                       />
                     ) : (
@@ -261,14 +270,14 @@ export const BrandsView: React.FC<BrandsViewProps> = ({ t }) => {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="p-4">
-                    <h3 className="text-lg font-bold text-slate-800 mb-1">{brand.name}</h3>
+                    <h3 className="text-lg font-bold text-slate-800 mb-1">{brandName}</h3>
                     <div className="flex items-center space-x-2 mb-2">
                       <Icon className="h-3 w-3 text-orange-500" />
                       <span className="text-xs text-slate-600">{brand.category}</span>
                     </div>
-                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">{brand.description}</p>
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">{brandDescription}</p>
                     
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
                       {brand.country && (

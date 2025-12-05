@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, Power, PowerOff } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
+import { MultilingualInput } from './MultilingualInput';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { supabase } from '../utils/supabaseClient';
@@ -110,12 +111,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   
   const [brandForm, setBrandForm] = useState({
     name: '', category: 'Bicicletas', description: '', logo: '', website: '',
-    country: '', foundedYear: '', specialties: '', featured: false, isActive: true
+    country: '', foundedYear: '', specialties: '', featured: false, isActive: true,
+    nameTranslations: { es: '', en: '', fr: '', it: '' },
+    descriptionTranslations: { es: '', en: '', fr: '', it: '' }
   });
   
   const [collaboratorForm, setCollaboratorForm] = useState({
     name: '', category: 'Tienda de Bicicletas', description: '', email: '',
-    phone: '', website: '', address: '', images: '', featured: false, isActive: true
+    phone: '', website: '', address: '', images: '', featured: false, isActive: true,
+    nameTranslations: { es: '', en: '', fr: '', it: '' },
+    descriptionTranslations: { es: '', en: '', fr: '', it: '' }
   });
 
   const [collaboratorCategories, setCollaboratorCategories] = useState<string[]>([
@@ -131,7 +136,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   
   const [newsForm, setNewsForm] = useState({
     title: '', summary: '', content: '', author: '', category: 'Noticias',
-    imageUrl: '', readTime: 5, featured: false, externalUrl: ''
+    imageUrl: '', readTime: 5, featured: false, externalUrl: '',
+    titleTranslations: { es: '', en: '', fr: '', it: '' },
+    summaryTranslations: { es: '', en: '', fr: '', it: '' },
+    contentTranslations: { es: '', en: '', fr: '', it: '' }
   });
 
   const [raceForm, setRaceForm] = useState({
@@ -139,7 +147,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     distance: '', elevation: '', type: 'Carretera', category: 'Amateur',
     description: '', posterUrl: '', registrationUrl: '', startTime: '',
     maxParticipants: '', price: '', organizer: '', contactEmail: '',
-    contactPhone: '', featured: false
+    contactPhone: '', featured: false,
+    nameTranslations: { es: '', en: '', fr: '', it: '' },
+    descriptionTranslations: { es: '', en: '', fr: '', it: '' }
   });
 
   const [socialForm, setSocialForm] = useState({
@@ -433,8 +443,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     const newBrand: Brand = {
       id: Date.now().toString(),
       name: brandForm.name,
+      nameTranslations: brandForm.nameTranslations,
       category: brandForm.category as any,
       description: brandForm.description,
+      descriptionTranslations: brandForm.descriptionTranslations,
       logo: brandForm.logo || undefined,
       website: brandForm.website || undefined,
       country: brandForm.country || undefined,
@@ -443,7 +455,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       isActive: brandForm.isActive,
       featured: brandForm.featured
     };
-    
+
     addBrand(newBrand);
     setBrands(loadBrands());
     setShowBrandModal(false);
@@ -454,8 +466,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setEditingBrand(brand);
     setBrandForm({
       name: brand.name,
+      nameTranslations: brand.nameTranslations || { es: brand.name, en: '', fr: '', it: '' },
       category: brand.category,
       description: brand.description,
+      descriptionTranslations: brand.descriptionTranslations || { es: brand.description, en: '', fr: '', it: '' },
       logo: brand.logo || '',
       website: brand.website || '',
       country: brand.country || '',
@@ -469,12 +483,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
   const handleUpdateBrand = () => {
     if (!editingBrand) return;
-    
+
     const updatedBrand: Brand = {
       ...editingBrand,
       name: brandForm.name,
+      nameTranslations: brandForm.nameTranslations,
       category: brandForm.category as any,
       description: brandForm.description,
+      descriptionTranslations: brandForm.descriptionTranslations,
       logo: brandForm.logo || undefined,
       website: brandForm.website || undefined,
       country: brandForm.country || undefined,
@@ -501,7 +517,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const resetBrandForm = () => {
     setBrandForm({
       name: '', category: 'Bicicletas', description: '', logo: '', website: '',
-      country: '', foundedYear: '', specialties: '', featured: false, isActive: true
+      country: '', foundedYear: '', specialties: '', featured: false, isActive: true,
+      nameTranslations: { es: '', en: '', fr: '', it: '' },
+      descriptionTranslations: { es: '', en: '', fr: '', it: '' }
     });
   };
 
@@ -676,8 +694,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     const newCollaborator: Collaborator = {
       id: Date.now().toString(),
       name: collaboratorForm.name,
+      nameTranslations: collaboratorForm.nameTranslations,
       category: collaboratorForm.category as any,
       description: collaboratorForm.description,
+      descriptionTranslations: collaboratorForm.descriptionTranslations,
       contactInfo: {
         email: collaboratorForm.email || undefined,
         phone: collaboratorForm.phone || undefined,
@@ -688,7 +708,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       isActive: collaboratorForm.isActive,
       featured: collaboratorForm.featured
     };
-    
+
     addCollaborator(newCollaborator);
     setCollaborators(loadCollaborators());
     setShowCollaboratorModal(false);
@@ -699,8 +719,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setEditingCollaborator(collaborator);
     setCollaboratorForm({
       name: collaborator.name,
+      nameTranslations: collaborator.nameTranslations || { es: collaborator.name, en: '', fr: '', it: '' },
       category: collaborator.category,
       description: collaborator.description,
+      descriptionTranslations: collaborator.descriptionTranslations || { es: collaborator.description, en: '', fr: '', it: '' },
       email: collaborator.contactInfo.email || '',
       phone: collaborator.contactInfo.phone || '',
       website: collaborator.contactInfo.website || '',
@@ -714,12 +736,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
   const handleUpdateCollaborator = () => {
     if (!editingCollaborator) return;
-    
+
     const updatedCollaborator: Collaborator = {
       ...editingCollaborator,
       name: collaboratorForm.name,
+      nameTranslations: collaboratorForm.nameTranslations,
       category: collaboratorForm.category as any,
       description: collaboratorForm.description,
+      descriptionTranslations: collaboratorForm.descriptionTranslations,
       contactInfo: {
         email: collaboratorForm.email || undefined,
         phone: collaboratorForm.phone || undefined,
@@ -730,7 +754,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       featured: collaboratorForm.featured,
       isActive: collaboratorForm.isActive
     };
-    
+
     updateCollaborator(updatedCollaborator);
     setCollaborators(loadCollaborators());
     setShowCollaboratorModal(false);
@@ -748,7 +772,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const resetCollaboratorForm = () => {
     setCollaboratorForm({
       name: '', category: 'Tienda de Bicicletas', description: '', email: '',
-      phone: '', website: '', address: '', images: '', featured: false, isActive: true
+      phone: '', website: '', address: '', images: '', featured: false, isActive: true,
+      nameTranslations: { es: '', en: '', fr: '', it: '' },
+      descriptionTranslations: { es: '', en: '', fr: '', it: '' }
     });
   };
 
@@ -782,8 +808,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     const newArticle: NewsArticle = {
       id: Date.now().toString(),
       title: newsForm.title,
+      titleTranslations: newsForm.titleTranslations,
       summary: newsForm.summary,
+      summaryTranslations: newsForm.summaryTranslations,
       content: newsForm.content,
+      contentTranslations: newsForm.contentTranslations,
       author: newsForm.author,
       publishDate: new Date().toISOString().split('T')[0],
       category: newsForm.category as any,
@@ -792,7 +821,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       featured: newsForm.featured,
       externalUrl: newsForm.externalUrl || undefined
     };
-    
+
     addNews(newArticle);
     setNews(loadNews());
     setShowNewsModal(false);
@@ -803,8 +832,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setEditingNews(article);
     setNewsForm({
       title: article.title,
+      titleTranslations: article.titleTranslations || { es: article.title, en: '', fr: '', it: '' },
       summary: article.summary,
+      summaryTranslations: article.summaryTranslations || { es: article.summary, en: '', fr: '', it: '' },
       content: article.content,
+      contentTranslations: article.contentTranslations || { es: article.content, en: '', fr: '', it: '' },
       author: article.author,
       category: article.category,
       imageUrl: article.imageUrl,
@@ -817,12 +849,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
 
   const handleUpdateNews = () => {
     if (!editingNews) return;
-    
+
     const updatedArticle: NewsArticle = {
       ...editingNews,
       title: newsForm.title,
+      titleTranslations: newsForm.titleTranslations,
       summary: newsForm.summary,
+      summaryTranslations: newsForm.summaryTranslations,
       content: newsForm.content,
+      contentTranslations: newsForm.contentTranslations,
       author: newsForm.author,
       category: newsForm.category as any,
       imageUrl: newsForm.imageUrl,
@@ -830,7 +865,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       featured: newsForm.featured,
       externalUrl: newsForm.externalUrl || undefined
     };
-    
+
     updateNews(updatedArticle);
     setNews(loadNews());
     setShowNewsModal(false);
@@ -848,7 +883,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
   const resetNewsForm = () => {
     setNewsForm({
       title: '', summary: '', content: '', author: '', category: 'Noticias',
-      imageUrl: '', readTime: 5, featured: false, externalUrl: ''
+      imageUrl: '', readTime: 5, featured: false, externalUrl: '',
+      titleTranslations: { es: '', en: '', fr: '', it: '' },
+      summaryTranslations: { es: '', en: '', fr: '', it: '' },
+      contentTranslations: { es: '', en: '', fr: '', it: '' }
     });
   };
 
@@ -857,6 +895,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     const newRace: CyclingRace = {
       id: Date.now().toString(),
       name: raceForm.name,
+      nameTranslations: raceForm.nameTranslations,
       date: raceForm.date,
       location: {
         city: raceForm.city,
@@ -872,6 +911,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       type: raceForm.type as any,
       category: raceForm.category as any,
       description: raceForm.description,
+      descriptionTranslations: raceForm.descriptionTranslations,
       posterUrl: raceForm.posterUrl,
       registrationUrl: raceForm.registrationUrl || undefined,
       startTime: raceForm.startTime || undefined,
@@ -894,6 +934,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     setEditingRace(race);
     setRaceForm({
       name: race.name,
+      nameTranslations: race.nameTranslations || { es: race.name, en: '', fr: '', it: '' },
       date: race.date,
       city: race.location.city,
       region: race.location.region,
@@ -905,6 +946,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       type: race.type,
       category: race.category,
       description: race.description,
+      descriptionTranslations: race.descriptionTranslations || { es: race.description, en: '', fr: '', it: '' },
       posterUrl: race.posterUrl,
       registrationUrl: race.registrationUrl || '',
       startTime: race.startTime || '',
@@ -924,6 +966,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     const updatedRace: CyclingRace = {
       ...editingRace,
       name: raceForm.name,
+      nameTranslations: raceForm.nameTranslations,
       date: raceForm.date,
       location: {
         city: raceForm.city,
@@ -939,6 +982,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       type: raceForm.type as any,
       category: raceForm.category as any,
       description: raceForm.description,
+      descriptionTranslations: raceForm.descriptionTranslations,
       posterUrl: raceForm.posterUrl,
       registrationUrl: raceForm.registrationUrl || undefined,
       startTime: raceForm.startTime || undefined,
@@ -970,7 +1014,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
       distance: '', elevation: '', type: 'Carretera', category: 'Amateur',
       description: '', posterUrl: '', registrationUrl: '', startTime: '',
       maxParticipants: '', price: '', organizer: '', contactEmail: '',
-      contactPhone: '', featured: false
+      contactPhone: '', featured: false,
+      nameTranslations: { es: '', en: '', fr: '', it: '' },
+      descriptionTranslations: { es: '', en: '', fr: '', it: '' }
     });
   };
 
