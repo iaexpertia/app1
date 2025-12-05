@@ -4,7 +4,7 @@ import { Translation } from '../i18n/translations';
 import { StravaConnect } from './StravaConnect';
 import { ShareButton } from './ShareButton';
 import { Activity } from 'lucide-react';
-import { Award, Calendar, Camera, FileText, Mountain, TrendingUp, MapPin, ChevronRight, ChevronLeft, Eye, CreditCard as Edit, Save, X, Plus } from 'lucide-react';
+import { Award, Calendar, Camera, FileText, Mountain, TrendingUp, MapPin, ChevronRight, ChevronLeft, Save, X } from 'lucide-react';
 
 interface ConqueredPassesViewProps {
   conqueredPasses: MountainPass[];
@@ -27,7 +27,6 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
   allPasses,
   onSyncComplete
 }) => {
-  const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
   const [notesText, setNotesText] = useState('');
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -321,8 +320,8 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                    <div className="flex items-center space-x-4 text-sm text-slate-600">
+                  {(hasPhotos || hasNotes) && (
+                    <div className="flex items-center space-x-4 text-sm text-slate-600 pt-4 border-t border-slate-200">
                       {hasPhotos && (
                         <span className="flex items-center">
                           <Camera className="h-4 w-4 mr-1" />
@@ -336,15 +335,7 @@ export const ConqueredPassesView: React.FC<ConqueredPassesViewProps> = ({
                         </span>
                       )}
                     </div>
-                    
-                    <button
-                      onClick={() => setSelectedPass(pass)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span>Ver Detalles</span>
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

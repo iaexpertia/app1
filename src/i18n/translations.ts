@@ -375,8 +375,6 @@ export const translations: Record<string, Translation> = {
     // Database
     databaseTitle: 'Base de Datos de Puertos',
     databaseDescription: 'Explora todos los puertos disponibles y añádelos a tu colección personal',
-    addToMyPasses: 'Añadir a Mis Puertos',
-    removeFromMyPasses: 'Quitar de Mis Puertos',
     alreadyInMyPasses: 'Ya en Mis Puertos',
     availablePasses: 'Puertos Disponibles',
     mySelectedPasses: 'Mis Puertos Seleccionados',
@@ -601,8 +599,6 @@ export const translations: Record<string, Translation> = {
     // Database
     databaseTitle: 'Mountain Pass Database',
     databaseDescription: 'Explore all available passes and add them to your personal collection',
-    addToMyPasses: 'Add to My Passes',
-    removeFromMyPasses: 'Remove from My Passes',
     alreadyInMyPasses: 'Already in My Passes',
     availablePasses: 'Available Passes',
     mySelectedPasses: 'My Selected Passes',
@@ -825,8 +821,6 @@ export const translations: Record<string, Translation> = {
     // Database
     databaseTitle: 'Base de Données des Cols',
     databaseDescription: 'Explorez tous les cols disponibles et ajoutez-les à votre collection personnelle',
-    addToMyPasses: 'Ajouter à Mes Cols',
-    removeFromMyPasses: 'Retirer de Mes Cols',
     alreadyInMyPasses: 'Déjà dans Mes Cols',
     availablePasses: 'Cols Disponibles',
     mySelectedPasses: 'Mes Cols Sélectionnés',
@@ -1049,8 +1043,6 @@ export const translations: Record<string, Translation> = {
     // Database
     databaseTitle: 'Database dei Passi',
     databaseDescription: 'Esplora tutti i passi disponibili e aggiungili alla tua collezione personale',
-    addToMyPasses: 'Aggiungi ai Miei Passi',
-    removeFromMyPasses: 'Rimuovi dai Miei Passi',
     alreadyInMyPasses: 'Già nei Miei Passi',
     availablePasses: 'Passi Disponibili',
     mySelectedPasses: 'I Miei Passi Selezionati',
