@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MountainPass, NewsArticle } from '../types';
 import { Translation } from '../i18n/translations';
 import { PassCard } from './PassCard';
+import { ShareButton } from './ShareButton';
 import { Search, Filter, ChevronLeft, ChevronRight, Tag, Users, ExternalLink, Globe, Phone, Mail, Mountain, Calendar, MapPin, Trophy, Newspaper, Clock, User as UserIcon } from 'lucide-react';
 import { loadBrands } from '../utils/brandsStorage';
 import { loadCollaborators } from '../utils/collaboratorStorage';
@@ -430,12 +431,19 @@ export const PassesList: React.FC<PassesListProps> = ({
                     </div>
                     <p className="text-xs text-slate-500 line-clamp-2">{article.summary}</p>
                   </div>
-                  <button
-                    onClick={() => handleOpenArticle(article)}
-                    className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap"
-                  >
-                    Leer artículo
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => handleOpenArticle(article)}
+                      className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap"
+                    >
+                      Leer artículo
+                    </button>
+                    <ShareButton
+                      title={article.title}
+                      text={article.summary}
+                      className="text-xs bg-blue-600 hover:bg-blue-700"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -545,7 +553,14 @@ export const PassesList: React.FC<PassesListProps> = ({
             </div>
 
             <div className="p-8">
-              <h1 className="text-3xl font-bold text-slate-800 mb-4">{selectedArticle.title}</h1>
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-3xl font-bold text-slate-800">{selectedArticle.title}</h1>
+                <ShareButton
+                  title={selectedArticle.title}
+                  text={selectedArticle.summary}
+                  className="bg-blue-600 hover:bg-blue-700"
+                />
+              </div>
 
               <div className="flex items-center space-x-4 text-sm text-slate-500 mb-6 pb-6 border-b border-slate-200">
                 <span className="flex items-center">

@@ -280,13 +280,20 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                     </div>
                   </div>
                   
-                  <button
-                    onClick={() => handleOpenArticle(featuredNews[0])}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                  >
-                    <span>{t.readArticle}</span>
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleOpenArticle(featuredNews[0])}
+                      className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      <span>{t.readArticle}</span>
+                      <ExternalLink className="h-4 w-4" />
+                    </button>
+                    <ShareButton
+                      title={featuredNews[0].title}
+                      text={featuredNews[0].summary}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,12 +338,19 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                         </span>
                       </div>
 
-                      <button
-                        onClick={() => handleOpenArticle(article)}
-                        className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
-                      >
-                        {t.readMore}
-                      </button>
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleOpenArticle(article)}
+                          className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                        >
+                          {t.readMore}
+                        </button>
+                        <ShareButton
+                          title={article.title}
+                          text={article.summary}
+                          className="w-full text-sm bg-blue-600 hover:bg-blue-700"
+                        />
+                      </div>
                     </div>
                   </div>
                 );
@@ -386,7 +400,7 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                       </span>
                     </div>
                     
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <span className="flex items-center text-xs text-slate-500">
                         <Clock className="h-3 w-3 mr-1" />
                         {t.readingTime.replace('{minutes}', String(article.readTime))}
@@ -399,6 +413,12 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
                         {t.read}
                       </button>
                     </div>
+
+                    <ShareButton
+                      title={article.title}
+                      text={article.summary}
+                      className="w-full text-xs bg-blue-600 hover:bg-blue-700"
+                    />
                   </div>
                 </div>
               );
@@ -435,10 +455,15 @@ export const NewsView: React.FC<NewsViewProps> = ({ t }) => {
             </div>
 
             <div className="p-8">
-              <div className="flex items-center space-x-2 mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedArticle.category)}`}>
                   {selectedArticle.category}
                 </span>
+                <ShareButton
+                  title={selectedArticle.title}
+                  text={selectedArticle.summary}
+                  className="bg-blue-600 hover:bg-blue-700"
+                />
               </div>
 
               <h1 className="text-3xl font-bold text-slate-800 mb-4">{selectedArticle.title}</h1>
