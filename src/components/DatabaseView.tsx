@@ -533,42 +533,56 @@ export const DatabaseView: React.FC<DatabaseViewProps> = ({
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Latitud</label>
-                  <input
-                    type="number"
-                    value={newPass.coordinates?.lat || ''}
-                    onChange={(e) => setNewPass({ 
-                      ...newPass, 
-                      coordinates: { 
-                        ...newPass.coordinates, 
-                        lat: parseFloat(e.target.value) || 0 
-                      } 
-                    })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="Ej: 45.0914"
-                    step="0.000001"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Longitud</label>
-                  <input
-                    type="number"
-                    value={newPass.coordinates?.lng || ''}
-                    onChange={(e) => setNewPass({ 
-                      ...newPass, 
-                      coordinates: { 
-                        ...newPass.coordinates, 
-                        lng: parseFloat(e.target.value) || 0 
-                      } 
-                    })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="Ej: 6.0669"
-                    step="0.000001"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Coordenadas de Google Maps
+                </label>
+                <input
+                  type="text"
+                  placeholder="Pega el enlace o coordenadas de Google Maps (Ej: 45.0914, 6.0669)"
+                  onChange={(e) => {
+                    const input = e.target.value.trim();
+
+                    // Extraer coordenadas de URL de Google Maps
+                    let lat = 0, lng = 0;
+
+                    // Patrón 1: URL con @lat,lng
+                    const pattern1 = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+                    const match1 = input.match(pattern1);
+
+                    // Patrón 2: URL con ?q=lat,lng
+                    const pattern2 = /\?q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+                    const match2 = input.match(pattern2);
+
+                    // Patrón 3: Coordenadas directas "lat, lng"
+                    const pattern3 = /^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/;
+                    const match3 = input.match(pattern3);
+
+                    if (match1) {
+                      lat = parseFloat(match1[1]);
+                      lng = parseFloat(match1[2]);
+                    } else if (match2) {
+                      lat = parseFloat(match2[1]);
+                      lng = parseFloat(match2[2]);
+                    } else if (match3) {
+                      lat = parseFloat(match3[1]);
+                      lng = parseFloat(match3[2]);
+                    }
+
+                    if (lat !== 0 || lng !== 0) {
+                      setNewPass({
+                        ...newPass,
+                        coordinates: { lat, lng }
+                      });
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                />
+                {newPass.coordinates && (newPass.coordinates.lat !== 0 || newPass.coordinates.lng !== 0) && (
+                  <p className="mt-2 text-sm text-green-600">
+                    Coordenadas detectadas: {newPass.coordinates.lat.toFixed(6)}, {newPass.coordinates.lng.toFixed(6)}
+                  </p>
+                )}
               </div>
               
               <div>
