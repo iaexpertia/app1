@@ -24,13 +24,20 @@ const RacesView = lazy(() => import('./components/RacesView').then(m => ({ defau
 import { mountainPasses } from './data/mountainPasses';
 import {
   loadConquests,
-  addConquest,
-  removeConquest,
+  addConquest as addConquestLocalStorage,
+  removeConquest as removeConquestLocalStorage,
   isPassConquered,
-  updateConquestPhotos,
-  getConquestByPassId,
+  updateConquestPhotos as updateConquestPhotosLocalStorage,
+  getConquestByPassId as getConquestByPassIdLocalStorage,
   updateConquest
 } from './utils/storage';
+import {
+  loadConquestsFromDB,
+  addConquestToDB,
+  removeConquestFromDB,
+  updateConquestPhotos as updateConquestPhotosDB,
+  subscribeToConquests
+} from './utils/conquestService';
 import { calculateUserStats } from './utils/stats';
 import { isCurrentUserAdmin, ensureAdminExists, setCurrentUser, getCurrentUser, logoutUser } from './utils/cyclistStorage';
 import { getAllPassesFromDB } from './utils/passesService';
@@ -76,11 +83,9 @@ function App() {
   };
 
   useEffect(() => {
-    const initializeApp = async () => {
-      const loadedConquests = loadConquests();
-      setConquests(loadedConquests);
-      setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
+    let subscription: any = null;
 
+    const initializeApp = async () => {
       // Ensure admin user exists in database
       await ensureAdminExists();
 
@@ -91,6 +96,27 @@ function App() {
       // Cargar el ciclista actual
       const cyclist = await getCurrentUser();
       setCurrentCyclist(cyclist);
+
+      // Cargar conquistas desde Supabase si hay un usuario logueado
+      if (cyclist?.id) {
+        const dbConquests = await loadConquestsFromDB(cyclist.id);
+        setConquests(dbConquests);
+        setConqueredPassIds(new Set(dbConquests.map(c => c.passId)));
+
+        // Suscribirse a cambios en tiempo real
+        subscription = subscribeToConquests(cyclist.id, async (payload) => {
+          console.log('Real-time update received:', payload);
+          // Recargar conquistas cuando hay cambios
+          const updatedConquests = await loadConquestsFromDB(cyclist.id);
+          setConquests(updatedConquests);
+          setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
+        });
+      } else {
+        // Si no hay usuario logueado, cargar desde localStorage como fallback
+        const loadedConquests = loadConquests();
+        setConquests(loadedConquests);
+        setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
+      }
 
       // Cargar puertos desde la base de datos
       const dbPasses = await getAllPassesFromDB();
@@ -109,12 +135,17 @@ function App() {
 
     return () => {
       window.removeEventListener('userChanged', handleUserChange);
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, []);
 
-  const handleToggleConquest = (passId: string) => {
-    if (isPassConquered(passId)) {
-      removeConquest(passId);
+  const handleToggleConquest = async (passId: string) => {
+    const isConquered = conqueredPassIds.has(passId);
+
+    // Optimistic UI update
+    if (isConquered) {
       const updatedConquests = conquests.filter(c => c.passId !== passId);
       setConquests(updatedConquests);
       setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
@@ -123,10 +154,47 @@ function App() {
         passId,
         dateCompleted: new Date().toISOString().split('T')[0]
       };
-      addConquest(newConquest);
       const updatedConquests = [...conquests.filter(c => c.passId !== passId), newConquest];
       setConquests(updatedConquests);
       setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
+    }
+
+    // Save to database if user is logged in
+    if (currentCyclist?.id) {
+      if (isConquered) {
+        const result = await removeConquestFromDB(currentCyclist.id, passId);
+        if (!result.success) {
+          console.error('Error removing conquest from DB:', result.error);
+          // Revert optimistic update on error
+          const revertedConquests = await loadConquestsFromDB(currentCyclist.id);
+          setConquests(revertedConquests);
+          setConqueredPassIds(new Set(revertedConquests.map(c => c.passId)));
+        }
+      } else {
+        const newConquest: ConquestData = {
+          passId,
+          dateCompleted: new Date().toISOString().split('T')[0]
+        };
+        const result = await addConquestToDB(currentCyclist.id, newConquest);
+        if (!result.success) {
+          console.error('Error adding conquest to DB:', result.error);
+          // Revert optimistic update on error
+          const revertedConquests = await loadConquestsFromDB(currentCyclist.id);
+          setConquests(revertedConquests);
+          setConqueredPassIds(new Set(revertedConquests.map(c => c.passId)));
+        }
+      }
+    } else {
+      // Fallback to localStorage if no user is logged in
+      if (isConquered) {
+        removeConquestLocalStorage(passId);
+      } else {
+        const newConquest: ConquestData = {
+          passId,
+          dateCompleted: new Date().toISOString().split('T')[0]
+        };
+        addConquestLocalStorage(newConquest);
+      }
     }
   };
 
@@ -141,10 +209,21 @@ function App() {
     }
   };
 
-  const handleSavePhotos = (passId: string, photos: string[]) => {
-    updateConquestPhotos(passId, photos);
-    const updatedConquests = loadConquests();
-    setConquests(updatedConquests);
+  const handleSavePhotos = async (passId: string, photos: string[]) => {
+    if (currentCyclist?.id) {
+      const result = await updateConquestPhotosDB(currentCyclist.id, passId, photos);
+      if (result.success) {
+        const updatedConquests = await loadConquestsFromDB(currentCyclist.id);
+        setConquests(updatedConquests);
+        setConqueredPassIds(new Set(updatedConquests.map(c => c.passId)));
+      } else {
+        console.error('Error updating photos:', result.error);
+      }
+    } else {
+      updateConquestPhotosLocalStorage(passId, photos);
+      const updatedConquests = loadConquests();
+      setConquests(updatedConquests);
+    }
     setPhotosPass(null);
   };
 
@@ -159,13 +238,20 @@ function App() {
   };
 
   const handleSyncComplete = async () => {
-    // Reload conquests after Strava sync
-    const loadedConquests = loadConquests();
-    setConquests(loadedConquests);
-    setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
     // Reload current cyclist to get updated tokens
     const cyclist = await getCurrentUser();
     setCurrentCyclist(cyclist);
+
+    // Reload conquests after Strava sync
+    if (cyclist?.id) {
+      const dbConquests = await loadConquestsFromDB(cyclist.id);
+      setConquests(dbConquests);
+      setConqueredPassIds(new Set(dbConquests.map(c => c.passId)));
+    } else {
+      const loadedConquests = loadConquests();
+      setConquests(loadedConquests);
+      setConqueredPassIds(new Set(loadedConquests.map(c => c.passId)));
+    }
   };
 
   const handleUpdatePass = async (updatedPass: MountainPass) => {
@@ -365,7 +451,7 @@ function App() {
         {photosPass && (
           <PhotosModal
             pass={photosPass}
-            conquest={photosPass ? getConquestByPassId(photosPass.id) : null}
+            conquest={photosPass ? conquests.find(c => c.passId === photosPass.id) || null : null}
             onClose={() => setPhotosPass(null)}
             onSavePhotos={handleSavePhotos}
             t={t}
