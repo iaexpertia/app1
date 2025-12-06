@@ -30,17 +30,28 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRace, setSelectedRace] = useState<CyclingRace | null>(null);
+  const [showPastRaces, setShowPastRaces] = useState(false);
+
+  const isRacePast = (dateString: string): boolean => {
+    const raceDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return raceDate < today;
+  };
 
   useEffect(() => {
     const loadedRaces = loadRaces();
-    // Solo mostrar carreras activas
     const activeRaces = loadedRaces.filter(race => race.isActive !== false);
     setRaces(activeRaces);
-    setFilteredRaces(activeRaces);
   }, []);
 
   useEffect(() => {
     let filtered = races;
+
+    filtered = filtered.filter(race => {
+      const isPast = isRacePast(race.date);
+      return showPastRaces ? isPast : !isPast;
+    });
 
     if (searchTerm) {
       filtered = filtered.filter(race =>
@@ -58,8 +69,14 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
       filtered = filtered.filter(race => race.category === selectedCategory);
     }
 
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return showPastRaces ? dateB - dateA : dateA - dateB;
+    });
+
     setFilteredRaces(filtered);
-  }, [searchTerm, selectedType, selectedCategory, races]);
+  }, [searchTerm, selectedType, selectedCategory, races, showPastRaces]);
 
   const types = ['Carretera', 'Contrarreloj', 'Criterium', 'Gravel', 'MTB'];
   const categories = ['Amateur', 'Master', 'Elite', 'Gran Fondo', 'Todos'];
@@ -96,6 +113,32 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Toggle Past/Upcoming Races */}
+        <div className="mb-6 flex justify-center">
+          <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
+            <button
+              onClick={() => setShowPastRaces(false)}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${
+                !showPastRaces
+                  ? 'bg-orange-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:text-orange-600'
+              }`}
+            >
+              {t.upcomingRaces}
+            </button>
+            <button
+              onClick={() => setShowPastRaces(true)}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${
+                showPastRaces
+                  ? 'bg-gray-600 text-white shadow-sm'
+                  : 'text-gray-700 hover:text-gray-600'
+              }`}
+            >
+              {t.pastRaces}
+            </button>
+          </div>
+        </div>
+
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -149,33 +192,44 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
 
         {/* List View / Race Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRaces.map((race) => (
-            <div
-              key={race.id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div onClick={() => setSelectedRace(race)} className="cursor-pointer">
-                {race.posterUrl && (
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={race.posterUrl}
-                      alt={race.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
+          {filteredRaces.map((race) => {
+            const isPast = isRacePast(race.date);
+            return (
+              <div
+                key={race.id}
+                className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden ${
+                  isPast ? 'opacity-80' : ''
+                }`}
+              >
+                <div onClick={() => setSelectedRace(race)} className="cursor-pointer">
+                  {race.posterUrl && (
+                    <div className="h-48 overflow-hidden relative">
+                      <img
+                        src={race.posterUrl}
+                        alt={race.name}
+                        className={`w-full h-full object-cover hover:scale-105 transition-transform duration-300 ${
+                          isPast ? 'grayscale-[30%]' : ''
+                        }`}
+                      />
+                      {isPast && (
+                        <div className="absolute top-2 left-2 bg-gray-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                          {t.pastRaces}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 flex-1">{race.name}</h3>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      race.category === 'Elite' ? 'bg-yellow-100 text-yellow-800' :
-                      race.category === 'Amateur' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {race.category}
-                    </span>
-                  </div>
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 flex-1">{race.name}</h3>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        race.category === 'Elite' ? 'bg-yellow-100 text-yellow-800' :
+                        race.category === 'Amateur' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {race.category}
+                      </span>
+                    </div>
 
                   <div className="space-y-2 text-sm text-gray-600 mb-4">
                     <div className="flex items-center gap-2">
@@ -225,7 +279,8 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 />
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {filteredRaces.length === 0 && (

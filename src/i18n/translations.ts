@@ -211,6 +211,10 @@ export interface Translation {
   noRacesFound: string;
   noRacesFoundDesc: string;
   participants: string;
+  upcomingRaces: string;
+  pastRaces: string;
+  showPastRaces: string;
+  showUpcomingRaces: string;
 
   // News
   cyclingNews: string;
@@ -435,6 +439,10 @@ export const translations: Record<string, Translation> = {
     noRacesFound: 'No se encontraron carreras',
     noRacesFoundDesc: 'Intenta ajustar tus filtros de búsqueda',
     participants: 'participantes',
+    upcomingRaces: 'Carreras Próximas',
+    pastRaces: 'Carreras Pasadas',
+    showPastRaces: 'Ver Carreras Pasadas',
+    showUpcomingRaces: 'Ver Carreras Próximas',
 
     // News
     cyclingNews: 'Noticias de Ciclismo',
@@ -657,6 +665,10 @@ export const translations: Record<string, Translation> = {
     noRacesFound: 'No races found',
     noRacesFoundDesc: 'Try adjusting your search filters',
     participants: 'participants',
+    upcomingRaces: 'Upcoming Races',
+    pastRaces: 'Past Races',
+    showPastRaces: 'Show Past Races',
+    showUpcomingRaces: 'Show Upcoming Races',
 
     // News
     cyclingNews: 'Cycling News',
@@ -879,6 +891,10 @@ export const translations: Record<string, Translation> = {
     noRacesFound: 'Aucune course trouvée',
     noRacesFoundDesc: 'Essayez d\'ajuster vos filtres de recherche',
     participants: 'participants',
+    upcomingRaces: 'Courses à Venir',
+    pastRaces: 'Courses Passées',
+    showPastRaces: 'Voir les Courses Passées',
+    showUpcomingRaces: 'Voir les Courses à Venir',
 
     // News
     cyclingNews: 'Actualités Cyclistes',
@@ -1101,6 +1117,10 @@ export const translations: Record<string, Translation> = {
     noRacesFound: 'Nessuna gara trovata',
     noRacesFoundDesc: 'Prova ad aggiustare i tuoi filtri di ricerca',
     participants: 'partecipanti',
+    upcomingRaces: 'Gare Prossime',
+    pastRaces: 'Gare Passate',
+    showPastRaces: 'Mostra Gare Passate',
+    showUpcomingRaces: 'Mostra Gare Prossime',
 
     // News
     cyclingNews: 'Notizie Ciclistiche',
