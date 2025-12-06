@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag, Heart, Medal } from 'lucide-react';
+import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag, Heart, Medal, HelpCircle } from 'lucide-react';
 import { Translation } from '../i18n/translations';
 import { getCurrentUser, loadCyclists } from '../utils/cyclistStorage';
+import { loadHelpConfig } from '../utils/helpConfigStorage';
 
 interface HeaderProps {
   activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses' | 'racehistory';
@@ -30,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [hasRegisteredCyclists, setHasRegisteredCyclists] = useState(false);
+  const [helpUrl, setHelpUrl] = useState<string | null>(null);
 
   const isLoggedIn = currentUser !== null;
   const isCurrentUserAdmin = currentUser?.isAdmin || false;
@@ -58,6 +60,29 @@ export const Header: React.FC<HeaderProps> = ({
       window.removeEventListener('userChanged', handleUserChange);
       window.removeEventListener('storage', handleUserChange);
       clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadHelp = async () => {
+      const config = await loadHelpConfig();
+      if (config && config.is_active) {
+        setHelpUrl(config.help_url);
+      } else {
+        setHelpUrl(null);
+      }
+    };
+
+    loadHelp();
+
+    const handleHelpConfigUpdate = () => {
+      loadHelp();
+    };
+
+    window.addEventListener('helpConfigUpdated', handleHelpConfigUpdate);
+
+    return () => {
+      window.removeEventListener('helpConfigUpdated', handleHelpConfigUpdate);
     };
   }, []);
 
@@ -180,6 +205,29 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* User Actions */}
             <div className="flex items-center space-x-1 border-l border-slate-200 pl-2">
+              {helpUrl && (
+                <div className="relative">
+                  <a
+                    href={helpUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onMouseEnter={() => setHoveredItem('help')}
+                    onMouseLeave={() => setHoveredItem(null)}
+                    className="px-2 py-2 rounded-lg transition-all duration-200 flex items-center space-x-1 text-slate-600 hover:bg-slate-100"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    <span className="hidden xl:inline text-sm">Ayuda</span>
+                  </a>
+
+                  {hoveredItem === 'help' && (
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+                      Acceder a la ayuda
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {userActions.map((action) => {
                 const Icon = action.icon;
                 return (
@@ -255,6 +303,18 @@ export const Header: React.FC<HeaderProps> = ({
             
             {/* Mobile User Actions */}
             <div className="border-t border-slate-200 pt-2 mt-2">
+              {helpUrl && (
+                <a
+                  href={helpUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-3 text-left text-slate-600 hover:bg-slate-100"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                  <span className="font-medium">Ayuda</span>
+                </a>
+              )}
+
               {userActions.map((action) => {
                 const Icon = action.icon;
                 return (

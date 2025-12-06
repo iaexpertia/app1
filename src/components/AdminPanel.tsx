@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, Power, PowerOff, FolderOpen } from 'lucide-react';
+import { Users, Mountain, Tag, UserCheck, Newspaper, Download, UserPlus, Plus, CreditCard as Edit, Trash2, X, Save, Upload, Database, FileSpreadsheet, Trophy, MapPin, Camera, User, Share2, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send, Globe, Power, PowerOff, FolderOpen, HelpCircle } from 'lucide-react';
 import { MountainPass, Cyclist, Brand, Collaborator, NewsArticle, CyclingRace, SocialLink } from '../types';
 import { MultilingualInput } from './MultilingualInput';
 import { NewsCategoriesView } from './NewsCategoriesView';
+import { HelpConfigView } from './HelpConfigView';
 import { exportCyclists, exportMountainPasses, exportBrands, exportCollaborators, exportNews, exportRaces } from '../utils/excelExport';
 import { exportPassesToExcel, importPassesFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { supabase } from '../utils/supabaseClient';
@@ -1084,6 +1085,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
     { id: 'newsCategories', label: 'Categorías de Noticias', icon: FolderOpen },
     { id: 'races', label: 'Gestionar Carreras', icon: Trophy },
     { id: 'social', label: 'Redes Sociales', icon: Share2 },
+    { id: 'help', label: 'Ayuda', icon: HelpCircle },
   ];
 
   return (
@@ -1715,6 +1717,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ passes, onUpdatePass, on
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'help' && (
+          <HelpConfigView />
         )}
       </div>
 
