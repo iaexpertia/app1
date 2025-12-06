@@ -6,6 +6,7 @@ declare global {
       };
     };
     googleTranslateElementInit: () => void;
+    googleTranslateReady: boolean;
   }
 }
 

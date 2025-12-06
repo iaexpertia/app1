@@ -24,25 +24,39 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0];
 
   useEffect(() => {
+    let checkCount = 0;
+    const maxChecks = 30;
+
     const checkGoogleTranslate = () => {
+      checkCount++;
       const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+
       if (selectElement) {
         setGoogleTranslateReady(true);
-        console.log('Google Translate widget is ready');
+        console.log('✅ Google Translate widget is ready after', checkCount, 'checks');
+        return true;
       }
+
+      if (checkCount >= maxChecks) {
+        console.error('❌ Google Translate widget did not load after', maxChecks, 'attempts');
+        return false;
+      }
+
+      return false;
     };
 
-    const interval = setInterval(checkGoogleTranslate, 500);
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      if (!googleTranslateReady) {
-        console.warn('Google Translate widget did not load within expected time');
+    if (checkGoogleTranslate()) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      if (checkGoogleTranslate()) {
+        clearInterval(interval);
       }
-    }, 10000);
+    }, 500);
 
     return () => {
       clearInterval(interval);
-      clearTimeout(timeout);
     };
   }, []);
 
@@ -61,12 +75,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement;
 
       if (selectElement) {
+        console.log('✅ Google Translate select element found immediately');
         resolve(selectElement);
         return;
       }
 
+      console.log('⏳ Waiting for Google Translate select element...');
       let attempts = 0;
-      const maxAttempts = 20;
+      const maxAttempts = 30;
 
       const checkInterval = setInterval(() => {
         attempts++;
@@ -74,10 +90,16 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
         if (element) {
           clearInterval(checkInterval);
+          console.log('✅ Google Translate select element found after', attempts, 'attempts');
           resolve(element);
         } else if (attempts >= maxAttempts) {
           clearInterval(checkInterval);
-          console.error('Google Translate widget not found after multiple attempts');
+          console.error('❌ Google Translate widget not found after', maxAttempts, 'attempts');
+          console.log('Debug info:');
+          console.log('- google_translate_element exists:', !!document.getElementById('google_translate_element'));
+          console.log('- google object exists:', typeof window.google !== 'undefined');
+          console.log('- .goog-te-combo exists:', !!document.querySelector('.goog-te-combo'));
+          console.log('- All elements with class containing "goog":', document.querySelectorAll('[class*="goog"]').length);
           resolve(null);
         }
       }, 200);
@@ -93,17 +115,29 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         element.style.display = 'none';
       }
       setShowGoogleTranslate(false);
-    } else {
-      if (element) {
-        element.style.display = 'block';
-      }
-      setShowGoogleTranslate(true);
+      return;
+    }
 
-      const selectElement = await waitForGoogleTranslate();
+    console.log('🔵 Toggling Google Translate ON');
 
-      if (selectElement) {
-        setTimeout(() => {
+    if (element) {
+      element.style.display = 'block';
+    }
+    setShowGoogleTranslate(true);
+
+    if (!googleTranslateReady) {
+      console.log('⚠️ Google Translate widget is not ready yet, waiting...');
+    }
+
+    const selectElement = await waitForGoogleTranslate();
+
+    if (selectElement) {
+      console.log('🎯 Attempting to open select dropdown...');
+
+      setTimeout(() => {
+        try {
           selectElement.focus();
+          console.log('✅ Focus set on select element');
 
           const mousedownEvent = new MouseEvent('mousedown', {
             bubbles: true,
@@ -120,11 +154,21 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             button: 0
           });
           selectElement.dispatchEvent(clickEvent);
-        }, 150);
-      } else {
-        console.error('No se pudo encontrar el selector de Google Translate');
-        alert('El traductor de Google aún no está disponible. Por favor, recarga la página e intenta de nuevo.');
+
+          console.log('✅ Click events dispatched on select element');
+        } catch (error) {
+          console.error('❌ Error triggering select dropdown:', error);
+        }
+      }, 150);
+    } else {
+      console.error('❌ No se pudo encontrar el selector de Google Translate');
+
+      if (element) {
+        element.style.display = 'none';
       }
+      setShowGoogleTranslate(false);
+
+      alert('El traductor de Google no se ha cargado correctamente.\n\nPrueba:\n1. Recarga la página\n2. Verifica tu conexión a internet\n3. Si el problema persiste, puede que haya un bloqueador de scripts activo');
     }
   };
 
