@@ -62,7 +62,8 @@ function App() {
                                window.location.search.includes('token=');
 
   // Check if we're on the forgot password page
-  const isForgotPasswordPage = window.location.pathname === '/forgot-password';
+  const isForgotPasswordPage = window.location.pathname === '/forgot-password' ||
+                                 window.location.pathname === '/auth/forgot-password';
 
   // Check if we're on the update password page (support both new and legacy paths)
   const isUpdatePasswordPage = window.location.pathname === '/auth/reset-password' ||

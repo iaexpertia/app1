@@ -128,10 +128,8 @@ export const UpdatePassword: React.FC = () => {
           </div>
           <div className="text-center">
             <a
-              href="https://www.cyclepeaks.com/auth/forgot-password"
+              href="/auth/forgot-password"
               className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
             >
               Solicitar nuevo enlace
             </a>
