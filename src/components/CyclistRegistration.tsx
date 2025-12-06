@@ -442,16 +442,12 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
             )}
 
             <div className="text-center mb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowLogin(false);
-                  setShowPasswordRecovery(true);
-                }}
+              <a
+                href="/forgot-password"
                 className="text-sm text-orange-600 hover:text-orange-700 underline"
               >
                 ¿Olvidaste tu contraseña?
-              </button>
+              </a>
             </div>
 
             <div className="flex space-x-3">

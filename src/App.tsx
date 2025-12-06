@@ -20,6 +20,8 @@ const NewsView = lazy(() => import('./components/NewsView').then(m => ({ default
 const PassFinderView = lazy(() => import('./components/PassFinderView').then(m => ({ default: m.PassFinderView })));
 const MyPassesView = lazy(() => import('./components/MyPassesView').then(m => ({ default: m.default })));
 const PasswordReset = lazy(() => import('./components/PasswordReset').then(m => ({ default: m.PasswordReset })));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const UpdatePassword = lazy(() => import('./components/UpdatePassword').then(m => ({ default: m.UpdatePassword })));
 const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
 const RacesView = lazy(() => import('./components/RacesView').then(m => ({ default: m.RacesView })));
 import { mountainPasses } from './data/mountainPasses';
@@ -57,6 +59,12 @@ function App() {
   const isPasswordResetPage = window.location.pathname === '/reset-password' ||
                                window.location.search.includes('token=');
 
+  // Check if we're on the forgot password page
+  const isForgotPasswordPage = window.location.pathname === '/forgot-password';
+
+  // Check if we're on the update password page
+  const isUpdatePasswordPage = window.location.pathname === '/update-password';
+
   const { language, t, changeLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<ActiveTab>('passes');
   const [selectedPass, setSelectedPass] = useState<MountainPass | null>(null);
@@ -73,6 +81,32 @@ function App() {
   // If we're on password reset page, render only that component
   if (isPasswordResetPage) {
     return <PasswordReset />;
+  }
+
+  // If we're on forgot password page, render only that component
+  if (isForgotPasswordPage) {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+        </div>
+      }>
+        <ForgotPassword />
+      </Suspense>
+    );
+  }
+
+  // If we're on update password page, render only that component
+  if (isUpdatePasswordPage) {
+    return (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+        </div>
+      }>
+        <UpdatePassword />
+      </Suspense>
+    );
   }
 
   const handleLogout = () => {
