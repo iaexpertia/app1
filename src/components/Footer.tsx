@@ -120,17 +120,27 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
               </li>
               <li>
                 <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
-                  Mapa Interactivo
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
                   Estadísticas
                 </a>
               </li>
               <li>
                 <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                  Ayuda
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                  Participaciones en Carreras
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
                   Colaboradores
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                  Marcas
                 </a>
               </li>
               <li>
