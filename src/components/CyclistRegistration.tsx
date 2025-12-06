@@ -443,7 +443,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
 
             <div className="text-center mb-4">
               <a
-                href="/auth/forgot-password"
+                href="/auth/forgot-password.html"
                 className="text-sm text-orange-600 hover:text-orange-700 underline"
               >
                 ¿Olvidaste tu contraseña?
@@ -583,7 +583,7 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               </button>
               <div className="mt-4">
                 <a
-                  href="/auth/forgot-password"
+                  href="/auth/forgot-password.html"
                   className="text-sm text-orange-600 hover:text-orange-700 underline"
                 >
                   ¿Olvidaste tu contraseña?
