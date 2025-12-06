@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag, Heart } from 'lucide-react';
-import { LanguageSelector } from './LanguageSelector';
 import { Translation } from '../i18n/translations';
 import { getCurrentUser, loadCyclists } from '../utils/cyclistStorage';
 
@@ -208,21 +207,10 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               })}
             </div>
-
-            <div className="border-l border-slate-200 pl-2">
-              <LanguageSelector
-                currentLanguage={language}
-                onLanguageChange={onLanguageChange}
-              />
-            </div>
           </div>
 
-          {/* Mobile Menu Button and Language Selector */}
+          {/* Mobile Menu Button */}
           <div className="flex items-center space-x-3 lg:hidden">
-            <LanguageSelector
-              currentLanguage={language}
-              onLanguageChange={onLanguageChange}
-            />
             <button
               onClick={toggleMobileMenu}
               className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
