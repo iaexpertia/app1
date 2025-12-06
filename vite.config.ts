@@ -14,7 +14,7 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           'leaflet-vendor': ['leaflet', 'react-leaflet'],
           'supabase-vendor': ['@supabase/supabase-js'],
-          'utils-vendor': ['xlsx', 'lucide-react']
+          'utils-vendor': ['lucide-react']
         }
       }
     },
