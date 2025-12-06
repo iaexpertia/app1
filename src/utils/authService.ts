@@ -25,7 +25,7 @@ export const requestPasswordReset = async (
 ): Promise<AuthResponse> => {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: redirectUrl || `${window.location.origin}/update-password`,
+      redirectTo: redirectUrl || 'https://cyclepeaks.com/auth/reset-password',
     });
 
     if (error) {

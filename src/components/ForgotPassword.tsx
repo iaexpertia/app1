@@ -20,7 +20,7 @@ export const ForgotPassword: React.FC = () => {
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: 'https://cyclepeaks.com/auth/reset-password',
       });
 
       if (resetError) {
