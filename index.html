@@ -5,27 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CyclePeaks - Mountain Pass Conquest</title>
-    <script type="text/javascript">
-      function googleTranslateElementInit() {
-        new google.translate.TranslateElement(
-          {
-            pageLanguage: 'es',
-            includedLanguages: 'es,en,fr,it',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false
-          },
-          'google_translate_element'
-        );
-      }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <style>
+      /* Ocultar barra superior de Google Translate */
       .goog-te-banner-frame.skiptranslate {
         display: none !important;
       }
       body {
         top: 0px !important;
       }
+      .skiptranslate iframe {
+        visibility: hidden !important;
+      }
+
+      /* Estilos del widget de Google Translate */
       #google_translate_element {
         display: none;
         position: fixed;
@@ -38,21 +30,76 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         border: 1px solid #e5e7eb;
       }
+
       .goog-te-gadget {
         font-family: system-ui, -apple-system, sans-serif !important;
+        color: #1e293b;
       }
+
       .goog-te-gadget .goog-te-combo {
-        padding: 6px 8px;
+        padding: 8px 12px;
         border: 1px solid #d1d5db;
         border-radius: 6px;
         font-size: 14px;
         background-color: white;
+        cursor: pointer;
+        min-width: 150px;
       }
+
+      .goog-te-gadget .goog-te-combo:hover {
+        border-color: #f97316;
+        background-color: #fff7ed;
+      }
+
       .goog-te-gadget .goog-te-combo:focus {
         outline: 2px solid #f97316;
         outline-offset: 2px;
+        border-color: #f97316;
+      }
+
+      /* Ocultar elementos no deseados de Google Translate */
+      .goog-te-gadget span {
+        display: none !important;
+      }
+
+      .goog-te-gadget > div {
+        display: inline-block;
+      }
+
+      /* Mostrar solo el selector */
+      #google_translate_element .skiptranslate {
+        display: inline-block !important;
+      }
+
+      #google_translate_element .goog-te-gadget {
+        font-size: 0 !important;
+      }
+
+      #google_translate_element .goog-te-combo {
+        display: inline-block !important;
       }
     </style>
+
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        if (typeof google !== 'undefined' && google.translate) {
+          new google.translate.TranslateElement(
+            {
+              pageLanguage: 'es',
+              includedLanguages: 'es,en,fr,it,de,pt,ca,eu,gl',
+              layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false
+            },
+            'google_translate_element'
+          );
+
+          console.log('Google Translate initialized successfully');
+        }
+      }
+
+      window.googleTranslateElementInit = googleTranslateElementInit;
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
   </head>
   <body>
     <div id="google_translate_element"></div>
