@@ -3,8 +3,8 @@ import { useEffect, useRef } from 'react';
 declare global {
   interface Window {
     google?: {
-      translate: {
-        TranslateElement: new (
+      translate?: {
+        TranslateElement?: new (
           config: {
             pageLanguage: string;
             includedLanguages: string;
@@ -13,7 +13,7 @@ declare global {
           },
           elementId: string
         ) => void;
-        InlineLayout: {
+        InlineLayout?: {
           SIMPLE: number;
         };
       };
@@ -43,10 +43,10 @@ export default function GoogleTranslate({ onReady, onError }: GoogleTranslatePro
       }
 
       try {
-        if (typeof window.google !== 'undefined' &&
-            window.google.translate &&
-            window.google.translate.TranslateElement) {
-
+        if (
+          window?.google?.translate?.TranslateElement &&
+          window?.google?.translate?.InlineLayout
+        ) {
           new window.google.translate.TranslateElement(
             {
               pageLanguage: 'es',
@@ -61,12 +61,20 @@ export default function GoogleTranslate({ onReady, onError }: GoogleTranslatePro
 
           setTimeout(() => {
             const selectElement = document.querySelector('.goog-te-combo');
-            if (selectElement && onReady) {
-              onReady();
-            } else if (!selectElement && onError) {
-              onError();
+            if (selectElement) {
+              if (onReady) {
+                onReady();
+              }
+            } else {
+              if (onError) {
+                onError();
+              }
             }
           }, 1000);
+        } else {
+          if (onError) {
+            onError();
+          }
         }
       } catch (error) {
         console.error('Error initializing Google Translate:', error);
@@ -76,7 +84,9 @@ export default function GoogleTranslate({ onReady, onError }: GoogleTranslatePro
       }
     };
 
-    window.googleTranslateElementInit = initializeGoogleTranslate;
+    if (typeof window !== 'undefined') {
+      window.googleTranslateElementInit = initializeGoogleTranslate;
+    }
 
     const existingScript = document.querySelector(
       'script[src*="translate.google.com"]'
@@ -84,7 +94,7 @@ export default function GoogleTranslate({ onReady, onError }: GoogleTranslatePro
 
     if (existingScript) {
       scriptLoadedRef.current = true;
-      initializeGoogleTranslate();
+      setTimeout(initializeGoogleTranslate, 100);
       return;
     }
 
@@ -114,6 +124,7 @@ export default function GoogleTranslate({ onReady, onError }: GoogleTranslatePro
       id="google_translate_element"
       ref={containerRef}
       className="google-translate-container"
+      style={{ display: 'none' }}
     />
   );
 }

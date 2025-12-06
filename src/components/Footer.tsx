@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Mountain, Mail, Globe, Shield, FileText, Cookie, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send } from 'lucide-react';
 import { loadSocialLinks } from '../utils/socialLinksStorage';
-import { forceRetranslate } from '../utils/googleTranslate';
 import type { SocialLink } from '../types';
 
 interface FooterProps {
@@ -44,13 +43,6 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
     };
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      forceRetranslate();
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const getSocialIcon = (platform: string) => {
     switch (platform) {
