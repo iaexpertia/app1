@@ -28,9 +28,29 @@
       }
       #google_translate_element {
         display: none;
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        z-index: 9999;
+        background: white;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
       }
       .goog-te-gadget {
-        display: none !important;
+        font-family: system-ui, -apple-system, sans-serif !important;
+      }
+      .goog-te-gadget .goog-te-combo {
+        padding: 6px 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: white;
+      }
+      .goog-te-gadget .goog-te-combo:focus {
+        outline: 2px solid #f97316;
+        outline-offset: 2px;
       }
     </style>
   </head>
