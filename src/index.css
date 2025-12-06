@@ -50,3 +50,40 @@
 .animate-slide-out {
   animation: slideOut 0.3s ease-in;
 }
+
+:root.font-size-large {
+  font-size: 18px;
+}
+
+:root.font-size-extra-large {
+  font-size: 22px;
+}
+
+:root.contrast-high {
+  filter: contrast(1.5);
+}
+
+:root.contrast-low {
+  filter: contrast(0.8);
+}
+
+:root.night-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+:root.blue-filter {
+  filter: sepia(0.3) saturate(0.7) hue-rotate(180deg);
+}
+
+:root.hide-images img {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+:root.reduce-motion *,
+:root.reduce-motion *::before,
+:root.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

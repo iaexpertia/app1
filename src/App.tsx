@@ -6,6 +6,7 @@ import { PassesList } from './components/PassesList';
 import { PassModal } from './components/PassModal';
 import { Footer } from './components/Footer';
 import { CookieBanner } from './components/CookieBanner';
+import { AccessibilityButton } from './components/AccessibilityButton';
 
 const InteractiveMap = lazy(() => import('./components/InteractiveMap').then(m => ({ default: m.InteractiveMap })));
 const PhotosModal = lazy(() => import('./components/PhotosModal').then(m => ({ default: m.PhotosModal })));
@@ -616,6 +617,8 @@ function App() {
         onOpenPrivacy={() => setShowLegalModal('privacy')}
         onOpenLegal={() => setShowLegalModal('legal')}
       />
+
+      <AccessibilityButton />
     </div>
   );
 }
