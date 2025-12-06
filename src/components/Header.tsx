@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag, Heart } from 'lucide-react';
+import { Mountain, Award, Map, UserPlus, Settings, Database, Menu, X, Users, Trophy, Tag, Newspaper, LogOut, UserCheck, Search, Flag, Heart, Medal } from 'lucide-react';
 import { Translation } from '../i18n/translations';
 import { getCurrentUser, loadCyclists } from '../utils/cyclistStorage';
 
 interface HeaderProps {
-  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses';
-  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses') => void;
+  activeTab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses' | 'racehistory';
+  onTabChange: (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses' | 'racehistory') => void;
   conqueredCount: number;
   totalCount: number;
   t: Translation;
@@ -65,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses') => {
+  const handleTabChange = (tab: 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses' | 'racehistory') => {
     onTabChange(tab);
     setIsMobileMenuOpen(false); // Close mobile menu when tab is selected
   };
@@ -81,6 +81,8 @@ export const Header: React.FC<HeaderProps> = ({
     // Solo mostrar stats si el usuario está registrado
     ...(isLoggedIn ? [{ key: 'stats', icon: Award, label: t.stats, tooltip: 'Estadísticas de tu progreso y conquistas' }] : []),
     { key: 'races', icon: Flag, label: t.races, tooltip: 'Calendario de carreras ciclistas' },
+    // Solo mostrar historial de carreras si el usuario está registrado
+    ...(isLoggedIn ? [{ key: 'racehistory', icon: Medal, label: 'Mis Carreras', tooltip: 'Historial completo de tus participaciones en carreras' }] : []),
     { key: 'brands', icon: Tag, label: 'Marcas', tooltip: 'Marcas de ciclismo y equipamiento' },
     { key: 'news', icon: Newspaper, label: 'Noticias', tooltip: 'Últimas noticias del mundo del ciclismo' },
     { key: 'collaborators', icon: Users, label: t.collaborators, tooltip: 'Colaboradores y servicios para ciclistas' },

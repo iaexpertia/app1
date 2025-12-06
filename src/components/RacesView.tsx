@@ -3,6 +3,9 @@ import { Translation } from '../i18n/translations';
 import { CyclingRace } from '../types';
 import { loadRaces } from '../utils/racesStorage';
 import { ShareButton } from './ShareButton';
+import { RaceFinishModal } from './RaceFinishModal';
+import { getCurrentUser } from '../utils/cyclistStorage';
+import { getRaceFinishesByRace } from '../utils/raceFinishService';
 import {
   Calendar,
   MapPin,
@@ -16,7 +19,9 @@ import {
   Bike,
   Mountain,
   Search,
-  Filter
+  Filter,
+  Award,
+  CheckCircle
 } from 'lucide-react';
 
 interface RacesViewProps {
@@ -31,6 +36,9 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRace, setSelectedRace] = useState<CyclingRace | null>(null);
   const [showPastRaces, setShowPastRaces] = useState(false);
+  const [finishModalRace, setFinishModalRace] = useState<CyclingRace | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [raceFinishes, setRaceFinishes] = useState<Map<string, number>>(new Map());
 
   const isRacePast = (dateString: string): boolean => {
     const raceDate = new Date(dateString);
@@ -40,9 +48,27 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
   };
 
   useEffect(() => {
-    const loadedRaces = loadRaces();
-    const activeRaces = loadedRaces.filter(race => race.isActive !== false);
-    setRaces(activeRaces);
+    const loadData = async () => {
+      const loadedRaces = loadRaces();
+      const activeRaces = loadedRaces.filter(race => race.isActive !== false);
+      setRaces(activeRaces);
+
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+
+      if (user?.id) {
+        const finishesMap = new Map<string, number>();
+        for (const race of activeRaces) {
+          const finishes = await getRaceFinishesByRace(user.id, race.id);
+          if (finishes.length > 0) {
+            finishesMap.set(race.id, finishes.length);
+          }
+        }
+        setRaceFinishes(finishesMap);
+      }
+    };
+
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -271,7 +297,24 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
                 </div>
               </div>
 
-              <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+              <div className="px-6 pb-6 pt-2 border-t border-gray-100 space-y-2">
+                {currentUser && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFinishModalRace(race);
+                    }}
+                    className="w-full bg-green-600 text-white hover:bg-green-700 px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Trophy className="w-5 h-5" />
+                    Finisher
+                    {raceFinishes.has(race.id) && (
+                      <span className="bg-white text-green-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                        {raceFinishes.get(race.id)}
+                      </span>
+                    )}
+                  </button>
+                )}
                 <ShareButton
                   title={race.name}
                   text={`${race.name} - ${formatDate(race.date)} en ${race.city}, ${race.region}`}
@@ -291,6 +334,25 @@ export const RacesView: React.FC<RacesViewProps> = ({ t }) => {
           </div>
         )}
       </div>
+
+      {/* Race Finish Modal */}
+      {finishModalRace && (
+        <RaceFinishModal
+          race={finishModalRace}
+          onClose={() => setFinishModalRace(null)}
+          onSuccess={async () => {
+            if (currentUser?.id) {
+              const finishes = await getRaceFinishesByRace(currentUser.id, finishModalRace.id);
+              const newFinishesMap = new Map(raceFinishes);
+              if (finishes.length > 0) {
+                newFinishesMap.set(finishModalRace.id, finishes.length);
+              }
+              setRaceFinishes(newFinishesMap);
+            }
+          }}
+          t={t}
+        />
+      )}
 
       {/* Race Detail Modal */}
       {selectedRace && (

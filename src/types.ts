@@ -189,3 +189,18 @@ export interface SocialLink {
   created_at: string;
   updated_at: string;
 }
+
+export interface RaceFinish {
+  id: string;
+  cyclist_id: string;
+  race_id: string;
+  race_name: string;
+  year: number;
+  finish_time: string;
+  finish_time_seconds: number;
+  notes?: string;
+  date_completed: string;
+  is_pr: boolean;
+  created_at: string;
+  updated_at: string;
+}
