@@ -609,6 +609,7 @@ function App() {
         onShowPrivacy={() => setShowLegalModal('privacy')}
         onShowLegal={() => setShowLegalModal('legal')}
         onShowCookies={() => setShowLegalModal('cookies')}
+        onTabChange={setActiveTab}
       />
 
       <CookieBanner

@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Mountain, Mail, Globe, Shield, FileText, Cookie, Instagram, Facebook, Youtube, Linkedin, Twitter, Github, Twitch, MessageCircle, Send } from 'lucide-react';
 import { loadSocialLinks } from '../utils/socialLinksStorage';
+import { loadHelpConfig } from '../utils/helpConfigStorage';
 import type { SocialLink } from '../types';
 
 interface FooterProps {
   onShowPrivacy: () => void;
   onShowLegal: () => void;
   onShowCookies: () => void;
+  onTabChange: (tab: string) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onShowCookies }) => {
+export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onShowCookies, onTabChange }) => {
   const currentYear = new Date().getFullYear();
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [helpUrl, setHelpUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSocialLinks = async () => {
@@ -19,7 +22,17 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
       setSocialLinks(links.filter(link => link.is_active));
     };
 
+    const fetchHelpConfig = async () => {
+      const config = await loadHelpConfig();
+      if (config && config.is_active) {
+        setHelpUrl(config.help_url);
+      } else {
+        setHelpUrl(null);
+      }
+    };
+
     fetchSocialLinks();
+    fetchHelpConfig();
 
     const handleSocialLinksUpdate = () => {
       fetchSocialLinks();
@@ -28,13 +41,17 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         fetchSocialLinks();
+        fetchHelpConfig();
       }
     };
 
     window.addEventListener('socialLinksUpdated', handleSocialLinksUpdate);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const interval = setInterval(fetchSocialLinks, 10000);
+    const interval = setInterval(() => {
+      fetchSocialLinks();
+      fetchHelpConfig();
+    }, 10000);
 
     return () => {
       window.removeEventListener('socialLinksUpdated', handleSocialLinksUpdate);
@@ -114,39 +131,64 @@ export const Footer: React.FC<FooterProps> = ({ onShowPrivacy, onShowLegal, onSh
             <h4 className="text-lg font-semibold">Enlaces Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                <button
+                  onClick={() => onTabChange('passes')}
+                  className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                >
                   Puertos de Montaña
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                <button
+                  onClick={() => onTabChange('stats')}
+                  className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                >
                   Estadísticas
-                </a>
+                </button>
               </li>
+              {helpUrl && (
+                <li>
+                  <a
+                    href={helpUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                  >
+                    Ayuda
+                  </a>
+                </li>
+              )}
               <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
-                  Ayuda
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                <button
+                  onClick={() => onTabChange('racehistory')}
+                  className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                >
                   Participaciones en Carreras
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                <button
+                  onClick={() => onTabChange('collaborators')}
+                  className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                >
                   Colaboradores
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                <button
+                  onClick={() => onTabChange('brands')}
+                  className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                >
                   Marcas
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="text-slate-300 hover:text-orange-400 transition-colors text-sm">
+                <button
+                  onClick={() => onTabChange('news')}
+                  className="text-slate-300 hover:text-orange-400 transition-colors text-sm"
+                >
                   Noticias
-                </a>
+                </button>
               </li>
             </ul>
           </div>
