@@ -64,39 +64,39 @@ export const PassModal: React.FC<PassModalProps> = ({ pass, onClose, t }) => {
     return t[regionMap[region]] || region;
   };
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="relative h-64">
-          <img 
-            src={pass.imageUrl} 
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-[9999]" onClick={onClose}>
+      <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="relative h-48 sm:h-64">
+          <img
+            src={pass.imageUrl}
             alt={pass.name}
-            className="w-full h-full object-cover rounded-t-2xl"
+            className="w-full h-full object-cover rounded-t-xl sm:rounded-t-2xl"
           />
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-slate-100 transition-colors"
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white rounded-full p-2 hover:bg-slate-100 transition-colors"
           >
             <X className="h-5 w-5 text-slate-600" />
           </button>
-          <div className="absolute bottom-4 left-4">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${difficultyColors[pass.difficulty]}`}>
+          <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4">
+            <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${difficultyColors[pass.difficulty]}`}>
               {getDifficultyText(pass.difficulty)}
             </span>
           </div>
         </div>
-        
-        <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">{pass.name}</h2>
+
+        <div className="p-4 sm:p-6">
+          <div className="mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">{pass.name}</h2>
             <div className="flex items-center text-slate-600">
-              <MapPin className="h-5 w-5 mr-2" />
-              <span className="text-lg">{getRegionText(pass.region)}, {getCountryText(pass.country)}</span>
+              <MapPin className="h-4 sm:h-5 w-4 sm:w-5 mr-2" />
+              <span className="text-base sm:text-lg">{getRegionText(pass.region)}, {getCountryText(pass.country)}</span>
             </div>
           </div>
-          
-          <p className="text-slate-700 mb-6 leading-relaxed">{pass.description}</p>
-          
-          <div className="grid grid-cols-2 gap-6 mb-6">
+
+          <p className="text-sm sm:text-base text-slate-700 mb-4 sm:mb-6 leading-relaxed">{pass.description}</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <Mountain className="h-5 w-5 text-orange-500" />
@@ -169,25 +169,25 @@ export const PassModal: React.FC<PassModalProps> = ({ pass, onClose, t }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 <a
                   href={`https://www.google.com/maps?q=${pass.coordinates.lat},${pass.coordinates.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center space-x-2 bg-blue-500 text-white rounded-lg px-4 py-3 hover:bg-blue-600 transition-colors"
+                  className="flex items-center justify-center space-x-2 bg-blue-500 text-white rounded-lg px-3 sm:px-4 py-2 sm:py-3 hover:bg-blue-600 transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  <span className="font-medium">Ver en Google Maps</span>
+                  <span className="text-sm sm:text-base font-medium">Google Maps</span>
                 </a>
 
                 <a
                   href={`https://www.openstreetmap.org/?mlat=${pass.coordinates.lat}&mlon=${pass.coordinates.lng}&zoom=13`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center space-x-2 bg-green-500 text-white rounded-lg px-4 py-3 hover:bg-green-600 transition-colors"
+                  className="flex items-center justify-center space-x-2 bg-green-500 text-white rounded-lg px-3 sm:px-4 py-2 sm:py-3 hover:bg-green-600 transition-colors"
                 >
                   <MapPin className="h-4 w-4" />
-                  <span className="font-medium">Ver en OpenStreetMap</span>
+                  <span className="text-sm sm:text-base font-medium">OpenStreetMap</span>
                 </a>
               </div>
             </div>

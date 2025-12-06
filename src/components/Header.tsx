@@ -276,13 +276,13 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen 
-            ? 'max-h-96 opacity-100 pb-4' 
-            : 'max-h-0 opacity-0 overflow-hidden'
-        }`}>
-          <div className="bg-white border-t border-slate-200 mx-4 rounded-lg shadow-lg mt-2">
-            <nav className="flex flex-col space-y-2 p-4">
+        {isMobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 top-[136px] sm:top-[160px] bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu}>
+            <div
+              className="bg-white rounded-t-xl shadow-2xl h-full overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <nav className="flex flex-col space-y-2 p-4 pb-32">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -337,10 +337,10 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               })}
             </div>
-            </nav>
-          
+              </nav>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );

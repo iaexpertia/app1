@@ -123,7 +123,7 @@ export const AccessibilityPanel: React.FC<AccessibilityPanelProps> = ({ isOpen, 
         className="fixed inset-0 bg-black bg-opacity-50 z-50"
         onClick={onClose}
       />
-      <div className="fixed right-4 top-20 bg-slate-900 text-white rounded-2xl shadow-2xl z-50 w-80 max-h-[80vh] overflow-y-auto">
+      <div className="fixed right-2 sm:right-4 top-16 sm:top-20 bg-slate-900 text-white rounded-xl sm:rounded-2xl shadow-2xl z-50 w-[calc(100vw-1rem)] sm:w-80 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
         <div className="sticky top-0 bg-slate-900 p-4 border-b border-slate-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Eye className="w-6 h-6 text-orange-400" />

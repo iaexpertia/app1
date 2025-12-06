@@ -8,7 +8,7 @@ export const AccessibilityButton: React.FC = () => {
     <>
       <button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
-        className="fixed right-4 bottom-20 z-40 w-14 h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-xl flex items-center justify-center transition-all hover:scale-110 border-2 border-slate-700"
+        className="fixed right-3 sm:right-4 bottom-24 sm:bottom-20 z-40 w-12 h-12 sm:w-14 sm:h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-xl sm:rounded-2xl shadow-xl flex items-center justify-center transition-all hover:scale-110 border-2 border-slate-700"
         aria-label="Abrir panel de accesibilidad"
       >
         <svg
