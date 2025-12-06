@@ -33,11 +33,29 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   const toggleGoogleTranslate = () => {
-    const newState = !showGoogleTranslate;
-    setShowGoogleTranslate(newState);
     const element = document.getElementById('google_translate_element');
-    if (element) {
-      element.style.display = newState ? 'block' : 'none';
+    const selectElement = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+
+    if (element && selectElement) {
+      const isCurrentlyVisible = element.style.display === 'block';
+
+      if (isCurrentlyVisible) {
+        element.style.display = 'none';
+        setShowGoogleTranslate(false);
+      } else {
+        element.style.display = 'block';
+        setShowGoogleTranslate(true);
+
+        setTimeout(() => {
+          selectElement.focus();
+          const clickEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          });
+          selectElement.dispatchEvent(clickEvent);
+        }, 100);
+      }
     }
   };
 
