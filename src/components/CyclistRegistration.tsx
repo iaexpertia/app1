@@ -581,6 +581,14 @@ export const CyclistRegistration: React.FC<CyclistRegistrationProps> = ({
               >
                 Iniciar Sesión
               </button>
+              <div className="mt-4">
+                <a
+                  href="/forgot-password"
+                  className="text-sm text-orange-600 hover:text-orange-700 underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
             </div>
           )}
           
