@@ -51,42 +51,20 @@ export const requestPasswordReset = async (
 /**
  * Actualiza la contrasena del usuario autenticado
  * Debe llamarse despues de que el usuario haga clic en el Magic Link
- * Actualiza tanto Supabase Auth como la tabla custom cyclists
  *
  * @param newPassword - Nueva contrasena
  * @returns Promise con resultado de la operacion
  */
 export const updatePassword = async (newPassword: string): Promise<AuthResponse> => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
 
-    if (authError || !user) {
+    if (error) {
       return {
         success: false,
-        error: authError?.message || 'Error al actualizar la contrasena en el sistema de autenticacion'
-      };
-    }
-
-    const userEmail = user.email;
-    if (!userEmail) {
-      return {
-        success: false,
-        error: 'No se pudo obtener el email del usuario'
-      };
-    }
-
-    const { error: dbError } = await supabase
-      .from('cyclists')
-      .update({ password: newPassword })
-      .eq('email', userEmail);
-
-    if (dbError) {
-      console.error('Error updating password in cyclists table:', dbError);
-      return {
-        success: false,
-        error: 'Contrasena actualizada en autenticacion pero fallo al actualizar en la base de datos'
+        error: error.message
       };
     }
 
