@@ -26,6 +26,12 @@ const UpdatePassword = lazy(() => import('./components/UpdatePassword').then(m =
 const LegalModal = lazy(() => import('./components/LegalModals').then(m => ({ default: m.LegalModal })));
 const RacesView = lazy(() => import('./components/RacesView').then(m => ({ default: m.RacesView })));
 const RaceHistoryView = lazy(() => import('./components/RaceHistoryView').then(m => ({ default: m.RaceHistoryView })));
+
+const RegisterPage = lazy(() => import('./components/auth/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const LoginPage = lazy(() => import('./components/auth/LoginPage').then(m => ({ default: m.LoginPage })));
+const ForgotPasswordPage = lazy(() => import('./components/auth/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./components/auth/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const DashboardPage = lazy(() => import('./components/auth/Dashboard').then(m => ({ default: m.Dashboard })));
 import { mountainPasses } from './data/mountainPasses';
 import {
   loadConquests,
@@ -56,21 +62,81 @@ import { Cyclist } from './types';
 
 type ActiveTab = 'passes' | 'map' | 'stats' | 'register' | 'admin' | 'database' | 'collaborators' | 'conquered' | 'brands' | 'news' | 'finder' | 'races' | 'mypasses' | 'racehistory';
 
+type AuthPage = 'register' | 'login' | 'forgot-password' | 'reset-password' | 'dashboard' | null;
+
+const getAuthPage = (): AuthPage => {
+  const path = window.location.pathname;
+
+  if (path === '/auth/register') return 'register';
+  if (path === '/auth/login') return 'login';
+  if (path === '/auth/forgot-password' || path === '/auth/forgot-password.html' || path === '/forgot-password') return 'forgot-password';
+  if (path === '/auth/reset-password' || path === '/auth/reset-password.html' || path === '/auth/update-password.html' || path === '/update-password' || path === '/reset-password') return 'reset-password';
+  if (path === '/dashboard') return 'dashboard';
+
+  return null;
+};
+
 function App() {
-  // Check if we're on the password reset page
+  const [authPage, setAuthPage] = useState<AuthPage>(getAuthPage());
+
   const isPasswordResetPage = window.location.pathname === '/reset-password' ||
                                window.location.search.includes('token=');
 
-  // Check if we're on the forgot password page
   const isForgotPasswordPage = window.location.pathname === '/forgot-password' ||
                                  window.location.pathname === '/auth/forgot-password' ||
                                  window.location.pathname === '/auth/forgot-password.html';
 
-  // Check if we're on the update password page (support both new and legacy paths)
   const isUpdatePasswordPage = window.location.pathname === '/auth/reset-password' ||
                                  window.location.pathname === '/auth/reset-password.html' ||
                                  window.location.pathname === '/auth/update-password.html' ||
                                  window.location.pathname === '/update-password';
+
+  const handleAuthNavigate = (page: string) => {
+    if (page === 'home') {
+      window.history.pushState({}, '', '/');
+      setAuthPage(null);
+      return;
+    }
+
+    if (page === 'register') {
+      window.history.pushState({}, '', '/auth/register');
+      setAuthPage('register');
+      return;
+    }
+
+    if (page === 'login') {
+      window.history.pushState({}, '', '/auth/login');
+      setAuthPage('login');
+      return;
+    }
+
+    if (page === 'forgot-password') {
+      window.history.pushState({}, '', '/auth/forgot-password');
+      setAuthPage('forgot-password');
+      return;
+    }
+
+    if (page === 'reset-password') {
+      window.history.pushState({}, '', '/auth/reset-password');
+      setAuthPage('reset-password');
+      return;
+    }
+
+    if (page === 'dashboard') {
+      window.history.pushState({}, '', '/dashboard');
+      setAuthPage('dashboard');
+      return;
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setAuthPage(getAuthPage());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const { language, t, changeLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<ActiveTab>('passes');
@@ -85,32 +151,67 @@ function App() {
   const [showLegalModal, setShowLegalModal] = useState<'privacy' | 'legal' | 'cookies' | null>(null);
   const [currentCyclist, setCurrentCyclist] = useState<Cyclist | null>(null);
 
-  // If we're on password reset page, render only that component
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+    </div>
+  );
+
+  if (authPage === 'register') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <RegisterPage onNavigate={handleAuthNavigate} />
+      </Suspense>
+    );
+  }
+
+  if (authPage === 'login') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <LoginPage onNavigate={handleAuthNavigate} />
+      </Suspense>
+    );
+  }
+
+  if (authPage === 'forgot-password') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <ForgotPasswordPage onNavigate={handleAuthNavigate} />
+      </Suspense>
+    );
+  }
+
+  if (authPage === 'reset-password') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <ResetPasswordPage onNavigate={handleAuthNavigate} />
+      </Suspense>
+    );
+  }
+
+  if (authPage === 'dashboard') {
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <DashboardPage onNavigate={handleAuthNavigate} />
+      </Suspense>
+    );
+  }
+
   if (isPasswordResetPage) {
     return <PasswordReset />;
   }
 
-  // If we're on forgot password page, render only that component
   if (isForgotPasswordPage) {
     return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-        </div>
-      }>
+      <Suspense fallback={<LoadingSpinner />}>
         <ForgotPassword />
       </Suspense>
     );
   }
 
-  // If we're on update password page, render only that component
   if (isUpdatePasswordPage) {
     return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-        </div>
-      }>
+      <Suspense fallback={<LoadingSpinner />}>
         <UpdatePassword />
       </Suspense>
     );
