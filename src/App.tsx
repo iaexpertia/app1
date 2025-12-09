@@ -69,7 +69,6 @@ function App() {
   // Check if we're on the update password page (support both new and legacy paths)
   const isUpdatePasswordPage = window.location.pathname === '/auth/reset-password' ||
                                  window.location.pathname === '/auth/reset-password.html' ||
-                                 window.location.pathname === '/auth/update-password.html' ||
                                  window.location.pathname === '/update-password';
 
   const { language, t, changeLanguage } = useLanguage();
