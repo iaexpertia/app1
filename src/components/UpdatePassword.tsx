@@ -128,7 +128,7 @@ export const UpdatePassword: React.FC = () => {
           </div>
           <div className="text-center">
             <a
-              href="/auth/forgot-password.html"
+              href="/auth/forgot-password"
               className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
               Solicitar nuevo enlace
